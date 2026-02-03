@@ -53,8 +53,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { InvoiceDetailDialog, type InvoiceDetail } from "@/components/billing/InvoiceDetailDialog";
 import { RecordPaymentDialog } from "@/components/billing/RecordPaymentDialog";
-import { useBills, type Bill } from "@/hooks/useBills";
-import { useCurrentTenant } from "@/hooks/useTenant";
+import { useBills, useGenerateBills, type Bill } from "@/hooks/useBills";
+import { useTenantContext } from "@/contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { downloadInvoicePdf } from "@/lib/generateInvoicePdf";
 import type { PaymentStatus } from "@/types";
@@ -112,12 +112,17 @@ function transformBillToInvoiceDetail(bill: Bill): InvoiceDetail {
 
 export default function Billing() {
   const { toast } = useToast();
-  const { data: tenant } = useCurrentTenant();
-  const { data: bills, isLoading, error } = useBills(tenant?.id);
+  const { currentTenant } = useTenantContext();
+  const { data: bills, isLoading, error } = useBills(currentTenant?.id);
+  const generateBills = useGenerateBills();
   
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceDetail | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [paymentDialog, setPaymentDialog] = useState<{
@@ -128,6 +133,43 @@ export default function Billing() {
     invoiceNumber: string;
     outstandingAmount: number;
   } | null>(null);
+
+  const handleGenerateBills = async () => {
+    if (!currentTenant?.id) {
+      toast({
+        title: "ত্রুটি",
+        description: "টেন্যান্ট পাওয়া যায়নি",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const [year, month] = selectedMonth.split('-').map(Number);
+    const billingPeriodStart = new Date(year, month - 1, 1);
+    const billingPeriodEnd = new Date(year, month, 0);
+    const dueDate = new Date(year, month - 1, 15);
+
+    try {
+      const result = await generateBills.mutateAsync({
+        tenantId: currentTenant.id,
+        billingPeriodStart: billingPeriodStart.toISOString().split('T')[0],
+        billingPeriodEnd: billingPeriodEnd.toISOString().split('T')[0],
+        dueDate: dueDate.toISOString().split('T')[0],
+      });
+
+      toast({
+        title: "বিল তৈরি হয়েছে",
+        description: `${result.length}টি গ্রাহকের জন্য বিল তৈরি হয়েছে`,
+      });
+      setIsGenerateDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "বিল তৈরি করতে ব্যর্থ",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const filteredBills = (bills || []).filter((bill) => {
     const matchesSearch =
@@ -223,48 +265,47 @@ export default function Billing() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Billing Month</Label>
-                <Select defaultValue="2024-02">
+                <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select month" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="2024-02">February 2024</SelectItem>
-                    <SelectItem value="2024-01">January 2024</SelectItem>
-                    <SelectItem value="2023-12">December 2023</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Customer Filter</Label>
-                <Select defaultValue="all">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select customers" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Active Customers</SelectItem>
-                    <SelectItem value="unbilled">Unbilled Only</SelectItem>
-                    <SelectItem value="package">By Package</SelectItem>
+                    {(() => {
+                      const months = [];
+                      const now = new Date();
+                      for (let i = 0; i < 6; i++) {
+                        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                        const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                        const label = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                        months.push(
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        );
+                      }
+                      return months;
+                    })()}
                   </SelectContent>
                 </Select>
               </div>
               <div className="rounded-lg bg-muted p-3">
                 <p className="text-sm text-muted-foreground">
-                  This will generate invoices for active customers based on their package prices.
+                  সক্রিয় গ্রাহকদের জন্য তাদের প্যাকেজ মূল্যের উপর ভিত্তি করে ইনভয়েস তৈরি হবে।
                 </p>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsGenerateDialogOpen(false)}>
-                Cancel
+                বাতিল
               </Button>
-              <Button onClick={() => {
-                toast({
-                  title: "Coming Soon",
-                  description: "Bill generation will be fully functional once customers are connected to database.",
-                });
-                setIsGenerateDialogOpen(false);
-              }}>
-                Generate Bills
+              <Button 
+                onClick={handleGenerateBills}
+                disabled={generateBills.isPending}
+              >
+                {generateBills.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                বিল তৈরি করুন
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -522,13 +563,13 @@ export default function Billing() {
       />
 
       {/* Record Payment Dialog */}
-      {paymentDialog && tenant && (
+      {paymentDialog && currentTenant && (
         <RecordPaymentDialog
           open={paymentDialog.open}
           onOpenChange={(open) => setPaymentDialog(open ? paymentDialog : null)}
           billId={paymentDialog.billId}
           customerId={paymentDialog.customerId}
-          tenantId={tenant.id}
+          tenantId={currentTenant.id}
           customerName={paymentDialog.customerName}
           invoiceNumber={paymentDialog.invoiceNumber}
           outstandingAmount={paymentDialog.outstandingAmount}
