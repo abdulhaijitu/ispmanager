@@ -56,6 +56,7 @@ import { RecordPaymentDialog } from "@/components/billing/RecordPaymentDialog";
 import { useBills, type Bill } from "@/hooks/useBills";
 import { useCurrentTenant } from "@/hooks/useTenant";
 import { useToast } from "@/hooks/use-toast";
+import { downloadInvoicePdf } from "@/lib/generateInvoicePdf";
 import type { PaymentStatus } from "@/types";
 
 const statusConfig: Record<
@@ -450,7 +451,15 @@ export default function Billing() {
                                   <Eye className="mr-2 h-4 w-4" />
                                   View Invoice
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                <DropdownMenuItem onClick={(e) => {
+                                  e.stopPropagation();
+                                  const invoiceDetail = transformBillToInvoiceDetail(bill);
+                                  downloadInvoicePdf(invoiceDetail);
+                                  toast({
+                                    title: "PDF Downloaded",
+                                    description: `Invoice ${bill.invoice_number} has been downloaded.`,
+                                  });
+                                }}>
                                   <Download className="mr-2 h-4 w-4" />
                                   Download PDF
                                 </DropdownMenuItem>
