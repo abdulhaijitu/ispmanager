@@ -13,6 +13,7 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,133 +52,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { InvoiceDetailDialog, type InvoiceDetail } from "@/components/billing/InvoiceDetailDialog";
+import { RecordPaymentDialog } from "@/components/billing/RecordPaymentDialog";
+import { useBills, type Bill } from "@/hooks/useBills";
+import { useCurrentTenant } from "@/hooks/useTenant";
 import { useToast } from "@/hooks/use-toast";
-import type { Bill, PaymentStatus } from "@/types";
-
-// Extended mock data for bills with line items and payments
-const mockBillsData: InvoiceDetail[] = [
-  {
-    id: "INV-2024-001",
-    customerId: "1",
-    customerName: "Md. Karim Uddin",
-    customerPhone: "+880 1712-345678",
-    customerEmail: "karim@email.com",
-    customerAddress: "House 12, Road 5, Dhanmondi, Dhaka",
-    packageName: "Premium 50 Mbps",
-    amount: 1200,
-    dueDate: new Date("2024-02-15"),
-    status: "paid",
-    billingPeriod: {
-      start: new Date("2023-12-31"),
-      end: new Date("2024-01-30"),
-    },
-    createdAt: new Date("2024-01-01"),
-    paidAmount: 1200,
-    lineItems: [
-      { id: "li1", description: "Monthly Internet Subscription - Premium 50 Mbps", quantity: 1, unitPrice: 1200, total: 1200 },
-    ],
-    payments: [
-      { id: "pay1", date: new Date("2024-01-10"), amount: 1200, method: "cash", receivedBy: "Staff Admin" },
-    ],
-  },
-  {
-    id: "INV-2024-002",
-    customerId: "2",
-    customerName: "Fatema Begum",
-    customerPhone: "+880 1812-456789",
-    customerEmail: "fatema@email.com",
-    customerAddress: "Flat 4B, Gulshan Avenue, Dhaka",
-    packageName: "Standard 30 Mbps",
-    amount: 1500,
-    dueDate: new Date("2024-02-15"),
-    status: "due",
-    billingPeriod: {
-      start: new Date("2023-12-31"),
-      end: new Date("2024-01-30"),
-    },
-    createdAt: new Date("2024-01-01"),
-    paidAmount: 0,
-    lineItems: [
-      { id: "li2", description: "Monthly Internet Subscription - Standard 30 Mbps", quantity: 1, unitPrice: 1000, total: 1000 },
-      { id: "li3", description: "Router Rental Fee", quantity: 1, unitPrice: 300, total: 300 },
-      { id: "li4", description: "Static IP Add-on", quantity: 1, unitPrice: 200, total: 200 },
-    ],
-    payments: [],
-  },
-  {
-    id: "INV-2024-003",
-    customerId: "3",
-    customerName: "Rahim Sheikh",
-    customerPhone: "+880 1912-567890",
-    customerAddress: "789 Banani DOHS, Dhaka",
-    packageName: "Basic 20 Mbps",
-    amount: 800,
-    dueDate: new Date("2024-02-10"),
-    status: "overdue",
-    billingPeriod: {
-      start: new Date("2023-12-31"),
-      end: new Date("2024-01-30"),
-    },
-    createdAt: new Date("2024-01-01"),
-    paidAmount: 0,
-    lineItems: [
-      { id: "li5", description: "Monthly Internet Subscription - Basic 20 Mbps", quantity: 1, unitPrice: 800, total: 800 },
-    ],
-    payments: [],
-    notes: "Customer contacted on 2024-02-12. Promised to pay by end of week.",
-  },
-  {
-    id: "INV-2024-004",
-    customerId: "4",
-    customerName: "Jamal Hossain",
-    customerPhone: "+880 1612-678901",
-    customerEmail: "jamal@email.com",
-    customerAddress: "321 Mirpur-10, Dhaka",
-    packageName: "Premium 50 Mbps",
-    amount: 2000,
-    dueDate: new Date("2024-02-20"),
-    status: "partial",
-    billingPeriod: {
-      start: new Date("2023-12-31"),
-      end: new Date("2024-01-30"),
-    },
-    createdAt: new Date("2024-01-01"),
-    paidAmount: 1000,
-    lineItems: [
-      { id: "li6", description: "Monthly Internet Subscription - Premium 50 Mbps", quantity: 1, unitPrice: 1500, total: 1500 },
-      { id: "li7", description: "Installation Fee (New Connection)", quantity: 1, unitPrice: 500, total: 500 },
-    ],
-    payments: [
-      { id: "pay2", date: new Date("2024-01-15"), amount: 1000, method: "online", reference: "TRX-78234", receivedBy: "System" },
-    ],
-  },
-  {
-    id: "INV-2024-005",
-    customerId: "5",
-    customerName: "Salma Akter",
-    customerPhone: "+880 1512-789012",
-    customerEmail: "salma@email.com",
-    customerAddress: "567 Uttara Sector-7, Dhaka",
-    packageName: "Standard 30 Mbps",
-    amount: 1200,
-    dueDate: new Date("2024-02-15"),
-    status: "paid",
-    billingPeriod: {
-      start: new Date("2023-12-31"),
-      end: new Date("2024-01-30"),
-    },
-    createdAt: new Date("2024-01-01"),
-    paidAmount: 1200,
-    lineItems: [
-      { id: "li8", description: "Monthly Internet Subscription - Standard 30 Mbps", quantity: 1, unitPrice: 1000, total: 1000 },
-      { id: "li9", description: "Late Payment Fee (Previous Month)", quantity: 1, unitPrice: 200, total: 200 },
-    ],
-    payments: [
-      { id: "pay3", date: new Date("2024-01-05"), amount: 700, method: "cash", receivedBy: "Collector A" },
-      { id: "pay4", date: new Date("2024-01-18"), amount: 500, method: "bank_transfer", reference: "BNK-45678", receivedBy: "System" },
-    ],
-  },
-];
+import type { PaymentStatus } from "@/types";
 
 const statusConfig: Record<
   PaymentStatus,
@@ -189,51 +68,132 @@ const statusConfig: Record<
   overdue: { label: "Overdue", variant: "destructive", icon: AlertCircle },
 };
 
+function transformBillToInvoiceDetail(bill: Bill): InvoiceDetail {
+  const paidAmount = bill.payments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+  
+  return {
+    id: bill.invoice_number,
+    customerId: bill.customer_id,
+    customerName: bill.customer?.name || "Unknown Customer",
+    customerPhone: bill.customer?.phone || "",
+    customerEmail: bill.customer?.email || undefined,
+    customerAddress: bill.customer?.address || undefined,
+    packageName: bill.customer?.package?.name || "No Package",
+    amount: Number(bill.amount),
+    dueDate: new Date(bill.due_date),
+    status: (bill.status || "due") as PaymentStatus,
+    billingPeriod: {
+      start: new Date(bill.billing_period_start),
+      end: new Date(bill.billing_period_end),
+    },
+    createdAt: new Date(bill.created_at),
+    paidAmount,
+    lineItems: [
+      {
+        id: "1",
+        description: `Monthly Internet Subscription - ${bill.customer?.package?.name || "Standard"}`,
+        quantity: 1,
+        unitPrice: Number(bill.amount),
+        total: Number(bill.amount),
+      },
+    ],
+    payments: bill.payments?.map((p) => ({
+      id: p.id,
+      date: new Date(p.created_at),
+      amount: Number(p.amount),
+      method: (p.method as "cash" | "online" | "bank_transfer") || "cash",
+      reference: p.reference || undefined,
+      receivedBy: "Staff",
+    })) || [],
+    notes: bill.notes || undefined,
+  };
+}
+
 export default function Billing() {
   const { toast } = useToast();
+  const { data: tenant } = useCurrentTenant();
+  const { data: bills, isLoading, error } = useBills(tenant?.id);
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceDetail | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [paymentDialog, setPaymentDialog] = useState<{
+    open: boolean;
+    billId: string;
+    customerId: string;
+    customerName: string;
+    invoiceNumber: string;
+    outstandingAmount: number;
+  } | null>(null);
 
-  const filteredBills = mockBillsData.filter((bill) => {
+  const filteredBills = (bills || []).filter((bill) => {
     const matchesSearch =
-      bill.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      bill.id.toLowerCase().includes(searchTerm.toLowerCase());
+      bill.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      bill.invoice_number.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
       statusFilter === "all" || bill.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const totalBilled = mockBillsData.reduce((sum, bill) => sum + bill.amount, 0);
-  const totalPaid = mockBillsData.reduce((sum, bill) => sum + bill.paidAmount, 0);
+  const totalBilled = (bills || []).reduce((sum, bill) => sum + Number(bill.amount), 0);
+  const totalPaid = (bills || []).reduce((sum, bill) => {
+    const paid = bill.payments?.reduce((s, p) => s + Number(p.amount), 0) || 0;
+    return sum + paid;
+  }, 0);
   const totalDue = totalBilled - totalPaid;
-  const overdueCount = mockBillsData.filter((b) => b.status === "overdue").length;
+  const overdueCount = (bills || []).filter((b) => b.status === "overdue").length;
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date | string) => {
+    const d = typeof date === "string" ? new Date(date) : date;
     return new Intl.DateTimeFormat("en-GB", {
       day: "2-digit",
       month: "short",
       year: "numeric",
-    }).format(date);
+    }).format(d);
   };
 
   const formatCurrency = (amount: number) => {
     return `৳${amount.toLocaleString()}`;
   };
 
-  const handleViewInvoice = (invoice: InvoiceDetail) => {
-    setSelectedInvoice(invoice);
+  const handleViewInvoice = (bill: Bill) => {
+    setSelectedInvoice(transformBillToInvoiceDetail(bill));
     setIsDetailDialogOpen(true);
   };
 
-  const handleRecordPayment = (invoiceId: string) => {
-    toast({
-      title: "Coming Soon",
-      description: "Payment recording will be implemented soon.",
+  const handleRecordPayment = (bill: Bill) => {
+    const paidAmount = bill.payments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+    const outstanding = Number(bill.amount) - paidAmount;
+    
+    setPaymentDialog({
+      open: true,
+      billId: bill.id,
+      customerId: bill.customer_id,
+      customerName: bill.customer?.name || "Unknown",
+      invoiceNumber: bill.invoice_number,
+      outstandingAmount: outstanding,
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <AlertCircle className="h-12 w-12 text-destructive" />
+        <p className="text-muted-foreground">Failed to load billing data</p>
+        <p className="text-sm text-destructive">{error.message}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -288,7 +248,7 @@ export default function Billing() {
               </div>
               <div className="rounded-lg bg-muted p-3">
                 <p className="text-sm text-muted-foreground">
-                  This will generate invoices for <strong>127 customers</strong> with a total billing amount of <strong>৳152,400</strong>.
+                  This will generate invoices for active customers based on their package prices.
                 </p>
               </div>
             </div>
@@ -296,7 +256,13 @@ export default function Billing() {
               <Button variant="outline" onClick={() => setIsGenerateDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={() => setIsGenerateDialogOpen(false)}>
+              <Button onClick={() => {
+                toast({
+                  title: "Coming Soon",
+                  description: "Bill generation will be fully functional once customers are connected to database.",
+                });
+                setIsGenerateDialogOpen(false);
+              }}>
                 Generate Bills
               </Button>
             </DialogFooter>
@@ -315,7 +281,7 @@ export default function Billing() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalBilled)}</div>
-            <p className="text-xs text-muted-foreground">This month</p>
+            <p className="text-xs text-muted-foreground">{bills?.length || 0} invoices</p>
           </CardContent>
         </Card>
         <Card>
@@ -330,7 +296,7 @@ export default function Billing() {
               {formatCurrency(totalPaid)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {((totalPaid / totalBilled) * 100).toFixed(1)}% collection rate
+              {totalBilled > 0 ? ((totalPaid / totalBilled) * 100).toFixed(1) : 0}% collection rate
             </p>
           </CardContent>
         </Card>
@@ -408,95 +374,108 @@ export default function Billing() {
           {/* Invoice Table */}
           <Card>
             <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Invoice ID</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Billing Period</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Due Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredBills.map((bill) => {
-                    const StatusIcon = statusConfig[bill.status].icon;
-                    return (
-                      <TableRow 
-                        key={bill.id}
-                        className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => handleViewInvoice(bill)}
-                      >
-                        <TableCell className="font-medium">{bill.id}</TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">{bill.customerName}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {bill.customerPhone}
-                            </p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-sm text-muted-foreground">
-                            {formatDate(bill.billingPeriod.start)} -{" "}
-                            {formatDate(bill.billingPeriod.end)}
-                          </span>
-                        </TableCell>
-                        <TableCell className="font-semibold">
-                          {formatCurrency(bill.amount)}
-                        </TableCell>
-                        <TableCell>{formatDate(bill.dueDate)}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={statusConfig[bill.status].variant}
-                            className="gap-1"
-                          >
-                            <StatusIcon className="h-3 w-3" />
-                            {statusConfig[bill.status].label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={(e) => {
-                                e.stopPropagation();
-                                handleViewInvoice(bill);
-                              }}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                View Invoice
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                                <Download className="mr-2 h-4 w-4" />
-                                Download PDF
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                                <Send className="mr-2 h-4 w-4" />
-                                Send to Customer
-                              </DropdownMenuItem>
-                              {bill.status !== "paid" && (
+              {filteredBills.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No invoices found</p>
+                  <p className="text-sm text-muted-foreground">
+                    {bills?.length === 0
+                      ? "Generate bills to get started"
+                      : "Try adjusting your search or filters"}
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Invoice ID</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Billing Period</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Due Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredBills.map((bill) => {
+                      const status = (bill.status || "due") as PaymentStatus;
+                      const StatusIcon = statusConfig[status].icon;
+                      return (
+                        <TableRow 
+                          key={bill.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => handleViewInvoice(bill)}
+                        >
+                          <TableCell className="font-medium">{bill.invoice_number}</TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{bill.customer?.name || "Unknown"}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {bill.customer?.phone}
+                              </p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm text-muted-foreground">
+                              {formatDate(bill.billing_period_start)} -{" "}
+                              {formatDate(bill.billing_period_end)}
+                            </span>
+                          </TableCell>
+                          <TableCell className="font-semibold">
+                            {formatCurrency(Number(bill.amount))}
+                          </TableCell>
+                          <TableCell>{formatDate(bill.due_date)}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={statusConfig[status].variant}
+                              className="gap-1"
+                            >
+                              <StatusIcon className="h-3 w-3" />
+                              {statusConfig[status].label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={(e) => {
                                   e.stopPropagation();
-                                  handleRecordPayment(bill.id);
+                                  handleViewInvoice(bill);
                                 }}>
-                                  <Receipt className="mr-2 h-4 w-4" />
-                                  Record Payment
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View Invoice
                                 </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                                <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                  <Download className="mr-2 h-4 w-4" />
+                                  Download PDF
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                  <Send className="mr-2 h-4 w-4" />
+                                  Send to Customer
+                                </DropdownMenuItem>
+                                {bill.status !== "paid" && (
+                                  <DropdownMenuItem onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRecordPayment(bill);
+                                  }}>
+                                    <Receipt className="mr-2 h-4 w-4" />
+                                    Record Payment
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -527,8 +506,25 @@ export default function Billing() {
         open={isDetailDialogOpen}
         onOpenChange={setIsDetailDialogOpen}
         invoice={selectedInvoice}
-        onRecordPayment={handleRecordPayment}
+        onRecordPayment={(invoiceId) => {
+          const bill = bills?.find(b => b.invoice_number === invoiceId);
+          if (bill) handleRecordPayment(bill);
+        }}
       />
+
+      {/* Record Payment Dialog */}
+      {paymentDialog && tenant && (
+        <RecordPaymentDialog
+          open={paymentDialog.open}
+          onOpenChange={(open) => setPaymentDialog(open ? paymentDialog : null)}
+          billId={paymentDialog.billId}
+          customerId={paymentDialog.customerId}
+          tenantId={tenant.id}
+          customerName={paymentDialog.customerName}
+          invoiceNumber={paymentDialog.invoiceNumber}
+          outstandingAmount={paymentDialog.outstandingAmount}
+        />
+      )}
     </div>
   );
 }
