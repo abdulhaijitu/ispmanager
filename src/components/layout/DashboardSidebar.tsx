@@ -1,0 +1,158 @@
+import { 
+  LayoutDashboard, 
+  Users, 
+  Package, 
+  Receipt, 
+  CreditCard, 
+  Settings, 
+  Building2,
+  BarChart3,
+  Bell,
+  FileText
+} from "lucide-react";
+import { NavLink, useLocation } from "react-router-dom";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarFooter,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
+
+const mainNavItems = [
+  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { title: "Customers", href: "/dashboard/customers", icon: Users },
+  { title: "Packages", href: "/dashboard/packages", icon: Package },
+  { title: "Billing", href: "/dashboard/billing", icon: Receipt },
+  { title: "Payments", href: "/dashboard/payments", icon: CreditCard },
+  { title: "Reports", href: "/dashboard/reports", icon: BarChart3 },
+];
+
+const systemNavItems = [
+  { title: "Notifications", href: "/dashboard/notifications", icon: Bell },
+  { title: "Settings", href: "/dashboard/settings", icon: Settings },
+];
+
+export function DashboardSidebar() {
+  const location = useLocation();
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
+
+  const isActive = (href: string) => {
+    if (href === "/dashboard") {
+      return location.pathname === "/dashboard";
+    }
+    return location.pathname.startsWith(href);
+  };
+
+  return (
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+      <SidebarHeader className="border-b border-sidebar-border p-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary">
+            <Building2 className="h-5 w-5 text-sidebar-primary-foreground" />
+          </div>
+          {!collapsed && (
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-sidebar-foreground">
+                ISP Manager
+              </span>
+              <span className="text-xs text-sidebar-foreground/60">
+                Multi-tenant SaaS
+              </span>
+            </div>
+          )}
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent className="scrollbar-thin">
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider">
+            Main Menu
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {mainNavItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href)}
+                    tooltip={item.title}
+                  >
+                    <NavLink
+                      to={item.href}
+                      className={cn(
+                        "flex items-center gap-3 transition-micro",
+                        isActive(item.href) && "bg-sidebar-accent text-sidebar-accent-foreground"
+                      )}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider">
+            System
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {systemNavItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href)}
+                    tooltip={item.title}
+                  >
+                    <NavLink
+                      to={item.href}
+                      className={cn(
+                        "flex items-center gap-3 transition-micro",
+                        isActive(item.href) && "bg-sidebar-accent text-sidebar-accent-foreground"
+                      )}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter className="border-t border-sidebar-border p-4">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-full bg-sidebar-accent flex items-center justify-center">
+            <span className="text-xs font-medium text-sidebar-accent-foreground">
+              AD
+            </span>
+          </div>
+          {!collapsed && (
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-sidebar-foreground">
+                Admin User
+              </span>
+              <span className="text-xs text-sidebar-foreground/60">
+                ISP Owner
+              </span>
+            </div>
+          )}
+        </div>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
