@@ -31,6 +31,8 @@ import {
   Wifi,
 } from "lucide-react";
 import type { PaymentStatus } from "@/types";
+import { downloadInvoicePdf } from "@/lib/generateInvoicePdf";
+import { useToast } from "@/hooks/use-toast";
 
 interface LineItem {
   id: string;
@@ -100,10 +102,43 @@ export function InvoiceDetailDialog({
   invoice,
   onRecordPayment,
 }: InvoiceDetailDialogProps) {
+  const { toast } = useToast();
+  
   if (!invoice) return null;
 
   const StatusIcon = statusConfig[invoice.status].icon;
   const remainingBalance = invoice.amount - invoice.paidAmount;
+
+  const handleDownloadPdf = () => {
+    try {
+      downloadInvoicePdf(invoice);
+      toast({
+        title: "PDF Downloaded",
+        description: `Invoice ${invoice.id} has been downloaded.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePrint = () => {
+    try {
+      const { generateInvoicePdf } = require("@/lib/generateInvoicePdf");
+      const doc = generateInvoicePdf(invoice);
+      doc.autoPrint();
+      window.open(doc.output("bloburl"), "_blank");
+    } catch (error) {
+      toast({
+        title: "Print Failed",
+        description: "Failed to generate print preview. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat("en-GB", {
@@ -299,11 +334,11 @@ export function InvoiceDetailDialog({
 
         {/* Actions */}
         <div className="flex flex-wrap gap-2 pt-4 border-t">
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={handlePrint}>
             <Printer className="h-4 w-4" />
             Print
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={handleDownloadPdf}>
             <Download className="h-4 w-4" />
             Download PDF
           </Button>
