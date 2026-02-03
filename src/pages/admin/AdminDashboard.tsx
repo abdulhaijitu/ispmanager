@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Building2, 
   Users, 
@@ -11,42 +12,28 @@ import {
   Activity
 } from "lucide-react";
 import { Link } from "react-router-dom";
-
-// Mock platform stats
-const platformStats = {
-  totalTenants: 24,
-  activeSubscriptions: 21,
-  trialTenants: 3,
-  suspendedTenants: 0,
-  totalRevenue: 456000,
-  monthlyRecurring: 42000,
-  totalEndUsers: 12450,
-  activeConnections: 11890,
-};
-
-const recentTenants = [
-  { id: "1", name: "FastNet BD", subdomain: "fastnet", status: "active", users: 1250, mrr: 5000 },
-  { id: "2", name: "Speed Link", subdomain: "speedlink", status: "active", users: 890, mrr: 3500 },
-  { id: "3", name: "NetZone", subdomain: "netzone", status: "trial", users: 120, mrr: 0 },
-  { id: "4", name: "CityBroadband", subdomain: "citybb", status: "active", users: 2100, mrr: 8000 },
-  { id: "5", name: "QuickNet", subdomain: "quicknet", status: "active", users: 560, mrr: 2500 },
-];
+import { usePlatformStats, useAllTenants } from "@/hooks/useTenants";
 
 const statusConfig = {
-  active: { label: "Active", variant: "default" as const, icon: CheckCircle },
-  trial: { label: "Trial", variant: "secondary" as const, icon: Clock },
-  suspended: { label: "Suspended", variant: "destructive" as const, icon: AlertTriangle },
+  active: { label: "সক্রিয়", variant: "default" as const, icon: CheckCircle },
+  trial: { label: "ট্রায়াল", variant: "secondary" as const, icon: Clock },
+  suspended: { label: "স্থগিত", variant: "destructive" as const, icon: AlertTriangle },
 };
 
 export default function AdminDashboard() {
+  const { data: stats, isLoading: statsLoading } = usePlatformStats();
+  const { data: tenants, isLoading: tenantsLoading } = useAllTenants();
+
   const formatCurrency = (amount: number) => `৳${amount.toLocaleString()}`;
+
+  const recentTenants = tenants?.slice(0, 5) ?? [];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Platform Overview</h1>
+        <h1 className="text-2xl font-bold">প্ল্যাটফর্ম ওভারভিউ</h1>
         <p className="text-muted-foreground">
-          Manage all ISP tenants and monitor platform health
+          সকল ISP টেন্যান্ট পরিচালনা ও প্ল্যাটফর্ম মনিটরিং
         </p>
       </div>
 
@@ -55,61 +42,87 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Tenants
+              মোট টেন্যান্ট
             </CardTitle>
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{platformStats.totalTenants}</div>
-            <div className="flex gap-2 mt-1">
-              <Badge variant="default" className="text-xs">{platformStats.activeSubscriptions} active</Badge>
-              <Badge variant="secondary" className="text-xs">{platformStats.trialTenants} trial</Badge>
-            </div>
+            {statsLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{stats?.totalTenants ?? 0}</div>
+                <div className="flex gap-2 mt-1 flex-wrap">
+                  <Badge variant="default" className="text-xs">{stats?.activeSubscriptions ?? 0} সক্রিয়</Badge>
+                  <Badge variant="secondary" className="text-xs">{stats?.trialTenants ?? 0} ট্রায়াল</Badge>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Monthly Revenue
+              মাসিক রাজস্ব
             </CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(platformStats.monthlyRecurring)}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              <span className="text-primary">+12%</span> from last month
-            </p>
+            {statsLoading ? (
+              <Skeleton className="h-8 w-24" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{formatCurrency(0)}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  শীঘ্রই আসছে
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total End Users
+              মোট গ্রাহক
             </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{platformStats.totalEndUsers.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Across all tenants
-            </p>
+            {statsLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{(stats?.totalEndUsers ?? 0).toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  সকল টেন্যান্ট জুড়ে
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Active Connections
+              সক্রিয় সংযোগ
             </CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{platformStats.activeConnections.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {((platformStats.activeConnections / platformStats.totalEndUsers) * 100).toFixed(1)}% active rate
-            </p>
+            {statsLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{(stats?.activeConnections ?? 0).toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stats?.totalEndUsers 
+                    ? ((stats.activeConnections / stats.totalEndUsers) * 100).toFixed(1) 
+                    : 0}% সক্রিয় হার
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -121,28 +134,26 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
-              Revenue Overview
+              রাজস্ব ওভারভিউ
             </CardTitle>
-            <CardDescription>Platform financial summary</CardDescription>
+            <CardDescription>প্ল্যাটফর্মের আর্থিক সারসংক্ষেপ</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
               <div>
-                <p className="text-sm text-muted-foreground">Total Revenue (All Time)</p>
-                <p className="text-2xl font-bold">{formatCurrency(platformStats.totalRevenue)}</p>
+                <p className="text-sm text-muted-foreground">মোট রাজস্ব (সর্বকালীন)</p>
+                <p className="text-2xl font-bold">{formatCurrency(0)}</p>
               </div>
               <DollarSign className="h-8 w-8 text-primary" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="p-3 rounded-lg border">
-                <p className="text-sm text-muted-foreground">Active MRR</p>
-                <p className="text-lg font-semibold">{formatCurrency(platformStats.monthlyRecurring)}</p>
+                <p className="text-sm text-muted-foreground">সক্রিয় MRR</p>
+                <p className="text-lg font-semibold">{formatCurrency(0)}</p>
               </div>
               <div className="p-3 rounded-lg border">
-                <p className="text-sm text-muted-foreground">Avg. per Tenant</p>
-                <p className="text-lg font-semibold">
-                  {formatCurrency(Math.round(platformStats.monthlyRecurring / platformStats.activeSubscriptions))}
-                </p>
+                <p className="text-sm text-muted-foreground">গড় প্রতি টেন্যান্ট</p>
+                <p className="text-lg font-semibold">{formatCurrency(0)}</p>
               </div>
             </div>
           </CardContent>
@@ -154,49 +165,61 @@ export default function AdminDashboard() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5" />
-                Recent Tenants
+                সাম্প্রতিক টেন্যান্ট
               </CardTitle>
-              <CardDescription>Latest ISP organizations</CardDescription>
+              <CardDescription>সর্বশেষ ISP প্রতিষ্ঠান</CardDescription>
             </div>
             <Link 
               to="/admin/tenants" 
               className="text-sm text-primary hover:underline"
             >
-              View all
+              সব দেখুন
             </Link>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {recentTenants.map((tenant) => {
-                const StatusIcon = statusConfig[tenant.status].icon;
-                return (
-                  <div
-                    key={tenant.id}
-                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                        <Building2 className="h-5 w-5 text-primary" />
+            {tenantsLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : recentTenants.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                কোন টেন্যান্ট পাওয়া যায়নি
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recentTenants.map((tenant) => {
+                  const status = tenant.subscription_status ?? "trial";
+                  const StatusIcon = statusConfig[status]?.icon ?? Clock;
+                  return (
+                    <div
+                      key={tenant.id}
+                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                          <Building2 className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{tenant.name}</p>
+                          <p className="text-sm text-muted-foreground">{tenant.subdomain}.ispmanager.com</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">{tenant.name}</p>
-                        <p className="text-sm text-muted-foreground">{tenant.subdomain}.ispmanager.com</p>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right hidden sm:block">
+                          <p className="text-sm font-medium">{tenant.customer_count ?? 0} গ্রাহক</p>
+                        </div>
+                        <Badge variant={statusConfig[status]?.variant ?? "secondary"} className="gap-1">
+                          <StatusIcon className="h-3 w-3" />
+                          {statusConfig[status]?.label ?? status}
+                        </Badge>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right hidden sm:block">
-                        <p className="text-sm font-medium">{tenant.users} users</p>
-                        <p className="text-xs text-muted-foreground">{formatCurrency(tenant.mrr)}/mo</p>
-                      </div>
-                      <Badge variant={statusConfig[tenant.status].variant} className="gap-1">
-                        <StatusIcon className="h-3 w-3" />
-                        {statusConfig[tenant.status].label}
-                      </Badge>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -206,7 +229,7 @@ export default function AdminDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" />
-            Attention Required
+            মনোযোগ প্রয়োজন
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -214,22 +237,24 @@ export default function AdminDashboard() {
             <div className="flex items-center gap-3 p-3 rounded-lg border border-destructive/20 bg-destructive/5">
               <AlertTriangle className="h-5 w-5 text-destructive" />
               <div>
-                <p className="font-medium text-sm">0 Suspended Tenants</p>
-                <p className="text-xs text-muted-foreground">No action needed</p>
+                <p className="font-medium text-sm">{stats?.suspendedTenants ?? 0} স্থগিত টেন্যান্ট</p>
+                <p className="text-xs text-muted-foreground">
+                  {stats?.suspendedTenants === 0 ? "কোন পদক্ষেপ প্রয়োজন নেই" : "পদক্ষেপ প্রয়োজন"}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 rounded-lg border border-primary/20 bg-primary/5">
               <Clock className="h-5 w-5 text-primary" />
               <div>
-                <p className="font-medium text-sm">3 Trial Expiring</p>
-                <p className="text-xs text-muted-foreground">Within 7 days</p>
+                <p className="font-medium text-sm">{stats?.trialTenants ?? 0} ট্রায়াল</p>
+                <p className="text-xs text-muted-foreground">ট্রায়ালে আছে</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 rounded-lg border">
               <CheckCircle className="h-5 w-5 text-primary" />
               <div>
-                <p className="font-medium text-sm">All Systems Healthy</p>
-                <p className="text-xs text-muted-foreground">No issues detected</p>
+                <p className="font-medium text-sm">সব সিস্টেম স্বাভাবিক</p>
+                <p className="text-xs text-muted-foreground">কোন সমস্যা নেই</p>
               </div>
             </div>
           </div>

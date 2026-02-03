@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -12,15 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,10 +26,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   Building2, 
   Search, 
-  Plus,
   MoreHorizontal,
   Eye,
   Edit,
@@ -48,202 +48,129 @@ import {
   CheckCircle,
   Clock,
   AlertTriangle,
-  Filter
+  Filter,
+  Loader2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-// Mock tenants data
-const mockTenants = [
-  { 
-    id: "1", 
-    name: "FastNet BD", 
-    subdomain: "fastnet", 
-    status: "active" as const, 
-    customers: 1250, 
-    mrr: 5000,
-    createdAt: "2023-06-15",
-    owner: "Rahim Khan",
-    email: "rahim@fastnet.com"
-  },
-  { 
-    id: "2", 
-    name: "Speed Link", 
-    subdomain: "speedlink", 
-    status: "active" as const, 
-    customers: 890, 
-    mrr: 3500,
-    createdAt: "2023-08-22",
-    owner: "Kamal Hossain",
-    email: "kamal@speedlink.net"
-  },
-  { 
-    id: "3", 
-    name: "NetZone", 
-    subdomain: "netzone", 
-    status: "trial" as const, 
-    customers: 120, 
-    mrr: 0,
-    createdAt: "2024-01-10",
-    owner: "Fatema Begum",
-    email: "fatema@netzone.bd"
-  },
-  { 
-    id: "4", 
-    name: "CityBroadband", 
-    subdomain: "citybb", 
-    status: "active" as const, 
-    customers: 2100, 
-    mrr: 8000,
-    createdAt: "2023-03-05",
-    owner: "Jamal Uddin",
-    email: "jamal@citybroadband.com"
-  },
-  { 
-    id: "5", 
-    name: "QuickNet", 
-    subdomain: "quicknet", 
-    status: "suspended" as const, 
-    customers: 560, 
-    mrr: 0,
-    createdAt: "2023-09-18",
-    owner: "Nasir Ahmed",
-    email: "nasir@quicknet.bd"
-  },
-];
+import { useAllTenants, useUpdateTenant, useDeleteTenant, type TenantWithStats } from "@/hooks/useTenants";
 
 const statusConfig = {
-  active: { label: "Active", variant: "default" as const, icon: CheckCircle },
-  trial: { label: "Trial", variant: "secondary" as const, icon: Clock },
-  suspended: { label: "Suspended", variant: "destructive" as const, icon: AlertTriangle },
+  active: { label: "সক্রিয়", variant: "default" as const, icon: CheckCircle },
+  trial: { label: "ট্রায়াল", variant: "secondary" as const, icon: Clock },
+  suspended: { label: "স্থগিত", variant: "destructive" as const, icon: AlertTriangle },
 };
 
 export default function AdminTenants() {
   const { toast } = useToast();
+  const { data: tenants, isLoading, error } = useAllTenants();
+  const updateTenant = useUpdateTenant();
+  const deleteTenant = useDeleteTenant();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newTenant, setNewTenant] = useState({
-    name: "",
-    subdomain: "",
-    ownerName: "",
-    ownerEmail: "",
-  });
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [tenantToDelete, setTenantToDelete] = useState<TenantWithStats | null>(null);
 
-  const filteredTenants = mockTenants.filter((tenant) => {
+  const filteredTenants = (tenants ?? []).filter((tenant) => {
     const matchesSearch =
       tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tenant.subdomain.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tenant.owner.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || tenant.status === statusFilter;
+      (tenant.owner_name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
+    const matchesStatus = statusFilter === "all" || tenant.subscription_status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const formatCurrency = (amount: number) => `৳${amount.toLocaleString()}`;
-
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-GB', {
+    return new Date(dateStr).toLocaleDateString('bn-BD', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
     });
   };
 
-  const handleCreateTenant = () => {
-    toast({
-      title: "Tenant Created",
-      description: `${newTenant.name} has been created successfully.`,
-    });
-    setIsCreateDialogOpen(false);
-    setNewTenant({ name: "", subdomain: "", ownerName: "", ownerEmail: "" });
+  const handleSuspend = async (tenant: TenantWithStats) => {
+    try {
+      await updateTenant.mutateAsync({
+        id: tenant.id,
+        updates: { subscription_status: "suspended" },
+      });
+      toast({
+        title: "টেন্যান্ট স্থগিত",
+        description: `${tenant.name} স্থগিত করা হয়েছে।`,
+      });
+    } catch (err) {
+      toast({
+        title: "ত্রুটি",
+        description: "টেন্যান্ট স্থগিত করতে সমস্যা হয়েছে।",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleSuspend = (tenant: typeof mockTenants[0]) => {
-    toast({
-      title: "Tenant Suspended",
-      description: `${tenant.name} has been suspended.`,
-    });
+  const handleActivate = async (tenant: TenantWithStats) => {
+    try {
+      await updateTenant.mutateAsync({
+        id: tenant.id,
+        updates: { subscription_status: "active" },
+      });
+      toast({
+        title: "টেন্যান্ট সক্রিয়",
+        description: `${tenant.name} সক্রিয় করা হয়েছে।`,
+      });
+    } catch (err) {
+      toast({
+        title: "ত্রুটি",
+        description: "টেন্যান্ট সক্রিয় করতে সমস্যা হয়েছে।",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleActivate = (tenant: typeof mockTenants[0]) => {
-    toast({
-      title: "Tenant Activated",
-      description: `${tenant.name} has been activated.`,
-    });
+  const handleDeleteConfirm = async () => {
+    if (!tenantToDelete) return;
+    
+    try {
+      await deleteTenant.mutateAsync(tenantToDelete.id);
+      toast({
+        title: "টেন্যান্ট মুছে ফেলা হয়েছে",
+        description: `${tenantToDelete.name} সফলভাবে মুছে ফেলা হয়েছে।`,
+      });
+    } catch (err) {
+      toast({
+        title: "ত্রুটি",
+        description: "টেন্যান্ট মুছে ফেলতে সমস্যা হয়েছে।",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setTenantToDelete(null);
+    }
   };
+
+  const activeCount = tenants?.filter(t => t.subscription_status === 'active').length ?? 0;
+  const trialCount = tenants?.filter(t => t.subscription_status === 'trial').length ?? 0;
+  const suspendedCount = tenants?.filter(t => t.subscription_status === 'suspended').length ?? 0;
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <p className="text-destructive">টেন্যান্ট তথ্য লোড করতে সমস্যা হয়েছে।</p>
+        <Button variant="outline" onClick={() => window.location.reload()}>
+          পুনরায় চেষ্টা করুন
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Tenant Management</h1>
+          <h1 className="text-2xl font-bold">টেন্যান্ট ম্যানেজমেন্ট</h1>
           <p className="text-muted-foreground">
-            Manage all ISP organizations on the platform
+            প্ল্যাটফর্মের সকল ISP প্রতিষ্ঠান পরিচালনা করুন
           </p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Add Tenant
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Tenant</DialogTitle>
-              <DialogDescription>
-                Add a new ISP organization to the platform
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Organization Name</Label>
-                <Input
-                  id="name"
-                  placeholder="FastNet BD"
-                  value={newTenant.name}
-                  onChange={(e) => setNewTenant({ ...newTenant, name: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="subdomain">Subdomain</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="subdomain"
-                    placeholder="fastnet"
-                    value={newTenant.subdomain}
-                    onChange={(e) => setNewTenant({ ...newTenant, subdomain: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
-                  />
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">.ispmanager.com</span>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="ownerName">Owner Name</Label>
-                <Input
-                  id="ownerName"
-                  placeholder="John Doe"
-                  value={newTenant.ownerName}
-                  onChange={(e) => setNewTenant({ ...newTenant, ownerName: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="ownerEmail">Owner Email</Label>
-                <Input
-                  id="ownerEmail"
-                  type="email"
-                  placeholder="john@example.com"
-                  value={newTenant.ownerEmail}
-                  onChange={(e) => setNewTenant({ ...newTenant, ownerEmail: e.target.value })}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleCreateTenant}>Create Tenant</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
 
       {/* Stats */}
@@ -255,8 +182,12 @@ export default function AdminTenants() {
                 <CheckCircle className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{mockTenants.filter(t => t.status === 'active').length}</p>
-                <p className="text-sm text-muted-foreground">Active Tenants</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-12" />
+                ) : (
+                  <p className="text-2xl font-bold">{activeCount}</p>
+                )}
+                <p className="text-sm text-muted-foreground">সক্রিয় টেন্যান্ট</p>
               </div>
             </div>
           </CardContent>
@@ -268,8 +199,12 @@ export default function AdminTenants() {
                 <Clock className="h-6 w-6 text-secondary-foreground" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{mockTenants.filter(t => t.status === 'trial').length}</p>
-                <p className="text-sm text-muted-foreground">Trial Tenants</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-12" />
+                ) : (
+                  <p className="text-2xl font-bold">{trialCount}</p>
+                )}
+                <p className="text-sm text-muted-foreground">ট্রায়াল টেন্যান্ট</p>
               </div>
             </div>
           </CardContent>
@@ -281,8 +216,12 @@ export default function AdminTenants() {
                 <AlertTriangle className="h-6 w-6 text-destructive" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{mockTenants.filter(t => t.status === 'suspended').length}</p>
-                <p className="text-sm text-muted-foreground">Suspended</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-12" />
+                ) : (
+                  <p className="text-2xl font-bold">{suspendedCount}</p>
+                )}
+                <p className="text-sm text-muted-foreground">স্থগিত</p>
               </div>
             </div>
           </CardContent>
@@ -294,10 +233,10 @@ export default function AdminTenants() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
-            All Tenants
+            সকল টেন্যান্ট
           </CardTitle>
           <CardDescription>
-            View and manage all ISP organizations
+            সকল ISP প্রতিষ্ঠান দেখুন ও পরিচালনা করুন
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -306,7 +245,7 @@ export default function AdminTenants() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search tenants..."
+                placeholder="টেন্যান্ট খুঁজুন..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
@@ -315,13 +254,13 @@ export default function AdminTenants() {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-40">
                 <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder="স্ট্যাটাস" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="trial">Trial</SelectItem>
-                <SelectItem value="suspended">Suspended</SelectItem>
+                <SelectItem value="all">সব স্ট্যাটাস</SelectItem>
+                <SelectItem value="active">সক্রিয়</SelectItem>
+                <SelectItem value="trial">ট্রায়াল</SelectItem>
+                <SelectItem value="suspended">স্থগিত</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -331,92 +270,145 @@ export default function AdminTenants() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Tenant</TableHead>
-                  <TableHead>Owner</TableHead>
-                  <TableHead>Customers</TableHead>
-                  <TableHead>MRR</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>টেন্যান্ট</TableHead>
+                  <TableHead>মালিক</TableHead>
+                  <TableHead>গ্রাহক</TableHead>
+                  <TableHead>তৈরি</TableHead>
+                  <TableHead>স্ট্যাটাস</TableHead>
+                  <TableHead className="text-right">অ্যাকশন</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTenants.map((tenant) => {
-                  const StatusIcon = statusConfig[tenant.status].icon;
-                  return (
-                    <TableRow key={tenant.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                            <Building2 className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <p className="font-medium">{tenant.name}</p>
-                            <p className="text-sm text-muted-foreground">{tenant.subdomain}.ispmanager.com</p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{tenant.owner}</p>
-                          <p className="text-sm text-muted-foreground">{tenant.email}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>{tenant.customers.toLocaleString()}</TableCell>
-                      <TableCell className="font-medium">{formatCurrency(tenant.mrr)}</TableCell>
-                      <TableCell>{formatDate(tenant.createdAt)}</TableCell>
-                      <TableCell>
-                        <Badge variant={statusConfig[tenant.status].variant} className="gap-1">
-                          <StatusIcon className="h-3 w-3" />
-                          {statusConfig[tenant.status].label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit Tenant
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {tenant.status === "active" || tenant.status === "trial" ? (
-                              <DropdownMenuItem 
-                                onClick={() => handleSuspend(tenant)}
-                                className="text-destructive"
-                              >
-                                <Pause className="mr-2 h-4 w-4" />
-                                Suspend
-                              </DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem onClick={() => handleActivate(tenant)}>
-                                <Play className="mr-2 h-4 w-4" />
-                                Activate
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem className="text-destructive">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete Tenant
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+                {isLoading ? (
+                  [...Array(3)].map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-12 w-full" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-8" /></TableCell>
                     </TableRow>
-                  );
-                })}
+                  ))
+                ) : filteredTenants.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                      কোন টেন্যান্ট পাওয়া যায়নি
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredTenants.map((tenant) => {
+                    const status = tenant.subscription_status ?? "trial";
+                    const StatusIcon = statusConfig[status]?.icon ?? Clock;
+                    return (
+                      <TableRow key={tenant.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                              <Building2 className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium">{tenant.name}</p>
+                              <p className="text-sm text-muted-foreground">{tenant.subdomain}.ispmanager.com</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{tenant.owner_name || "-"}</p>
+                            <p className="text-sm text-muted-foreground">{tenant.owner_email || "-"}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>{(tenant.customer_count ?? 0).toLocaleString()}</TableCell>
+                        <TableCell>{formatDate(tenant.created_at)}</TableCell>
+                        <TableCell>
+                          <Badge variant={statusConfig[status]?.variant ?? "secondary"} className="gap-1">
+                            <StatusIcon className="h-3 w-3" />
+                            {statusConfig[status]?.label ?? status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" disabled={updateTenant.isPending}>
+                                {updateTenant.isPending ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <MoreHorizontal className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                <Eye className="mr-2 h-4 w-4" />
+                                বিস্তারিত দেখুন
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Edit className="mr-2 h-4 w-4" />
+                                সম্পাদনা
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              {status === "active" || status === "trial" ? (
+                                <DropdownMenuItem 
+                                  onClick={() => handleSuspend(tenant)}
+                                  className="text-destructive"
+                                >
+                                  <Pause className="mr-2 h-4 w-4" />
+                                  স্থগিত করুন
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem onClick={() => handleActivate(tenant)}>
+                                  <Play className="mr-2 h-4 w-4" />
+                                  সক্রিয় করুন
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem 
+                                className="text-destructive"
+                                onClick={() => {
+                                  setTenantToDelete(tenant);
+                                  setDeleteDialogOpen(true);
+                                }}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                মুছে ফেলুন
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
               </TableBody>
             </Table>
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>আপনি কি নিশ্চিত?</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{tenantToDelete?.name}" টেন্যান্ট এবং এর সাথে সম্পর্কিত সকল ডেটা স্থায়ীভাবে মুছে ফেলা হবে। 
+              এই কাজ পূর্বাবস্থায় ফেরানো যাবে না।
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>বাতিল</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteTenant.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              মুছে ফেলুন
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
