@@ -13,15 +13,32 @@ interface TenantContextType {
   allTenants: Tenant[];
   isLoading: boolean;
   isSuperAdmin: boolean;
+  // Impersonation mode
+  isImpersonating: boolean;
+  impersonatedTenantId: string | null;
+  startImpersonation: (tenantId: string) => void;
+  stopImpersonation: () => void;
 }
 
 const TenantContext = createContext<TenantContextType | undefined>(undefined);
+
+const IMPERSONATION_KEY = "super_admin_impersonating_tenant";
 
 export function TenantProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const { data: role } = useUserRole();
   const isSuperAdmin = role === "super_admin";
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
+  
+  // Impersonation state - persisted in sessionStorage
+  const [impersonatedTenantId, setImpersonatedTenantId] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem(IMPERSONATION_KEY);
+    }
+    return null;
+  });
+
+  const isImpersonating = isSuperAdmin && !!impersonatedTenantId;
 
   // Fetch user's profile to get their default tenant_id
   const { data: profile } = useQuery({
@@ -65,8 +82,10 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     enabled: !!user?.id && (isSuperAdmin || !!profile?.tenant_id),
   });
 
-  // Determine current tenant
-  const currentTenant = selectedTenantId
+  // Determine current tenant - use impersonated tenant if in impersonation mode
+  const currentTenant = impersonatedTenantId
+    ? allTenants.find((t) => t.id === impersonatedTenantId) || null
+    : selectedTenantId
     ? allTenants.find((t) => t.id === selectedTenantId) || null
     : isSuperAdmin
     ? allTenants[0] || null
@@ -74,18 +93,36 @@ export function TenantProvider({ children }: { children: ReactNode }) {
 
   // Initialize selected tenant when tenants load
   useEffect(() => {
-    if (!selectedTenantId && allTenants.length > 0) {
+    if (!selectedTenantId && allTenants.length > 0 && !impersonatedTenantId) {
       if (isSuperAdmin) {
         setSelectedTenantId(allTenants[0]?.id || null);
       } else if (profile?.tenant_id) {
         setSelectedTenantId(profile.tenant_id);
       }
     }
-  }, [allTenants, isSuperAdmin, profile?.tenant_id, selectedTenantId]);
+  }, [allTenants, isSuperAdmin, profile?.tenant_id, selectedTenantId, impersonatedTenantId]);
 
   const setCurrentTenant = (tenant: Tenant | null) => {
     setSelectedTenantId(tenant?.id || null);
   };
+
+  const startImpersonation = (tenantId: string) => {
+    setImpersonatedTenantId(tenantId);
+    sessionStorage.setItem(IMPERSONATION_KEY, tenantId);
+  };
+
+  const stopImpersonation = () => {
+    setImpersonatedTenantId(null);
+    sessionStorage.removeItem(IMPERSONATION_KEY);
+  };
+
+  // Clear impersonation if user logs out or role changes
+  useEffect(() => {
+    if (!user || !isSuperAdmin) {
+      setImpersonatedTenantId(null);
+      sessionStorage.removeItem(IMPERSONATION_KEY);
+    }
+  }, [user, isSuperAdmin]);
 
   return (
     <TenantContext.Provider
@@ -95,6 +132,10 @@ export function TenantProvider({ children }: { children: ReactNode }) {
         allTenants,
         isLoading: tenantsLoading,
         isSuperAdmin,
+        isImpersonating,
+        impersonatedTenantId,
+        startImpersonation,
+        stopImpersonation,
       }}
     >
       {children}
