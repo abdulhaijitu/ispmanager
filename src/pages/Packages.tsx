@@ -13,13 +13,15 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { usePackages, useCreatePackage, useUpdatePackage, type Package } from "@/hooks/usePackages";
+import { usePackages, useCreatePackage, useUpdatePackage, useDeletePackage, type Package } from "@/hooks/usePackages";
 import { useTenantContext } from "@/contexts/TenantContext";
 import { useCustomers } from "@/hooks/useCustomers";
 import { PackageFormDialog } from "@/components/packages/PackageFormDialog";
+import { DeletePackageDialog } from "@/components/packages/DeletePackageDialog";
 import { toast } from "sonner";
 
 export default function Packages() {
@@ -28,9 +30,12 @@ export default function Packages() {
   const { data: customers = [] } = useCustomers(currentTenant?.id);
   const createPackage = useCreatePackage();
   const updatePackage = useUpdatePackage();
+  const deletePackage = useDeletePackage();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingPackage, setDeletingPackage] = useState<Package | null>(null);
 
   const activePackages = packages.filter((p) => p.is_active);
   const inactivePackages = packages.filter((p) => !p.is_active);
@@ -95,7 +100,23 @@ export default function Packages() {
     }
   };
 
-  // Calculate stats
+  const handleDeletePackage = (pkg: Package) => {
+    setDeletingPackage(pkg);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingPackage) return;
+    try {
+      await deletePackage.mutateAsync(deletingPackage.id);
+      toast.success("প্যাকেজ ডিলিট হয়েছে");
+      setDeleteDialogOpen(false);
+      setDeletingPackage(null);
+    } catch (error) {
+      toast.error("প্যাকেজ ডিলিট করা যায়নি");
+      console.error(error);
+    }
+  };
   const totalSubscriptions = packages.reduce((sum, p) => sum + getCustomerCount(p.id), 0);
   const avgRevenuePerPackage = activePackages.length > 0 && totalSubscriptions > 0
     ? Math.round(
@@ -208,11 +229,18 @@ export default function Packages() {
                             সম্পাদনা
                           </DropdownMenuItem>
                           <DropdownMenuItem 
-                            className="text-destructive"
                             onClick={() => handleToggleActive(pkg)}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             নিষ্ক্রিয় করুন
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            className="text-destructive"
+                            onClick={() => handleDeletePackage(pkg)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            ডিলিট করুন
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -293,6 +321,16 @@ export default function Packages() {
         package={editingPackage}
         onSubmit={handleSubmit}
         isLoading={createPackage.isPending || updatePackage.isPending}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeletePackageDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        packageName={deletingPackage?.name || ""}
+        customerCount={deletingPackage ? getCustomerCount(deletingPackage.id) : 0}
+        onConfirm={handleConfirmDelete}
+        isLoading={deletePackage.isPending}
       />
     </div>
   );
