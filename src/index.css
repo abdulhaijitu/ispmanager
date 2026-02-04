@@ -220,4 +220,33 @@
   .hover-lift {
     @apply transition-transform duration-200 ease-out hover:-translate-y-0.5;
   }
+
+  /* Mobile Safe Area utilities for PWA */
+  .safe-area-inset {
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Touch-friendly utilities */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Prevent text selection on mobile buttons */
+  .select-none-mobile {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Smooth momentum scrolling for iOS */
+  .scroll-smooth-ios {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+  }
 }

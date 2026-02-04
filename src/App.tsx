@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PortalLayout } from "@/components/portal/PortalLayout";
 import { SuperAdminLayout } from "@/components/admin/SuperAdminLayout";
+import MobileLayout from "@/components/mobile/MobileLayout";
 import { StaffRoute } from "@/components/StaffRoute";
 import { CustomerRoute } from "@/components/CustomerRoute";
 import { SuperAdminRoute } from "@/components/SuperAdminRoute";
@@ -35,6 +36,14 @@ import PortalDashboard from "@/pages/portal/PortalDashboard";
 import PortalBills from "@/pages/portal/PortalBills";
 import PortalPayments from "@/pages/portal/PortalPayments";
 import PortalProfile from "@/pages/portal/PortalProfile";
+
+// Mobile App Pages
+import MobileLogin from "@/pages/mobile/MobileLogin";
+import MobileHome from "@/pages/mobile/MobileHome";
+import MobileBills from "@/pages/mobile/MobileBills";
+import MobilePayments from "@/pages/mobile/MobilePayments";
+import MobileProfile from "@/pages/mobile/MobileProfile";
+import MobileInstall from "@/pages/mobile/MobileInstall";
 
 // Super Admin Pages
 import AdminLogin from "@/pages/admin/AdminLogin";
@@ -81,7 +90,7 @@ const App = () => (
                 <Route path="/dashboard/settings" element={<Settings />} />
               </Route>
 
-              {/* Customer Portal Routes */}
+              {/* Customer Portal Routes (Web) */}
               <Route path="/portal/login" element={<Login />} />
               <Route path="/portal/signup" element={<Signup />} />
               <Route
@@ -95,6 +104,22 @@ const App = () => (
                 <Route path="/portal/bills" element={<PortalBills />} />
                 <Route path="/portal/payments" element={<PortalPayments />} />
                 <Route path="/portal/profile" element={<PortalProfile />} />
+              </Route>
+
+              {/* Mobile Customer App Routes (PWA) */}
+              <Route path="/app/login" element={<MobileLogin />} />
+              <Route path="/app/install" element={<MobileInstall />} />
+              <Route
+                element={
+                  <MobileLayout>
+                    <></>
+                  </MobileLayout>
+                }
+              >
+                <Route path="/app" element={<MobileLayout><MobileHome /></MobileLayout>} />
+                <Route path="/app/bills" element={<MobileLayout><MobileBills /></MobileLayout>} />
+                <Route path="/app/payments" element={<MobileLayout><MobilePayments /></MobileLayout>} />
+                <Route path="/app/profile" element={<MobileLayout><MobileProfile /></MobileLayout>} />
               </Route>
 
               {/* Super Admin Routes */}
