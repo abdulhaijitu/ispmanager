@@ -48,16 +48,17 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Main Content Area - Scrollable */}
       <main className="flex-1 overflow-y-auto pb-20">
-        <div className="p-4 safe-area-inset">
+        <div className="p-4 safe-area-inset animate-fade-in">
           {children}
         </div>
       </main>
 
       {/* Bottom Navigation - Fixed */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border safe-area-bottom z-50">
-        <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
+      <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border safe-area-bottom z-50">
+        <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname === item.path || 
+              (item.path !== "/app" && location.pathname.startsWith(item.path));
             const Icon = item.icon;
             
             return (
@@ -65,13 +66,31 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
                 key={item.path}
                 onClick={() => navigate(item.path)}
                 className={cn(
-                  "flex flex-col items-center justify-center w-full h-full gap-1 transition-colors",
-                  "active:bg-muted/50 touch-manipulation",
+                  "relative flex flex-col items-center justify-center flex-1 py-2 rounded-xl transition-all duration-200",
+                  "active:scale-[0.95] touch-manipulation",
                   isActive ? "text-primary" : "text-muted-foreground"
                 )}
               >
-                <Icon className={cn("w-6 h-6", isActive && "fill-primary/20")} />
-                <span className="text-xs font-medium">{item.label}</span>
+                {/* Active indicator */}
+                {isActive && (
+                  <span className="absolute top-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-primary animate-scale-in" />
+                )}
+                
+                <div className={cn(
+                  "relative p-1.5 rounded-xl transition-all duration-200",
+                  isActive && "bg-primary/10"
+                )}>
+                  <Icon className={cn(
+                    "w-5 h-5 transition-transform duration-200",
+                    isActive && "scale-110"
+                  )} />
+                </div>
+                <span className={cn(
+                  "text-[10px] font-medium mt-0.5 transition-all duration-200",
+                  isActive && "font-semibold"
+                )}>
+                  {item.label}
+                </span>
               </button>
             );
           })}

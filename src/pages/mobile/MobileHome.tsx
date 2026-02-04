@@ -4,13 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { 
   Wifi, 
   Receipt, 
   CreditCard, 
@@ -21,19 +14,16 @@ import {
   UserX,
   Bell,
   Package,
-  BellRing,
-  CreditCard as PaymentIcon,
-  AlertTriangle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePortalCustomer, usePortalBills, usePortalPayments } from "@/hooks/usePortalData";
-import { usePushNotifications } from "@/hooks/usePushNotifications";
-import { formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
+import { MobileNotificationSheet } from "@/components/mobile/MobileNotificationSheet";
 
 const statusConfig = {
-  active: { label: "Active", color: "bg-green-500", icon: CheckCircle },
-  suspended: { label: "Suspended", color: "bg-red-500", icon: AlertCircle },
-  pending: { label: "Pending", color: "bg-yellow-500", icon: Clock },
+  active: { label: "Active", color: "bg-success", icon: CheckCircle },
+  suspended: { label: "Suspended", color: "bg-destructive", icon: AlertCircle },
+  pending: { label: "Pending", color: "bg-warning", icon: Clock },
 };
 
 const billStatusConfig = {
@@ -43,34 +33,36 @@ const billStatusConfig = {
   overdue: { label: "Overdue", variant: "destructive" as const },
 };
 
-const notificationIcons: Record<string, React.ElementType> = {
-  billing_reminder: AlertTriangle,
-  payment_confirmation: PaymentIcon,
-  connection_status: Wifi,
-  general: BellRing,
-};
-
 export default function MobileHome() {
   const navigate = useNavigate();
   const { data: customer, isLoading: customerLoading } = usePortalCustomer();
   const { data: bills, isLoading: billsLoading } = usePortalBills();
   const { data: payments } = usePortalPayments();
-  const { notifications, isLoadingNotifications } = usePushNotifications();
   const [notificationSheetOpen, setNotificationSheetOpen] = useState(false);
 
   const formatCurrency = (amount: number) => `৳${amount.toLocaleString()}`;
   const currentBill = bills?.find(b => b.status !== "paid") || bills?.[0];
   const lastPayment = payments?.[0];
-  const unreadCount = notifications?.filter(n => !n.sent_at || new Date(n.sent_at) > new Date(Date.now() - 24 * 60 * 60 * 1000)).length || 0;
 
   if (customerLoading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-20 w-full rounded-2xl" />
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-8 w-32" />
+          </div>
+          <Skeleton className="h-12 w-12 rounded-full" />
+        </div>
         <Skeleton className="h-40 w-full rounded-2xl" />
         <div className="grid grid-cols-2 gap-4">
           <Skeleton className="h-32 rounded-2xl" />
           <Skeleton className="h-32 rounded-2xl" />
+        </div>
+        <div className="space-y-3">
+          <Skeleton className="h-5 w-28" />
+          <Skeleton className="h-20 rounded-xl" />
+          <Skeleton className="h-20 rounded-xl" />
         </div>
       </div>
     );
@@ -78,7 +70,7 @@ export default function MobileHome() {
 
   if (!customer) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 text-center">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 text-center animate-fade-in">
         <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
           <UserX className="h-12 w-12 text-muted-foreground" />
         </div>
@@ -103,76 +95,35 @@ export default function MobileHome() {
             {customer.name.split(" ")[0]}
           </h1>
         </div>
-        <Sheet open={notificationSheetOpen} onOpenChange={setNotificationSheetOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative h-12 w-12 rounded-full">
-              <Bell className="h-6 w-6" />
-              {unreadCount > 0 && (
-                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-primary rounded-full" />
-              )}
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-full sm:max-w-md">
-            <SheetHeader>
-              <SheetTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                Notifications
-              </SheetTitle>
-            </SheetHeader>
-            <div className="mt-6 space-y-4 max-h-[calc(100vh-150px)] overflow-y-auto">
-              {isLoadingNotifications ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-20 w-full rounded-lg" />
-                ))
-              ) : notifications && notifications.length > 0 ? (
-                notifications.map((notification) => {
-                  const Icon = notificationIcons[notification.notification_type] || BellRing;
-                  return (
-                    <div
-                      key={notification.id}
-                      className="flex gap-3 p-4 bg-muted/50 rounded-lg"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{notification.title}</p>
-                        <p className="text-sm text-muted-foreground line-clamp-2">{notification.body}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                    <Bell className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <p className="font-medium">No Notifications</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    You're all caught up!
-                  </p>
-                </div>
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative h-12 w-12 rounded-full"
+          onClick={() => setNotificationSheetOpen(true)}
+        >
+          <Bell className="h-6 w-6" />
+        </Button>
       </div>
 
       {/* Connection Status Card */}
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden border-0 shadow-lg animate-slide-up">
         <CardContent className="p-0">
-          <div className={`${connectionStatus === "active" ? "bg-gradient-to-r from-green-500 to-emerald-600" : connectionStatus === "suspended" ? "bg-gradient-to-r from-red-500 to-rose-600" : "bg-gradient-to-r from-yellow-500 to-amber-600"} text-white p-5`}>
+          <div className={cn(
+            "text-white p-5",
+            connectionStatus === "active" 
+              ? "bg-gradient-to-br from-success to-success/80" 
+              : connectionStatus === "suspended" 
+                ? "bg-gradient-to-br from-destructive to-destructive/80" 
+                : "bg-gradient-to-br from-warning to-warning/80"
+          )}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
                   <Wifi className="w-5 h-5" />
                 </div>
                 <span className="font-medium">Connection</span>
               </div>
-              <Badge variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-0 gap-1">
+              <Badge variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-0 gap-1 backdrop-blur-sm">
                 <StatusIcon className="w-3 h-3" />
                 {statusConfig[connectionStatus].label}
               </Badge>
@@ -192,10 +143,12 @@ export default function MobileHome() {
 
       {/* Due Balance Alert */}
       {Number(customer.due_balance) > 0 && (
-        <Card className="border-destructive/50 bg-destructive/5">
+        <Card className="border-destructive/50 bg-destructive/5 animate-slide-up" style={{ animationDelay: "50ms" }}>
           <CardContent className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <AlertCircle className="h-8 w-8 text-destructive" />
+              <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                <AlertCircle className="h-5 w-5 text-destructive" />
+              </div>
               <div>
                 <p className="text-sm text-muted-foreground">Due Balance</p>
                 <p className="text-xl font-bold text-destructive">
@@ -213,7 +166,11 @@ export default function MobileHome() {
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-2 gap-4">
         {/* Current Bill */}
-        <Card className="touch-manipulation active:scale-[0.98] transition-transform" onClick={() => navigate("/app/bills")}>
+        <Card 
+          className="touch-manipulation active:scale-[0.98] transition-all duration-200 cursor-pointer animate-slide-up hover:shadow-soft" 
+          style={{ animationDelay: "100ms" }}
+          onClick={() => navigate("/app/bills")}
+        >
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -225,7 +182,7 @@ export default function MobileHome() {
               <Skeleton className="h-8 w-20" />
             ) : currentBill ? (
               <>
-                <p className="text-2xl font-bold mb-1">
+                <p className="text-2xl font-bold mb-1 tabular-nums">
                   {formatCurrency(Number(currentBill.amount))}
                 </p>
                 <Badge variant={billStatusConfig[currentBill.status || "due"].variant} className="text-xs">
@@ -239,17 +196,21 @@ export default function MobileHome() {
         </Card>
 
         {/* Last Payment */}
-        <Card className="touch-manipulation active:scale-[0.98] transition-transform" onClick={() => navigate("/app/payments")}>
+        <Card 
+          className="touch-manipulation active:scale-[0.98] transition-all duration-200 cursor-pointer animate-slide-up hover:shadow-soft" 
+          style={{ animationDelay: "150ms" }}
+          onClick={() => navigate("/app/payments")}
+        >
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-                <CreditCard className="w-4 h-4 text-green-600" />
+              <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
+                <CreditCard className="w-4 h-4 text-success" />
               </div>
               <span className="text-sm text-muted-foreground">Last Payment</span>
             </div>
             {lastPayment ? (
               <>
-                <p className="text-2xl font-bold mb-1">
+                <p className="text-2xl font-bold mb-1 tabular-nums">
                   {formatCurrency(Number(lastPayment.amount))}
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -270,54 +231,81 @@ export default function MobileHome() {
       <div className="space-y-3">
         <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Quick Actions</h3>
         
-        <button
+        <QuickActionButton
+          icon={Receipt}
+          iconBg="bg-primary/10"
+          iconColor="text-primary"
+          title="View All Bills"
+          subtitle="Check your billing history"
           onClick={() => navigate("/app/bills")}
-          className="w-full flex items-center justify-between p-4 bg-card rounded-xl border active:bg-muted/50 touch-manipulation transition-colors"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-              <Receipt className="w-6 h-6 text-blue-600" />
-            </div>
-            <div className="text-left">
-              <p className="font-semibold">View All Bills</p>
-              <p className="text-sm text-muted-foreground">Check your billing history</p>
-            </div>
-          </div>
-          <ChevronRight className="w-5 h-5 text-muted-foreground" />
-        </button>
+          delay="200ms"
+        />
 
-        <button
+        <QuickActionButton
+          icon={CreditCard}
+          iconBg="bg-success/10"
+          iconColor="text-success"
+          title="Payment History"
+          subtitle="View past transactions"
           onClick={() => navigate("/app/payments")}
-          className="w-full flex items-center justify-between p-4 bg-card rounded-xl border active:bg-muted/50 touch-manipulation transition-colors"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
-              <CreditCard className="w-6 h-6 text-green-600" />
-            </div>
-            <div className="text-left">
-              <p className="font-semibold">Payment History</p>
-              <p className="text-sm text-muted-foreground">View past transactions</p>
-            </div>
-          </div>
-          <ChevronRight className="w-5 h-5 text-muted-foreground" />
-        </button>
+          delay="250ms"
+        />
 
-        <button
+        <QuickActionButton
+          icon={Package}
+          iconBg="bg-purple-500/10"
+          iconColor="text-purple-600"
+          title="My Package"
+          subtitle="View package details"
           onClick={() => navigate("/app/profile")}
-          className="w-full flex items-center justify-between p-4 bg-card rounded-xl border active:bg-muted/50 touch-manipulation transition-colors"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center">
-              <Package className="w-6 h-6 text-purple-600" />
-            </div>
-            <div className="text-left">
-              <p className="font-semibold">My Package</p>
-              <p className="text-sm text-muted-foreground">View package details</p>
-            </div>
-          </div>
-          <ChevronRight className="w-5 h-5 text-muted-foreground" />
-        </button>
+          delay="300ms"
+        />
       </div>
+
+      {/* Notification Sheet */}
+      <MobileNotificationSheet 
+        open={notificationSheetOpen} 
+        onOpenChange={setNotificationSheetOpen} 
+      />
     </div>
+  );
+}
+
+interface QuickActionButtonProps {
+  icon: React.ElementType;
+  iconBg: string;
+  iconColor: string;
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+  delay?: string;
+}
+
+function QuickActionButton({ 
+  icon: Icon, 
+  iconBg, 
+  iconColor, 
+  title, 
+  subtitle, 
+  onClick,
+  delay = "0ms"
+}: QuickActionButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center justify-between p-4 bg-card rounded-xl border active:scale-[0.98] hover:bg-muted/30 touch-manipulation transition-all duration-200 animate-slide-up"
+      style={{ animationDelay: delay }}
+    >
+      <div className="flex items-center gap-4">
+        <div className={cn("w-12 h-12 rounded-full flex items-center justify-center", iconBg)}>
+          <Icon className={cn("w-6 h-6", iconColor)} />
+        </div>
+        <div className="text-left">
+          <p className="font-semibold">{title}</p>
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
+        </div>
+      </div>
+      <ChevronRight className="w-5 h-5 text-muted-foreground" />
+    </button>
   );
 }
