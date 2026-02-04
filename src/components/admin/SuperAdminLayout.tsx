@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
+import { TenantSwitcher } from "@/components/layout/TenantSwitcher";
 
 const navItems = [
   { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -78,7 +79,8 @@ export function SuperAdminLayout() {
               ))}
             </nav>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
+              <TenantSwitcher />
               <span className="hidden sm:block text-sm text-muted-foreground">
                 {user?.email}
               </span>
