@@ -532,20 +532,119 @@ export default function Billing() {
 
         <TabsContent value="pending" className="space-y-4">
           <Card>
-            <CardContent className="p-6">
-              <p className="text-muted-foreground">
-                Showing invoices with Due or Partial status
-              </p>
+            <CardContent className="p-0">
+              {(() => {
+                const pendingBills = (bills || []).filter(b => b.status === "due" || b.status === "partial");
+                if (pendingBills.length === 0) {
+                  return (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <CheckCircle className="h-12 w-12 text-success mb-4" />
+                      <p className="text-muted-foreground">No pending invoices</p>
+                      <p className="text-sm text-muted-foreground">All invoices are paid!</p>
+                    </div>
+                  );
+                }
+                return (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Invoice ID</TableHead>
+                        <TableHead>Customer</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Due Date</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pendingBills.map((bill) => {
+                        const status = (bill.status || "due") as PaymentStatus;
+                        const StatusIcon = statusConfig[status].icon;
+                        return (
+                          <TableRow key={bill.id}>
+                            <TableCell className="font-medium">{bill.invoice_number}</TableCell>
+                            <TableCell>{bill.customer?.name || "Unknown"}</TableCell>
+                            <TableCell>{formatCurrency(Number(bill.amount))}</TableCell>
+                            <TableCell>{formatDate(bill.due_date)}</TableCell>
+                            <TableCell>
+                              <Badge variant={statusConfig[status].variant} className="gap-1">
+                                <StatusIcon className="h-3 w-3" />
+                                {statusConfig[status].label}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button size="sm" onClick={() => handleRecordPayment(bill)}>
+                                Record Payment
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                );
+              })()}
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="overdue" className="space-y-4">
           <Card>
-            <CardContent className="p-6">
-              <p className="text-muted-foreground">
-                Showing overdue invoices that need immediate attention
-              </p>
+            <CardContent className="p-0">
+              {(() => {
+                const overdueBills = (bills || []).filter(b => b.status === "overdue");
+                if (overdueBills.length === 0) {
+                  return (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <CheckCircle className="h-12 w-12 text-success mb-4" />
+                      <p className="text-muted-foreground">No overdue invoices</p>
+                      <p className="text-sm text-muted-foreground">Great! All payments are on time.</p>
+                    </div>
+                  );
+                }
+                return (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Invoice ID</TableHead>
+                        <TableHead>Customer</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Due Date</TableHead>
+                        <TableHead>Days Overdue</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {overdueBills.map((bill) => {
+                        const dueDate = new Date(bill.due_date);
+                        const today = new Date();
+                        const daysOverdue = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+                        return (
+                          <TableRow key={bill.id} className="bg-destructive/5">
+                            <TableCell className="font-medium">{bill.invoice_number}</TableCell>
+                            <TableCell>{bill.customer?.name || "Unknown"}</TableCell>
+                            <TableCell className="font-semibold text-destructive">
+                              {formatCurrency(Number(bill.amount))}
+                            </TableCell>
+                            <TableCell>{formatDate(bill.due_date)}</TableCell>
+                            <TableCell>
+                              <Badge variant="destructive">{daysOverdue} days</Badge>
+                            </TableCell>
+                            <TableCell className="text-right space-x-2">
+                              <Button size="sm" variant="outline" onClick={() => handleViewInvoice(bill)}>
+                                View
+                              </Button>
+                              <Button size="sm" onClick={() => handleRecordPayment(bill)}>
+                                Collect
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                );
+              })()}
             </CardContent>
           </Card>
         </TabsContent>
@@ -571,8 +670,11 @@ export default function Billing() {
           customerId={paymentDialog.customerId}
           tenantId={currentTenant.id}
           customerName={paymentDialog.customerName}
+          customerPhone={bills?.find(b => b.id === paymentDialog.billId)?.customer?.phone}
+          customerAddress={bills?.find(b => b.id === paymentDialog.billId)?.customer?.address || undefined}
           invoiceNumber={paymentDialog.invoiceNumber}
           outstandingAmount={paymentDialog.outstandingAmount}
+          tenantName={currentTenant.name}
         />
       )}
     </div>
