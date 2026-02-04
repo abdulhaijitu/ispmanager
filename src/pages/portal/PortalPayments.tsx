@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -17,59 +18,29 @@ import {
   CheckCircle,
   Banknote,
   Smartphone,
-  Download
+  Download,
+  FileX
 } from "lucide-react";
+import { usePortalPayments } from "@/hooks/usePortalData";
 
-// Mock payments data
-const mockPayments = [
-  {
-    id: "PAY-2024-001",
-    date: "2024-01-10",
-    amount: 1200,
-    method: "cash" as const,
-    reference: "Receipt #1234",
-    billId: "INV-2024-001",
-  },
-  {
-    id: "PAY-2023-012",
-    date: "2023-12-08",
-    amount: 1200,
-    method: "online" as const,
-    reference: "TXN-789456",
-    billId: "INV-2023-012",
-  },
-  {
-    id: "PAY-2023-011",
-    date: "2023-11-05",
-    amount: 1200,
-    method: "bank_transfer" as const,
-    reference: "BANK-456123",
-    billId: "INV-2023-011",
-  },
-  {
-    id: "PAY-2023-010",
-    date: "2023-10-12",
-    amount: 1200,
-    method: "online" as const,
-    reference: "TXN-321654",
-    billId: "INV-2023-010",
-  },
-];
-
-const methodConfig = {
+const methodConfig: Record<string, { label: string; icon: typeof CreditCard }> = {
   cash: { label: "Cash", icon: Banknote },
   online: { label: "Online", icon: Smartphone },
   bank_transfer: { label: "Bank Transfer", icon: CreditCard },
+  bkash: { label: "bKash", icon: Smartphone },
+  nagad: { label: "Nagad", icon: Smartphone },
+  uddoktapay: { label: "UddoktaPay", icon: Smartphone },
 };
 
 export default function PortalPayments() {
   const [searchTerm, setSearchTerm] = useState("");
+  const { data: payments, isLoading } = usePortalPayments();
 
-  const filteredPayments = mockPayments.filter(
+  const filteredPayments = (payments || []).filter(
     (payment) =>
       payment.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.billId.toLowerCase().includes(searchTerm.toLowerCase())
+      (payment.reference || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (payment.bills?.invoice_number || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const formatCurrency = (amount: number) => `৳${amount.toLocaleString()}`;
@@ -82,7 +53,24 @@ export default function PortalPayments() {
     });
   };
 
-  const totalPaid = mockPayments.reduce((sum, p) => sum + p.amount, 0);
+  const totalPaid = (payments || []).reduce((sum, p) => sum + Number(p.amount), 0);
+  const lastPayment = payments?.[0];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-4 w-48 mt-2" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -97,23 +85,25 @@ export default function PortalPayments() {
       <div className="grid gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Paid (Last 12 Months)</CardDescription>
+            <CardDescription>Total Paid (All Time)</CardDescription>
             <CardTitle className="text-3xl">{formatCurrency(totalPaid)}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              {mockPayments.length} payments made
+              {payments?.length || 0} payments made
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Last Payment</CardDescription>
-            <CardTitle className="text-3xl">{formatCurrency(mockPayments[0].amount)}</CardTitle>
+            <CardTitle className="text-3xl">
+              {lastPayment ? formatCurrency(Number(lastPayment.amount)) : "৳0"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              on {formatDate(mockPayments[0].date)}
+              {lastPayment ? `on ${formatDate(lastPayment.created_at)}` : "No payments yet"}
             </p>
           </CardContent>
         </Card>
@@ -141,52 +131,70 @@ export default function PortalPayments() {
             />
           </div>
 
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Payment ID</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Reference</TableHead>
-                  <TableHead>For Invoice</TableHead>
-                  <TableHead className="text-right">Receipt</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredPayments.map((payment) => {
-                  const MethodIcon = methodConfig[payment.method].icon;
-                  return (
-                    <TableRow key={payment.id}>
-                      <TableCell className="font-medium">{payment.id}</TableCell>
-                      <TableCell>{formatDate(payment.date)}</TableCell>
-                      <TableCell className="font-semibold">
-                        {formatCurrency(payment.amount)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <MethodIcon className="h-4 w-4 text-muted-foreground" />
-                          {methodConfig[payment.method].label}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {payment.reference}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{payment.billId}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="icon">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+          {filteredPayments.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <FileX className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="font-medium">No Payments Found</h3>
+              <p className="text-sm text-muted-foreground">
+                {searchTerm ? "Try a different search term" : "You haven't made any payments yet"}
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Payment ID</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Method</TableHead>
+                    <TableHead>Reference</TableHead>
+                    <TableHead>For Invoice</TableHead>
+                    <TableHead className="text-right">Receipt</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredPayments.map((payment) => {
+                    const method = payment.method || "cash";
+                    const config = methodConfig[method] || methodConfig.cash;
+                    const MethodIcon = config.icon;
+                    return (
+                      <TableRow key={payment.id}>
+                        <TableCell className="font-medium font-mono text-xs">
+                          {payment.id.slice(0, 8).toUpperCase()}
+                        </TableCell>
+                        <TableCell>{formatDate(payment.created_at)}</TableCell>
+                        <TableCell className="font-semibold">
+                          {formatCurrency(Number(payment.amount))}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <MethodIcon className="h-4 w-4 text-muted-foreground" />
+                            {config.label}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {payment.reference || "-"}
+                        </TableCell>
+                        <TableCell>
+                          {payment.bills?.invoice_number ? (
+                            <Badge variant="outline">{payment.bills.invoice_number}</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon">
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

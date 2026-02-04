@@ -1,45 +1,54 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   User, 
   Mail, 
   Phone, 
-  MapPin, 
   Wifi,
   Calendar,
   Save,
-  Loader2
+  Loader2,
+  UserX
 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
+import { usePortalCustomer } from "@/hooks/usePortalData";
+import { useCurrentTenant } from "@/hooks/useTenant";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-// Mock customer data
-const customerData = {
-  name: "Md. Karim Uddin",
-  email: "karim@example.com",
-  phone: "+880 1712-345678",
-  address: "House 12, Road 5, Dhanmondi, Dhaka",
-  connectionId: "CONN-2024-001",
-  packageName: "Premium 50 Mbps",
-  joinDate: "2022-06-15",
-  status: "active" as const,
+const statusConfig = {
+  active: { label: "Active", variant: "default" as const },
+  suspended: { label: "Suspended", variant: "destructive" as const },
+  pending: { label: "Pending", variant: "secondary" as const },
 };
 
 export default function PortalProfile() {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const { data: customer, isLoading, refetch } = usePortalCustomer();
+  const { data: tenant } = useCurrentTenant();
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
-    name: customerData.name,
-    email: customerData.email,
-    phone: customerData.phone,
-    address: customerData.address,
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
   });
+
+  // Load customer data into form
+  useEffect(() => {
+    if (customer) {
+      setFormData({
+        name: customer.name || "",
+        email: customer.email || "",
+        phone: customer.phone || "",
+        address: customer.address || "",
+      });
+    }
+  }, [customer]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -49,14 +58,30 @@ export default function PortalProfile() {
   };
 
   const handleSave = async () => {
-    setLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setLoading(false);
-    toast({
-      title: "Profile Updated",
-      description: "Your profile has been updated successfully.",
-    });
+    if (!customer?.id) return;
+    
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("customers")
+        .update({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+        })
+        .eq("id", customer.id);
+
+      if (error) throw error;
+      
+      toast.success("Profile updated successfully");
+      refetch();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -66,6 +91,39 @@ export default function PortalProfile() {
       year: 'numeric'
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-4 w-48 mt-2" />
+        </div>
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <Skeleton className="h-80" />
+          </div>
+          <Skeleton className="h-64" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!customer) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+          <UserX className="h-10 w-10 text-muted-foreground" />
+        </div>
+        <h2 className="text-xl font-semibold">No Account Found</h2>
+        <p className="text-muted-foreground text-center max-w-md">
+          Your login is not linked to any customer account. Please contact your ISP to link your account.
+        </p>
+      </div>
+    );
+  }
+
+  const connectionStatus = customer.connection_status || "pending";
 
   return (
     <div className="space-y-6">
@@ -130,8 +188,8 @@ export default function PortalProfile() {
                 />
               </div>
               <Separator />
-              <Button onClick={handleSave} disabled={loading}>
-                {loading ? (
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <Save className="mr-2 h-4 w-4" />
@@ -154,7 +212,9 @@ export default function PortalProfile() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Status</span>
-                <Badge variant="default">Active</Badge>
+                <Badge variant={statusConfig[connectionStatus].variant}>
+                  {statusConfig[connectionStatus].label}
+                </Badge>
               </div>
               <Separator />
               <div className="space-y-3">
@@ -162,21 +222,30 @@ export default function PortalProfile() {
                   <Wifi className="h-4 w-4 mt-0.5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Package</p>
-                    <p className="font-medium">{customerData.packageName}</p>
+                    <p className="font-medium">
+                      {customer.packages?.name || "No Package"}
+                      {customer.packages?.speed_label && (
+                        <span className="text-muted-foreground text-sm ml-1">
+                          ({customer.packages.speed_label})
+                        </span>
+                      )}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Mail className="h-4 w-4 mt-0.5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Connection ID</p>
-                    <p className="font-medium">{customerData.connectionId}</p>
+                    <p className="text-sm text-muted-foreground">Customer ID</p>
+                    <p className="font-medium font-mono text-sm">
+                      {customer.id.slice(0, 8).toUpperCase()}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Member Since</p>
-                    <p className="font-medium">{formatDate(customerData.joinDate)}</p>
+                    <p className="font-medium">{formatDate(customer.join_date)}</p>
                   </div>
                 </div>
               </div>
@@ -191,14 +260,14 @@ export default function PortalProfile() {
               <p className="text-sm text-muted-foreground">
                 Contact your ISP for support or to request changes to your package.
               </p>
-              <div className="flex items-center gap-2 text-sm">
-                <Phone className="h-4 w-4 text-primary" />
-                <span>+880 1234-567890</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Mail className="h-4 w-4 text-primary" />
-                <span>support@isp.com</span>
-              </div>
+              {tenant && (
+                <>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Phone className="h-4 w-4 text-primary" />
+                    <span>{tenant.name}</span>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
