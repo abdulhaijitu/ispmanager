@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -27,214 +28,167 @@ import {
   CheckCircle,
   Clock,
   AlertTriangle,
-  DollarSign,
-  ArrowUpRight,
-  ArrowDownRight
+  Building2,
+  Users
 } from "lucide-react";
-
-// Mock subscription data
-const mockSubscriptions = [
-  { 
-    id: "1", 
-    tenant: "FastNet BD", 
-    plan: "Professional",
-    status: "active" as const,
-    amount: 5000,
-    billingCycle: "monthly",
-    nextBilling: "2024-03-01",
-    customers: 1250,
-  },
-  { 
-    id: "2", 
-    tenant: "Speed Link", 
-    plan: "Starter",
-    status: "active" as const,
-    amount: 3500,
-    billingCycle: "monthly",
-    nextBilling: "2024-02-28",
-    customers: 890,
-  },
-  { 
-    id: "3", 
-    tenant: "NetZone", 
-    plan: "Professional",
-    status: "trial" as const,
-    amount: 0,
-    billingCycle: "monthly",
-    nextBilling: "2024-02-24",
-    customers: 120,
-  },
-  { 
-    id: "4", 
-    tenant: "CityBroadband", 
-    plan: "Enterprise",
-    status: "active" as const,
-    amount: 8000,
-    billingCycle: "monthly",
-    nextBilling: "2024-03-05",
-    customers: 2100,
-  },
-  { 
-    id: "5", 
-    tenant: "QuickNet", 
-    plan: "Starter",
-    status: "past_due" as const,
-    amount: 2500,
-    billingCycle: "monthly",
-    nextBilling: "2024-02-10",
-    customers: 560,
-  },
-];
-
-const planConfig = {
-  Starter: { color: "bg-secondary" },
-  Professional: { color: "bg-primary" },
-  Enterprise: { color: "bg-accent" },
-};
+import { useAllSubscriptions, useSubscriptionStats } from "@/hooks/useSubscriptions";
 
 const statusConfig = {
-  active: { label: "Active", variant: "default" as const, icon: CheckCircle },
-  trial: { label: "Trial", variant: "secondary" as const, icon: Clock },
-  past_due: { label: "Past Due", variant: "destructive" as const, icon: AlertTriangle },
-  canceled: { label: "Canceled", variant: "outline" as const, icon: AlertTriangle },
+  active: { label: "সক্রিয়", variant: "default" as const, icon: CheckCircle },
+  trial: { label: "ট্রায়াল", variant: "secondary" as const, icon: Clock },
+  suspended: { label: "স্থগিত", variant: "destructive" as const, icon: AlertTriangle },
 };
 
 export default function AdminSubscriptions() {
+  const { data: subscriptions, isLoading } = useAllSubscriptions();
+  const { data: stats, isLoading: statsLoading } = useSubscriptionStats();
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const filteredSubscriptions = mockSubscriptions.filter((sub) => {
-    const matchesSearch = sub.tenant.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || sub.status === statusFilter;
+  const filteredSubscriptions = (subscriptions ?? []).filter((sub) => {
+    const matchesSearch = 
+      sub.tenant_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sub.subdomain.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || sub.subscription_status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const formatCurrency = (amount: number) => `৳${amount.toLocaleString()}`;
-
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-GB', {
+    return new Date(dateStr).toLocaleDateString('bn-BD', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
     });
   };
 
-  const totalMRR = mockSubscriptions
-    .filter(s => s.status === 'active')
-    .reduce((sum, s) => sum + s.amount, 0);
-
-  const activeCount = mockSubscriptions.filter(s => s.status === 'active').length;
-  const trialCount = mockSubscriptions.filter(s => s.status === 'trial').length;
-  const pastDueCount = mockSubscriptions.filter(s => s.status === 'past_due').length;
-
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Subscriptions</h1>
+        <h1 className="text-2xl font-bold">সাবস্ক্রিপশন ম্যানেজমেন্ট</h1>
         <p className="text-muted-foreground">
-          Manage tenant subscriptions and billing
+          টেন্যান্ট সাবস্ক্রিপশন ও বিলিং পরিচালনা করুন
         </p>
       </div>
 
-      {/* Revenue Stats */}
+      {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Monthly Recurring Revenue
+              মোট সাবস্ক্রিপশন
             </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalMRR)}</div>
-            <div className="flex items-center gap-1 text-xs text-primary mt-1">
-              <ArrowUpRight className="h-3 w-3" />
-              <span>+12% from last month</span>
-            </div>
+            {statsLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <div className="text-2xl font-bold">{stats?.total ?? 0}</div>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">সকল টেন্যান্ট</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Active Subscriptions
+              সক্রিয় সাবস্ক্রিপশন
             </CardTitle>
             <CheckCircle className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{activeCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Paying customers
-            </p>
+            {statsLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <div className="text-2xl font-bold">{stats?.active ?? 0}</div>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">পেইং কাস্টমার</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Trial Accounts
+              ট্রায়াল অ্যাকাউন্ট
             </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{trialCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Potential conversions
-            </p>
+            {statsLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <div className="text-2xl font-bold">{stats?.trial ?? 0}</div>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">সম্ভাব্য কনভার্শন</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Past Due
+              স্থগিত
             </CardTitle>
             <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">{pastDueCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Require attention
-            </p>
+            {statsLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <div className="text-2xl font-bold text-destructive">{stats?.suspended ?? 0}</div>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">মনোযোগ প্রয়োজন</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Subscription Plans */}
+      {/* Subscription Status Distribution */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
-            Plan Distribution
+            স্ট্যাটাস ডিস্ট্রিবিউশন
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="flex items-center gap-4 p-4 rounded-lg border">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                <CheckCircle className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                {statsLoading ? (
+                  <Skeleton className="h-8 w-12" />
+                ) : (
+                  <p className="text-2xl font-bold">{stats?.active ?? 0}</p>
+                )}
+                <p className="text-sm text-muted-foreground">সক্রিয়</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 p-4 rounded-lg border">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-secondary">
-                <CreditCard className="h-6 w-6 text-secondary-foreground" />
+                <Clock className="h-6 w-6 text-secondary-foreground" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{mockSubscriptions.filter(s => s.plan === 'Starter').length}</p>
-                <p className="text-sm text-muted-foreground">Starter Plan</p>
+                {statsLoading ? (
+                  <Skeleton className="h-8 w-12" />
+                ) : (
+                  <p className="text-2xl font-bold">{stats?.trial ?? 0}</p>
+                )}
+                <p className="text-sm text-muted-foreground">ট্রায়াল</p>
               </div>
             </div>
             <div className="flex items-center gap-4 p-4 rounded-lg border">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-                <CreditCard className="h-6 w-6 text-primary-foreground" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-destructive/10">
+                <AlertTriangle className="h-6 w-6 text-destructive" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{mockSubscriptions.filter(s => s.plan === 'Professional').length}</p>
-                <p className="text-sm text-muted-foreground">Professional Plan</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 p-4 rounded-lg border">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent">
-                <CreditCard className="h-6 w-6 text-accent-foreground" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{mockSubscriptions.filter(s => s.plan === 'Enterprise').length}</p>
-                <p className="text-sm text-muted-foreground">Enterprise Plan</p>
+                {statsLoading ? (
+                  <Skeleton className="h-8 w-12" />
+                ) : (
+                  <p className="text-2xl font-bold">{stats?.suspended ?? 0}</p>
+                )}
+                <p className="text-sm text-muted-foreground">স্থগিত</p>
               </div>
             </div>
           </div>
@@ -246,10 +200,10 @@ export default function AdminSubscriptions() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
-            All Subscriptions
+            সকল সাবস্ক্রিপশন
           </CardTitle>
           <CardDescription>
-            View and manage tenant subscriptions
+            টেন্যান্ট সাবস্ক্রিপশন দেখুন ও পরিচালনা করুন
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -258,7 +212,7 @@ export default function AdminSubscriptions() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search subscriptions..."
+                placeholder="সাবস্ক্রিপশন খুঁজুন..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
@@ -267,13 +221,13 @@ export default function AdminSubscriptions() {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-40">
                 <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder="স্ট্যাটাস" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="trial">Trial</SelectItem>
-                <SelectItem value="past_due">Past Due</SelectItem>
+                <SelectItem value="all">সব স্ট্যাটাস</SelectItem>
+                <SelectItem value="active">সক্রিয়</SelectItem>
+                <SelectItem value="trial">ট্রায়াল</SelectItem>
+                <SelectItem value="suspended">স্থগিত</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -283,48 +237,76 @@ export default function AdminSubscriptions() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Tenant</TableHead>
-                  <TableHead>Plan</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Customers</TableHead>
-                  <TableHead>Next Billing</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>টেন্যান্ট</TableHead>
+                  <TableHead>সাবডোমেইন</TableHead>
+                  <TableHead>গ্রাহক</TableHead>
+                  <TableHead>তৈরি</TableHead>
+                  <TableHead>স্ট্যাটাস</TableHead>
+                  <TableHead className="text-right">অ্যাকশন</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredSubscriptions.map((sub) => {
-                  const StatusIcon = statusConfig[sub.status].icon;
-                  return (
-                    <TableRow key={sub.id}>
-                      <TableCell className="font-medium">{sub.tenant}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{sub.plan}</Badge>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {sub.amount > 0 ? `${formatCurrency(sub.amount)}/mo` : 'Free Trial'}
-                      </TableCell>
-                      <TableCell>{sub.customers.toLocaleString()}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          {formatDate(sub.nextBilling)}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={statusConfig[sub.status].variant} className="gap-1">
-                          <StatusIcon className="h-3 w-3" />
-                          {statusConfig[sub.status].label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          Manage
-                        </Button>
-                      </TableCell>
+                {isLoading ? (
+                  [...Array(3)].map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-8 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-28" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-20" /></TableCell>
                     </TableRow>
-                  );
-                })}
+                  ))
+                ) : filteredSubscriptions.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                      কোন সাবস্ক্রিপশন পাওয়া যায়নি
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredSubscriptions.map((sub) => {
+                    const status = sub.subscription_status;
+                    const StatusIcon = statusConfig[status]?.icon ?? Clock;
+                    return (
+                      <TableRow key={sub.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                              <Building2 className="h-5 w-5 text-primary" />
+                            </div>
+                            <span className="font-medium">{sub.tenant_name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {sub.subdomain}.ispmanager.com
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            {sub.customer_count.toLocaleString()}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            {formatDate(sub.created_at)}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={statusConfig[status]?.variant ?? "secondary"} className="gap-1">
+                            <StatusIcon className="h-3 w-3" />
+                            {statusConfig[status]?.label ?? status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="sm">
+                            পরিচালনা
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
               </TableBody>
             </Table>
           </div>
