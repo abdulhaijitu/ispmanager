@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,10 +50,12 @@ import {
   Clock,
   AlertTriangle,
   Filter,
-  Loader2
+  Loader2,
+  LogIn
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAllTenants, useUpdateTenant, useDeleteTenant, type TenantWithStats } from "@/hooks/useTenants";
+import { useTenantContext } from "@/contexts/TenantContext";
 
 const statusConfig = {
   active: { label: "সক্রিয়", variant: "default" as const, icon: CheckCircle },
@@ -62,6 +65,8 @@ const statusConfig = {
 
 export default function AdminTenants() {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { startImpersonation } = useTenantContext();
   const { data: tenants, isLoading, error } = useAllTenants();
   const updateTenant = useUpdateTenant();
   const deleteTenant = useDeleteTenant();
@@ -70,6 +75,15 @@ export default function AdminTenants() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [tenantToDelete, setTenantToDelete] = useState<TenantWithStats | null>(null);
+
+  const handleLoginAsTenant = (tenant: TenantWithStats) => {
+    startImpersonation(tenant.id);
+    toast({
+      title: "টেন্যান্ট হিসেবে লগইন",
+      description: `আপনি "${tenant.name}" এর অ্যাডমিন হিসেবে লগইন করেছেন।`,
+    });
+    navigate("/dashboard");
+  };
 
   const filteredTenants = (tenants ?? []).filter((tenant) => {
     const matchesSearch =
@@ -346,6 +360,10 @@ export default function AdminTenants() {
                               <DropdownMenuItem>
                                 <Edit className="mr-2 h-4 w-4" />
                                 সম্পাদনা
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleLoginAsTenant(tenant)}>
+                                <LogIn className="mr-2 h-4 w-4" />
+                                অ্যাডমিন হিসেবে লগইন
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               {status === "active" || status === "trial" ? (
