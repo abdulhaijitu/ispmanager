@@ -33,18 +33,27 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-const mainNavItems = [
+import type { AppRole } from "@/hooks/useUserRole";
+
+type NavItem = {
+  title: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  roles?: AppRole[]; // If undefined, all staff can access
+};
+
+const mainNavItems: NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Customers", href: "/dashboard/customers", icon: Users },
-  { title: "Packages", href: "/dashboard/packages", icon: Package },
-  { title: "Billing", href: "/dashboard/billing", icon: Receipt },
-  { title: "Payments", href: "/dashboard/payments", icon: CreditCard },
-  { title: "Reports", href: "/dashboard/reports", icon: BarChart3 },
+  { title: "Customers", href: "/dashboard/customers", icon: Users, roles: ["super_admin", "isp_owner", "admin", "manager", "staff"] },
+  { title: "Packages", href: "/dashboard/packages", icon: Package, roles: ["super_admin", "isp_owner", "admin"] },
+  { title: "Billing", href: "/dashboard/billing", icon: Receipt, roles: ["super_admin", "isp_owner", "admin", "manager", "accountant"] },
+  { title: "Payments", href: "/dashboard/payments", icon: CreditCard, roles: ["super_admin", "isp_owner", "admin", "manager", "accountant", "staff"] },
+  { title: "Reports", href: "/dashboard/reports", icon: BarChart3, roles: ["super_admin", "isp_owner", "admin", "manager", "accountant"] },
 ];
 
-const systemNavItems = [
+const systemNavItems: NavItem[] = [
   { title: "Notifications", href: "/dashboard/notifications", icon: Bell },
-  { title: "Settings", href: "/dashboard/settings", icon: Settings },
+  { title: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["super_admin", "isp_owner", "admin"] },
 ];
 
 // Role display names
@@ -95,6 +104,16 @@ export function DashboardSidebar() {
     return location.pathname.startsWith(href);
   };
 
+  // Filter menu items based on user role
+  const canAccess = (item: NavItem) => {
+    if (!item.roles) return true; // No role restriction, all staff can access
+    if (!role) return false; // No role yet, hide restricted items
+    return item.roles.includes(role);
+  };
+
+  const filteredMainNavItems = mainNavItems.filter(canAccess);
+  const filteredSystemNavItems = systemNavItems.filter(canAccess);
+
   const displayName = profile?.full_name || user?.email?.split("@")[0] || "User";
   const initials = displayName
     .split(" ")
@@ -131,7 +150,7 @@ export function DashboardSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainNavItems.map((item) => (
+              {filteredMainNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild
@@ -161,7 +180,7 @@ export function DashboardSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {systemNavItems.map((item) => (
+              {filteredSystemNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild
