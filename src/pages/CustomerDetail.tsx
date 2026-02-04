@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Edit, CreditCard, Receipt, Phone, Mail, MapPin, Calendar, Wifi, Loader2, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { useCustomer, useUpdateCustomer } from "@/hooks/useCustomers";
 import { useCustomerBills } from "@/hooks/useBills";
 import { useCustomerPayments } from "@/hooks/usePayments";
+import { useTenantContext } from "@/contexts/TenantContext";
+import { QuickPaymentDialog } from "@/components/payments/QuickPaymentDialog";
 import { toast } from "sonner";
 import type { ConnectionStatus, PaymentStatus } from "@/types";
 
@@ -35,10 +38,13 @@ const billStatusStyles: Record<PaymentStatus, string> = {
 export default function CustomerDetail() {
   const { customerId } = useParams<{ customerId: string }>();
   const navigate = useNavigate();
-  const { data: customer, isLoading: customerLoading } = useCustomer(customerId || "");
-  const { data: bills = [], isLoading: billsLoading } = useCustomerBills(customerId || "");
-  const { data: payments = [], isLoading: paymentsLoading } = useCustomerPayments(customerId || "");
+  const { currentTenant } = useTenantContext();
+  const { data: customer, isLoading: customerLoading, refetch: refetchCustomer } = useCustomer(customerId || "");
+  const { data: bills = [], isLoading: billsLoading, refetch: refetchBills } = useCustomerBills(customerId || "");
+  const { data: payments = [], isLoading: paymentsLoading, refetch: refetchPayments } = useCustomerPayments(customerId || "");
   const updateCustomer = useUpdateCustomer();
+  
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
 
   const isLoading = customerLoading || billsLoading || paymentsLoading;
 
@@ -286,7 +292,7 @@ export default function CustomerDetail() {
                   <CardTitle>Payment Records</CardTitle>
                   <CardDescription>Total paid: ৳{totalPaid.toLocaleString()}</CardDescription>
                 </div>
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={() => setPaymentDialogOpen(true)}>
                   <CreditCard className="h-4 w-4" />
                   Record Payment
                 </Button>
@@ -337,6 +343,18 @@ export default function CustomerDetail() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Payment Dialog */}
+      <QuickPaymentDialog
+        open={paymentDialogOpen}
+        onOpenChange={setPaymentDialogOpen}
+        preselectedCustomerId={customerId}
+        onSuccess={() => {
+          refetchCustomer();
+          refetchPayments();
+          refetchBills();
+        }}
+      />
     </div>
   );
 }
