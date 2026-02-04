@@ -61,6 +61,23 @@ export function useBill(billId: string) {
   });
 }
 
+export function useCustomerBills(customerId: string) {
+  return useQuery({
+    queryKey: ["bills", "customer", customerId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("bills")
+        .select("*")
+        .eq("customer_id", customerId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!customerId,
+  });
+}
+
 export function useCreateBill() {
   const queryClient = useQueryClient();
 

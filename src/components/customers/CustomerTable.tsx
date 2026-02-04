@@ -182,7 +182,7 @@ export function CustomerTable({
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => onViewDetails(customer)}>
+                      <DropdownMenuItem onClick={() => window.location.href = `/dashboard/customers/${customer.id}`}>
                         <Eye className="mr-2 h-4 w-4" />
                         View Details
                       </DropdownMenuItem>

@@ -15,6 +15,7 @@ import { TenantProvider } from "@/contexts/TenantContext";
 // Dashboard Pages
 import Dashboard from "@/pages/Dashboard";
 import Customers from "@/pages/Customers";
+import CustomerDetail from "@/pages/CustomerDetail";
 import Packages from "@/pages/Packages";
 import Billing from "@/pages/Billing";
 import Payments from "@/pages/Payments";
@@ -72,6 +73,7 @@ const App = () => (
               >
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/dashboard/customers" element={<Customers />} />
+                <Route path="/dashboard/customers/:customerId" element={<CustomerDetail />} />
                 <Route path="/dashboard/packages" element={<Packages />} />
                 <Route path="/dashboard/billing" element={<Billing />} />
                 <Route path="/dashboard/payments" element={<Payments />} />
