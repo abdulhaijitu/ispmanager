@@ -1,31 +1,36 @@
-import { useState } from "react";
-import { Plus, Search, Filter, Download, Loader2 } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Plus, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { CustomerTable, type CustomerTableData } from "@/components/customers/CustomerTable";
 import { CustomerFormDialog, type CustomerFormData } from "@/components/customers/CustomerFormDialog";
 import { ConnectionStatusDialog } from "@/components/customers/ConnectionStatusDialog";
+import { CustomerFiltersBar, type CustomerFilters } from "@/components/customers/CustomerFilters";
+import { CustomerPagination } from "@/components/customers/CustomerPagination";
 import { useToast } from "@/hooks/use-toast";
 import { useCustomers, useCreateCustomer, useUpdateCustomer } from "@/hooks/useCustomers";
+import { usePackages } from "@/hooks/usePackages";
 import { useTenantContext } from "@/contexts/TenantContext";
 import type { ConnectionStatus } from "@/types";
 
 export default function Customers() {
   const { toast } = useToast();
-  const { currentTenant, isLoading: tenantLoading } = useTenantContext();
+  const { currentTenant } = useTenantContext();
   const { data: customers, isLoading, error } = useCustomers(currentTenant?.id);
+  const { data: packages } = usePackages(currentTenant?.id);
   const createCustomer = useCreateCustomer();
   const updateCustomer = useUpdateCustomer();
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  // Filter state
+  const [filters, setFilters] = useState<CustomerFilters>({
+    search: "",
+    status: "all",
+    packageId: "all",
+    balanceType: "all",
+  });
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Form dialog state
   const [formDialogOpen, setFormDialogOpen] = useState(false);
@@ -38,30 +43,77 @@ export default function Customers() {
   const [targetStatus, setTargetStatus] = useState<ConnectionStatus>("active");
 
   // Transform database customers to table format
-  const tableData: CustomerTableData[] = (customers ?? []).map((c) => ({
-    id: c.id,
-    name: c.name,
-    email: c.email ?? "",
-    phone: c.phone,
-    address: c.address ?? "",
-    package: c.package?.name ?? "No package",
-    packageId: c.package_id ?? "",
-    status: c.connection_status ?? "pending",
-    dueAmount: c.due_balance ?? 0,
-    advanceAmount: c.advance_balance ?? 0,
-    joinDate: c.join_date,
-    lastPayment: c.last_payment_date ?? c.join_date,
-  }));
+  const tableData: CustomerTableData[] = useMemo(() => 
+    (customers ?? []).map((c) => ({
+      id: c.id,
+      name: c.name,
+      email: c.email ?? "",
+      phone: c.phone,
+      address: c.address ?? "",
+      package: c.package?.name ?? "No package",
+      packageId: c.package_id ?? "",
+      status: c.connection_status ?? "pending",
+      dueAmount: c.due_balance ?? 0,
+      advanceAmount: c.advance_balance ?? 0,
+      joinDate: c.join_date,
+      lastPayment: c.last_payment_date ?? c.join_date,
+    })), [customers]
+  );
 
-  const filteredCustomers = tableData.filter((customer) => {
-    const matchesSearch =
-      customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      customer.phone.includes(searchQuery) ||
-      customer.id.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || customer.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  // Filter customers
+  const filteredCustomers = useMemo(() => {
+    return tableData.filter((customer) => {
+      // Search filter
+      const searchLower = filters.search.toLowerCase();
+      const matchesSearch =
+        !filters.search ||
+        customer.name.toLowerCase().includes(searchLower) ||
+        customer.phone.includes(filters.search) ||
+        customer.email.toLowerCase().includes(searchLower) ||
+        customer.id.toLowerCase().includes(searchLower);
+
+      // Status filter
+      const matchesStatus =
+        filters.status === "all" || customer.status === filters.status;
+
+      // Package filter
+      const matchesPackage =
+        filters.packageId === "all" ||
+        (filters.packageId === "none" && !customer.packageId) ||
+        customer.packageId === filters.packageId;
+
+      // Balance type filter
+      let matchesBalance = true;
+      if (filters.balanceType === "due") {
+        matchesBalance = customer.dueAmount > 0;
+      } else if (filters.balanceType === "advance") {
+        matchesBalance = customer.advanceAmount > 0;
+      } else if (filters.balanceType === "clear") {
+        matchesBalance = customer.dueAmount === 0 && customer.advanceAmount === 0;
+      }
+
+      return matchesSearch && matchesStatus && matchesPackage && matchesBalance;
+    });
+  }, [tableData, filters]);
+
+  // Paginate customers
+  const paginatedCustomers = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredCustomers.slice(startIndex, startIndex + pageSize);
+  }, [filteredCustomers, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredCustomers.length / pageSize);
+
+  // Reset to page 1 when filters change
+  const handleFiltersChange = (newFilters: CustomerFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setCurrentPage(1);
+  };
 
   const handleAddCustomer = () => {
     setFormMode("add");
@@ -180,10 +232,7 @@ export default function Customers() {
   };
 
   const handleViewDetails = (customer: CustomerTableData) => {
-    toast({
-      title: "শীঘ্রই আসছে",
-      description: "কাস্টমার বিস্তারিত ভিউ শীঘ্রই যুক্ত হবে।",
-    });
+    window.location.href = `/dashboard/customers/${customer.id}`;
   };
 
   const handleRecordPayment = (customer: CustomerTableData) => {
@@ -197,6 +246,35 @@ export default function Customers() {
     toast({
       title: "শীঘ্রই আসছে",
       description: "বিল জেনারেট শীঘ্রই যুক্ত হবে।",
+    });
+  };
+
+  const handleExport = () => {
+    // Export filtered data as CSV
+    const headers = ["ID", "Name", "Phone", "Email", "Package", "Status", "Due", "Advance"];
+    const rows = filteredCustomers.map((c) => [
+      c.id,
+      c.name,
+      c.phone,
+      c.email,
+      c.package,
+      c.status,
+      c.dueAmount,
+      c.advanceAmount,
+    ]);
+
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `customers-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "এক্সপোর্ট সম্পন্ন",
+      description: `${filteredCustomers.length} কাস্টমার এক্সপোর্ট করা হয়েছে।`,
     });
   };
 
@@ -221,41 +299,26 @@ export default function Customers() {
             আপনার কাস্টমার এবং সংযোগ ম্যানেজ করুন
           </p>
         </div>
-        <Button className="gap-2" onClick={handleAddCustomer}>
-          <Plus className="h-4 w-4" />
-          নতুন কাস্টমার
-        </Button>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="নাম, ফোন বা ID দিয়ে খুঁজুন..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
         <div className="flex gap-2">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[140px]">
-              <Filter className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="স্ট্যাটাস" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">সব স্ট্যাটাস</SelectItem>
-              <SelectItem value="active">সক্রিয়</SelectItem>
-              <SelectItem value="suspended">স্থগিত</SelectItem>
-              <SelectItem value="pending">অপেক্ষমান</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" className="gap-2" onClick={handleExport}>
             <Download className="h-4 w-4" />
+            এক্সপোর্ট
+          </Button>
+          <Button className="gap-2" onClick={handleAddCustomer}>
+            <Plus className="h-4 w-4" />
+            নতুন কাস্টমার
           </Button>
         </div>
       </div>
+
+      {/* Filters */}
+      <CustomerFiltersBar
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        packages={packages ?? []}
+        totalCount={tableData.length}
+        filteredCount={filteredCustomers.length}
+      />
 
       {/* Customer Table */}
       {isLoading ? (
@@ -264,7 +327,7 @@ export default function Customers() {
         </div>
       ) : (
         <CustomerTable
-          customers={filteredCustomers}
+          customers={paginatedCustomers}
           onEdit={handleEditCustomer}
           onViewDetails={handleViewDetails}
           onSuspend={handleSuspendConnection}
@@ -275,19 +338,14 @@ export default function Customers() {
       )}
 
       {/* Pagination */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          মোট {tableData.length} কাস্টমারের মধ্যে {filteredCustomers.length} জন দেখানো হচ্ছে
-        </p>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" disabled>
-            আগের
-          </Button>
-          <Button variant="outline" size="sm" disabled={filteredCustomers.length <= 10}>
-            পরের
-          </Button>
-        </div>
-      </div>
+      <CustomerPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={filteredCustomers.length}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={handlePageSizeChange}
+      />
 
       {/* Add/Edit Customer Dialog */}
       <CustomerFormDialog
