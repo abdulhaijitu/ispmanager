@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { 
-  User, 
   Phone, 
   Mail, 
   MapPin, 
@@ -24,11 +23,12 @@ import { usePortalCustomer } from "@/hooks/usePortalData";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { cn } from "@/lib/utils";
 
 const statusConfig = {
-  active: { label: "Active", color: "bg-green-500", icon: CheckCircle },
-  suspended: { label: "Suspended", color: "bg-red-500", icon: AlertCircle },
-  pending: { label: "Pending", color: "bg-yellow-500", icon: Clock },
+  active: { label: "Active", color: "bg-success", textColor: "text-success", icon: CheckCircle },
+  suspended: { label: "Suspended", color: "bg-destructive", textColor: "text-destructive", icon: AlertCircle },
+  pending: { label: "Pending", color: "bg-warning", textColor: "text-warning", icon: Clock },
 };
 
 export default function MobileProfile() {
@@ -82,8 +82,8 @@ export default function MobileProfile() {
   return (
     <div className="space-y-5">
       {/* Profile Header */}
-      <div className="flex flex-col items-center text-center pt-4">
-        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-3xl font-bold">
+      <div className="flex flex-col items-center text-center pt-4 animate-fade-in">
+        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-3xl font-bold shadow-lg">
           {customer.name.charAt(0).toUpperCase()}
         </div>
         <h1 className="text-xl font-bold mt-4">{customer.name}</h1>
@@ -100,58 +100,46 @@ export default function MobileProfile() {
       </div>
 
       {/* Contact Info */}
-      <Card>
+      <Card className="animate-slide-up" style={{ animationDelay: "50ms" }}>
         <CardContent className="p-4 space-y-4">
           <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
             Contact Information
           </h3>
           
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <Phone className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Phone</p>
-              <p className="font-medium">{customer.phone}</p>
-            </div>
-          </div>
+          <ProfileInfoRow 
+            icon={Phone} 
+            label="Phone" 
+            value={customer.phone} 
+          />
 
           {customer.email && (
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Mail className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Email</p>
-                <p className="font-medium">{customer.email}</p>
-              </div>
-            </div>
+            <ProfileInfoRow 
+              icon={Mail} 
+              label="Email" 
+              value={customer.email} 
+            />
           )}
 
           {customer.address && (
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Address</p>
-                <p className="font-medium">{customer.address}</p>
-              </div>
-            </div>
+            <ProfileInfoRow 
+              icon={MapPin} 
+              label="Address" 
+              value={customer.address} 
+            />
           )}
         </CardContent>
       </Card>
 
       {/* Package Info */}
-      <Card>
+      <Card className="animate-slide-up" style={{ animationDelay: "100ms" }}>
         <CardContent className="p-4 space-y-4">
           <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
             Package Details
           </h3>
           
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
-              <Wifi className="w-5 h-5 text-green-600" />
+            <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
+              <Wifi className="w-5 h-5 text-success" />
             </div>
             <div className="flex-1">
               <p className="text-sm text-muted-foreground">Current Package</p>
@@ -161,7 +149,7 @@ export default function MobileProfile() {
               )}
             </div>
             {customer.packages && (
-              <p className="text-lg font-bold text-primary">
+              <p className="text-lg font-bold text-primary tabular-nums">
                 ৳{customer.packages.monthly_price?.toLocaleString()}/mo
               </p>
             )}
@@ -186,38 +174,43 @@ export default function MobileProfile() {
       </Card>
 
       {/* Balance Info */}
-      <div className="grid grid-cols-2 gap-4">
-        {Number(customer.due_balance) > 0 && (
-          <Card className="border-destructive/30">
-            <CardContent className="p-4 text-center">
-              <AlertCircle className="w-6 h-6 text-destructive mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">Due</p>
-              <p className="text-xl font-bold text-destructive">
-                ৳{Number(customer.due_balance).toLocaleString()}
-              </p>
-            </CardContent>
-          </Card>
-        )}
-        {Number(customer.advance_balance) > 0 && (
-          <Card className="border-green-500/30">
-            <CardContent className="p-4 text-center">
-              <CheckCircle className="w-6 h-6 text-green-600 mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">Advance</p>
-              <p className="text-xl font-bold text-green-600">
-                ৳{Number(customer.advance_balance).toLocaleString()}
-              </p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+      {(Number(customer.due_balance) > 0 || Number(customer.advance_balance) > 0) && (
+        <div className="grid grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: "150ms" }}>
+          {Number(customer.due_balance) > 0 && (
+            <Card className="border-destructive/30">
+              <CardContent className="p-4 text-center">
+                <AlertCircle className="w-6 h-6 text-destructive mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">Due</p>
+                <p className="text-xl font-bold text-destructive tabular-nums">
+                  ৳{Number(customer.due_balance).toLocaleString()}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+          {Number(customer.advance_balance) > 0 && (
+            <Card className="border-success/30">
+              <CardContent className="p-4 text-center">
+                <CheckCircle className="w-6 h-6 text-success mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">Advance</p>
+                <p className="text-xl font-bold text-success tabular-nums">
+                  ৳{Number(customer.advance_balance).toLocaleString()}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
 
       {/* Notification Settings */}
       {notificationsSupported && (
-        <Card>
+        <Card className="animate-slide-up" style={{ animationDelay: "200ms" }}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center",
+                  isSubscribed ? "bg-primary/10" : "bg-muted"
+                )}>
                   {isSubscribed ? (
                     <Bell className="w-5 h-5 text-primary" />
                   ) : (
@@ -250,30 +243,13 @@ export default function MobileProfile() {
       )}
 
       {/* Actions */}
-      <div className="space-y-3 pt-4">
-        <button
-          className="w-full flex items-center justify-between p-4 bg-card rounded-xl border active:bg-muted/50 touch-manipulation transition-colors"
-        >
-          <div className="flex items-center gap-4">
-            <Download className="w-5 h-5 text-muted-foreground" />
-            <span className="font-medium">Download Statement</span>
-          </div>
-          <ChevronRight className="w-5 h-5 text-muted-foreground" />
-        </button>
-
-        <button
-          className="w-full flex items-center justify-between p-4 bg-card rounded-xl border active:bg-muted/50 touch-manipulation transition-colors"
-        >
-          <div className="flex items-center gap-4">
-            <Share2 className="w-5 h-5 text-muted-foreground" />
-            <span className="font-medium">Share App</span>
-          </div>
-          <ChevronRight className="w-5 h-5 text-muted-foreground" />
-        </button>
+      <div className="space-y-3 pt-2 animate-slide-up" style={{ animationDelay: "250ms" }}>
+        <ActionButton icon={Download} label="Download Statement" />
+        <ActionButton icon={Share2} label="Share App" />
 
         <Button 
           variant="outline" 
-          className="w-full h-14 text-destructive hover:text-destructive hover:bg-destructive/10 gap-2"
+          className="w-full h-14 text-destructive hover:text-destructive hover:bg-destructive/10 gap-2 mt-4"
           onClick={handleLogout}
         >
           <LogOut className="w-5 h-5" />
@@ -281,5 +257,46 @@ export default function MobileProfile() {
         </Button>
       </div>
     </div>
+  );
+}
+
+interface ProfileInfoRowProps {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+}
+
+function ProfileInfoRow({ icon: Icon, label, value }: ProfileInfoRowProps) {
+  return (
+    <div className="flex items-center gap-4">
+      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+        <Icon className="w-5 h-5 text-primary" />
+      </div>
+      <div>
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="font-medium">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+interface ActionButtonProps {
+  icon: React.ElementType;
+  label: string;
+  onClick?: () => void;
+}
+
+function ActionButton({ icon: Icon, label, onClick }: ActionButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center justify-between p-4 bg-card rounded-xl border active:scale-[0.98] hover:bg-muted/30 touch-manipulation transition-all duration-200"
+    >
+      <div className="flex items-center gap-4">
+        <Icon className="w-5 h-5 text-muted-foreground" />
+        <span className="font-medium">{label}</span>
+      </div>
+      <ChevronRight className="w-5 h-5 text-muted-foreground" />
+    </button>
   );
 }

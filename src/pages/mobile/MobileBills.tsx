@@ -10,12 +10,13 @@ import { useSearchParams } from "react-router-dom";
 import MobileBillDetail from "@/components/mobile/MobileBillDetail";
 import type { Bill } from "@/hooks/usePortalData";
 import { useInitiatePayment } from "@/hooks/usePaymentGateway";
+import { cn } from "@/lib/utils";
 
 const billStatusConfig = {
-  paid: { label: "Paid", variant: "default" as const, color: "text-green-600" },
-  due: { label: "Due", variant: "secondary" as const, color: "text-amber-600" },
-  partial: { label: "Partial", variant: "outline" as const, color: "text-blue-600" },
-  overdue: { label: "Overdue", variant: "destructive" as const, color: "text-red-600" },
+  paid: { label: "Paid", variant: "default" as const, color: "text-success", bg: "bg-success/10" },
+  due: { label: "Due", variant: "secondary" as const, color: "text-warning", bg: "bg-warning/10" },
+  partial: { label: "Partial", variant: "outline" as const, color: "text-primary", bg: "bg-primary/10" },
+  overdue: { label: "Overdue", variant: "destructive" as const, color: "text-destructive", bg: "bg-destructive/10" },
 };
 
 export default function MobileBills() {
@@ -32,9 +33,7 @@ export default function MobileBills() {
   useEffect(() => {
     if (paymentStatus) {
       setShowPaymentResult(true);
-      // Refetch bills after payment
       refetch();
-      // Clear the status param after showing
       const timer = setTimeout(() => {
         setShowPaymentResult(false);
         setSearchParams({});
@@ -51,8 +50,6 @@ export default function MobileBills() {
   ) || [];
   
   const totalDue = unpaidBills.reduce((sum, bill) => sum + Number(bill.amount), 0);
-
-  // Get oldest unpaid bill for "Pay All" (pay one at a time actually)
   const oldestUnpaidBill = unpaidBills.length > 0 ? unpaidBills[unpaidBills.length - 1] : null;
 
   const handlePayAll = () => {
@@ -73,20 +70,20 @@ export default function MobileBills() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold">Bills</h1>
-        <p className="text-muted-foreground">Your billing history</p>
+        <p className="text-muted-foreground text-sm">Your billing history</p>
       </div>
 
       {/* Payment Result Alert */}
       {showPaymentResult && paymentStatus === "success" && (
-        <Alert className="bg-green-500/10 border-green-500/30">
-          <CheckCircle2 className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-700">
+        <Alert className="bg-success/10 border-success/30 animate-slide-up">
+          <CheckCircle2 className="h-4 w-4 text-success" />
+          <AlertDescription className="text-success">
             Payment successful! Your bill has been paid.
           </AlertDescription>
         </Alert>
       )}
       {showPaymentResult && paymentStatus === "cancelled" && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="animate-slide-up">
           <XCircle className="h-4 w-4" />
           <AlertDescription>
             Payment was cancelled. Please try again.
@@ -96,30 +93,32 @@ export default function MobileBills() {
 
       {/* Summary Card */}
       {totalDue > 0 && (
-        <Card className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm opacity-80">Total Due</p>
-                <p className="text-3xl font-bold">{formatCurrency(totalDue)}</p>
-                <p className="text-xs opacity-70 mt-1">
-                  {unpaidBills.length} unpaid bill{unpaidBills.length > 1 ? "s" : ""}
-                </p>
+        <Card className="overflow-hidden border-0 shadow-lg animate-slide-up">
+          <CardContent className="p-0">
+            <div className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-white/80">Total Due</p>
+                  <p className="text-3xl font-bold tabular-nums">{formatCurrency(totalDue)}</p>
+                  <p className="text-xs text-white/70 mt-1">
+                    {unpaidBills.length} unpaid bill{unpaidBills.length > 1 ? "s" : ""}
+                  </p>
+                </div>
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="font-semibold gap-2"
+                  onClick={handlePayAll}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <CreditCard className="w-4 h-4" />
+                  )}
+                  {unpaidBills.length > 1 ? "Pay Oldest" : "Pay Now"}
+                </Button>
               </div>
-              <Button 
-                variant="secondary" 
-                size="sm" 
-                className="font-semibold gap-2"
-                onClick={handlePayAll}
-                disabled={isProcessing}
-              >
-                {isProcessing ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <CreditCard className="w-4 h-4" />
-                )}
-                {unpaidBills.length > 1 ? "Pay Oldest" : "Pay Now"}
-              </Button>
             </div>
           </CardContent>
         </Card>
@@ -132,23 +131,25 @@ export default function MobileBills() {
             <Skeleton key={i} className="h-24 rounded-xl" />
           ))
         ) : bills && bills.length > 0 ? (
-          bills.map((bill) => {
+          bills.map((bill, index) => {
             const status = bill.status || "due";
+            const statusStyle = billStatusConfig[status];
+            
             return (
               <Card 
                 key={bill.id} 
-                className="touch-manipulation active:scale-[0.98] transition-transform cursor-pointer"
+                className="touch-manipulation active:scale-[0.98] transition-all duration-200 cursor-pointer hover:shadow-soft animate-slide-up"
+                style={{ animationDelay: `${index * 50}ms` }}
                 onClick={() => setSelectedBill(bill)}
               >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                        status === "paid" ? "bg-green-500/10" : 
-                        status === "overdue" ? "bg-red-500/10" : 
-                        "bg-amber-500/10"
-                      }`}>
-                        <Receipt className={`w-6 h-6 ${billStatusConfig[status].color}`} />
+                      <div className={cn(
+                        "w-12 h-12 rounded-full flex items-center justify-center",
+                        statusStyle.bg
+                      )}>
+                        <Receipt className={cn("w-6 h-6", statusStyle.color)} />
                       </div>
                       <div>
                         <p className="font-semibold">{bill.invoice_number}</p>
@@ -167,9 +168,9 @@ export default function MobileBills() {
                     </div>
                     <div className="text-right flex items-center gap-2">
                       <div>
-                        <p className="font-bold text-lg">{formatCurrency(Number(bill.amount))}</p>
-                        <Badge variant={billStatusConfig[status].variant} className="text-xs">
-                          {billStatusConfig[status].label}
+                        <p className="font-bold text-lg tabular-nums">{formatCurrency(Number(bill.amount))}</p>
+                        <Badge variant={statusStyle.variant} className="text-xs">
+                          {statusStyle.label}
                         </Badge>
                       </div>
                       <ChevronRight className="w-5 h-5 text-muted-foreground" />
@@ -180,7 +181,7 @@ export default function MobileBills() {
             );
           })
         ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="flex flex-col items-center justify-center py-12 text-center animate-fade-in">
             <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
               <FileText className="w-8 h-8 text-muted-foreground" />
             </div>
