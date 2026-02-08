@@ -110,62 +110,28 @@ export function useCreateReseller() {
       const tenantId = currentTenant?.id;
       if (!tenantId) throw new Error("No tenant");
 
-      // Create auth user first
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.user_email,
-        password: data.user_password,
-        options: {
-          data: { full_name: data.name },
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const response = await supabase.functions.invoke("create-reseller-user", {
+        body: {
+          email: data.user_email,
+          password: data.user_password,
+          name: data.name,
+          phone: data.phone,
+          tenant_id: tenantId,
+          reseller_email: data.email,
+          address: data.address,
+          commission_type: data.commission_type,
+          commission_value: data.commission_value,
+          notes: data.notes,
         },
       });
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("User creation failed");
+      if (response.error) throw new Error(response.error.message || "রিসেলার তৈরিতে ত্রুটি");
+      if (response.data?.error) throw new Error(response.data.error);
 
-      // Create reseller record
-      const { data: reseller, error } = await supabase
-        .from("resellers")
-        .insert({
-          tenant_id: tenantId,
-          user_id: authData.user.id,
-          name: data.name,
-          phone: data.phone,
-          email: data.email || null,
-          address: data.address || null,
-          commission_type: data.commission_type,
-          commission_value: data.commission_value,
-          notes: data.notes || null,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Assign reseller role
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .insert({
-          user_id: authData.user.id,
-          role: "reseller" as any,
-          tenant_id: tenantId,
-        });
-
-      if (roleError) throw roleError;
-
-      // Create profile
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .upsert({
-          id: authData.user.id,
-          full_name: data.name,
-          email: data.user_email,
-          phone: data.phone,
-          tenant_id: tenantId,
-        });
-
-      if (profileError) console.error("Profile error:", profileError);
-
-      return reseller;
+      return response.data.reseller;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["resellers"] });
