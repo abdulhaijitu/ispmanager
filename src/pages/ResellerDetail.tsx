@@ -134,7 +134,7 @@ export default function ResellerDetail() {
         </TabsList>
 
         <TabsContent value="customers">
-          <ResellerCustomersTab customers={customers || []} isLoading={customersLoading} />
+          <ResellerCustomersTab customers={customers || []} isLoading={customersLoading} resellerId={resellerId!} tenantId={reseller.tenant_id} />
         </TabsContent>
         <TabsContent value="commissions">
           <ResellerCommissionsTab commissions={commissions || []} isLoading={commissionsLoading} />
