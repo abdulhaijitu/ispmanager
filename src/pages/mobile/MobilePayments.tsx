@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CreditCard, CheckCircle, FileText, Download } from "lucide-react";
+import { CreditCard, CheckCircle, FileText, Download, ShieldCheck } from "lucide-react";
 import { usePortalPayments } from "@/hooks/usePortalData";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { cn } from "@/lib/utils";
@@ -36,7 +36,7 @@ export default function MobilePayments() {
                 {formatCurrency(totalPaid)}
               </p>
               <p className="text-xs text-white/60 mt-1">
-                {payments?.length || 0} transactions
+                {payments?.length || 0} transaction{(payments?.length || 0) !== 1 ? "s" : ""}
               </p>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function MobilePayments() {
                 <div className="mt-2.5 pt-2.5 border-t border-border flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <FileText className="w-3.5 h-3.5" />
-                    <span>For: {payment.bills.invoice_number}</span>
+                    <span>Invoice: {payment.bills.invoice_number}</span>
                   </div>
                   <button className="text-primary text-xs flex items-center gap-1 font-medium active:scale-95 touch-manipulation">
                     <Download className="w-3.5 h-3.5" />
@@ -105,11 +105,19 @@ export default function MobilePayments() {
             </div>
             <p className="font-semibold">No Payments Yet</p>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Your payments will appear here
+              Your payment history will appear here after your first payment
             </p>
           </div>
         )}
       </div>
+
+      {/* Trust footer */}
+      {payments && payments.length > 0 && (
+        <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/60 py-2">
+          <ShieldCheck className="w-3.5 h-3.5" />
+          <span>All payments are securely processed</span>
+        </div>
+      )}
     </div>
   );
 }

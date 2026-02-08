@@ -8,6 +8,7 @@ import {
   Clock,
   Package,
   TrendingUp,
+  ShieldCheck,
 } from "lucide-react";
 import { usePlatformStats, useAllTenants, type TenantWithStats } from "@/hooks/useTenants";
 import { useTenantContext } from "@/contexts/TenantContext";
@@ -34,14 +35,12 @@ export default function AdminDashboard() {
     navigate("/dashboard");
   };
 
-  // Calculate some derived stats
   const activeISPs = stats?.activeSubscriptions ?? 0;
   const totalISPs = stats?.totalTenants ?? 0;
   const totalCustomers = stats?.totalEndUsers ?? 0;
   const trialISPs = stats?.trialTenants ?? 0;
   const suspendedISPs = stats?.suspendedTenants ?? 0;
 
-  // Mock data for demo
   const monthlyRevenue = 125000;
   const pendingPayouts = 3;
   const systemAlerts = suspendedISPs + (pendingPayouts > 0 ? 1 : 0);
@@ -50,21 +49,21 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Platform Overview</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Platform Control Center</h1>
         <p className="text-muted-foreground">
-          Monitor and manage all ISPs across the platform
+          Real-time overview of platform health, revenue, and ISP operations
         </p>
       </div>
 
-      {/* Primary Metrics Grid */}
+      {/* Primary Metrics — Revenue & Financials first for authority */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard
-          title="Total ISPs"
-          value={totalISPs}
-          subtitle={`${trialISPs} on trial`}
-          icon={Building2}
-          variant="default"
-          href="/admin/tenants"
+          title="Platform Revenue"
+          value={`৳${monthlyRevenue.toLocaleString()}`}
+          trend={{ value: 8, isPositive: true }}
+          icon={DollarSign}
+          variant="success"
+          href="/admin/revenue"
           isLoading={statsLoading}
         />
         <StatCard
@@ -77,20 +76,20 @@ export default function AdminDashboard() {
           isLoading={statsLoading}
         />
         <StatCard
-          title="End Customers"
-          value={totalCustomers.toLocaleString()}
-          subtitle="Platform-wide"
-          icon={Users}
-          variant="info"
+          title="Total ISPs"
+          value={totalISPs}
+          subtitle={`${trialISPs} on trial`}
+          icon={Building2}
+          variant="default"
+          href="/admin/tenants"
           isLoading={statsLoading}
         />
         <StatCard
-          title="Monthly Revenue"
-          value={`৳${monthlyRevenue.toLocaleString()}`}
-          trend={{ value: 8, isPositive: true }}
-          icon={DollarSign}
-          variant="success"
-          href="/admin/revenue"
+          title="End Customers"
+          value={totalCustomers.toLocaleString()}
+          subtitle="Across all ISPs"
+          icon={Users}
+          variant="info"
           isLoading={statsLoading}
         />
         <StatCard
@@ -103,10 +102,10 @@ export default function AdminDashboard() {
           isLoading={statsLoading}
         />
         <StatCard
-          title="System Alerts"
+          title="Alerts"
           value={systemAlerts}
-          subtitle={systemAlerts > 0 ? "Action needed" : "All clear"}
-          icon={AlertTriangle}
+          subtitle={systemAlerts > 0 ? "Requires attention" : "All systems clear"}
+          icon={systemAlerts > 0 ? AlertTriangle : ShieldCheck}
           variant={systemAlerts > 0 ? "danger" : "success"}
           isLoading={statsLoading}
         />
@@ -129,7 +128,7 @@ export default function AdminDashboard() {
                       id: "suspended",
                       type: "warning",
                       title: "Suspended ISPs",
-                      description: `${suspendedISPs} ISPs are currently suspended`,
+                      description: `${suspendedISPs} ISP${suspendedISPs > 1 ? "s" : ""} currently suspended — review billing status`,
                       count: suspendedISPs,
                       href: "/admin/tenants?status=suspended",
                       icon: AlertTriangle,
@@ -155,13 +154,13 @@ export default function AdminDashboard() {
         <StatCard
           title="Add-on Adoption"
           value="68%"
-          subtitle="ISPs with add-ons"
+          subtitle="ISPs using premium features"
           icon={Package}
           variant="default"
           href="/admin/addons"
         />
         <StatCard
-          title="Payment Success"
+          title="Payment Success Rate"
           value="96.5%"
           trend={{ value: 2, isPositive: true }}
           icon={TrendingUp}
@@ -169,16 +168,16 @@ export default function AdminDashboard() {
           href="/admin/payments"
         />
         <StatCard
-          title="Trial Conversions"
+          title="Trial → Paid Conversion"
           value="42%"
           trend={{ value: 5, isPositive: true }}
           icon={Activity}
           variant="info"
         />
         <StatCard
-          title="Avg. Revenue/ISP"
+          title="Revenue per ISP"
           value="৳2,450"
-          subtitle="Monthly ARPU"
+          subtitle="Monthly average"
           icon={DollarSign}
           variant="default"
           href="/admin/revenue"

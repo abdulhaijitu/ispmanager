@@ -8,14 +8,17 @@ import {
   Key,
   Network,
   Package,
+  Star,
   type LucideIcon,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface SettingsSection {
   id: string;
   label: string;
   icon: LucideIcon;
   description?: string;
+  recommended?: boolean;
 }
 
 interface SettingsSidebarProps {
@@ -24,15 +27,15 @@ interface SettingsSidebarProps {
   onSectionChange: (section: string) => void;
 }
 
-export const settingsSections = {
-  general: { id: "general", label: "General", icon: Building2, description: "Business info & regional settings" },
-  subscription: { id: "subscription", label: "Subscription", icon: Package, description: "Plan & usage" },
-  billing: { id: "billing", label: "Billing", icon: CreditCard, description: "Payment & automation" },
-  notifications: { id: "notifications", label: "Notifications", icon: Bell, description: "Alerts & reminders" },
-  branding: { id: "branding", label: "Branding", icon: Palette, description: "Logo & colors" },
-  email: { id: "email", label: "Email", icon: Mail, description: "Email configuration" },
-  network: { id: "network", label: "Network", icon: Network, description: "Router integration" },
-  api: { id: "api", label: "API Access", icon: Key, description: "API keys & access" },
+export const settingsSections: Record<string, SettingsSection> = {
+  general: { id: "general", label: "General", icon: Building2, description: "Business identity & regional preferences" },
+  subscription: { id: "subscription", label: "Subscription", icon: Package, description: "Your plan, usage & billing estimate" },
+  billing: { id: "billing", label: "Billing & Automation", icon: CreditCard, description: "Payment gateway, auto-suspend & invoicing rules", recommended: true },
+  notifications: { id: "notifications", label: "Notifications", icon: Bell, description: "Control what alerts reach your customers" },
+  branding: { id: "branding", label: "Branding", icon: Palette, description: "Logo & colors for invoices and portals" },
+  email: { id: "email", label: "Email", icon: Mail, description: "Transactional email sender configuration" },
+  network: { id: "network", label: "Network Automation", icon: Network, description: "Automatically control customer speed & access", recommended: true },
+  api: { id: "api", label: "API Access", icon: Key, description: "Manage API keys for external integrations" },
 };
 
 export function SettingsSidebar({ sections, activeSection, onSectionChange }: SettingsSidebarProps) {
@@ -62,12 +65,20 @@ export function SettingsSidebar({ sections, activeSection, onSectionChange }: Se
               )} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className={cn(
-                "font-medium text-sm",
-                isActive ? "text-primary" : "text-foreground"
-              )}>
-                {section.label}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className={cn(
+                  "font-medium text-sm",
+                  isActive ? "text-primary" : "text-foreground"
+                )}>
+                  {section.label}
+                </p>
+                {section.recommended && (
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-primary/30 text-primary font-medium">
+                    <Star className="h-2.5 w-2.5 mr-0.5 fill-primary" />
+                    Recommended
+                  </Badge>
+                )}
+              </div>
               {section.description && (
                 <p className="text-xs text-muted-foreground truncate">
                   {section.description}

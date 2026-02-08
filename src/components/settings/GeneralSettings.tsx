@@ -69,7 +69,7 @@ export function GeneralSettings() {
     <div className="space-y-6">
       <SettingsSection
         title="Business Information"
-        description="Your ISP business details and contact information"
+        description="Your ISP identity — this appears on invoices, receipts, and the customer portal."
       >
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -106,6 +106,7 @@ export function GeneralSettings() {
                 type="email"
                 placeholder="support@yourisp.com"
               />
+              <p className="text-xs text-muted-foreground">Shown on customer invoices and portal</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Support Phone</Label>
@@ -124,7 +125,7 @@ export function GeneralSettings() {
 
       <SettingsSection
         title="Regional Settings"
-        description="Configure regional preferences for your workspace"
+        description="Currency and timezone affect how amounts and dates appear across your workspace."
       >
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-3">

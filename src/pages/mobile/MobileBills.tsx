@@ -1,17 +1,15 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Receipt,
-  Calendar,
   ChevronRight,
   FileText,
   CreditCard,
   CheckCircle2,
   XCircle,
   Loader2,
-  ArrowRight,
+  ShieldCheck,
 } from "lucide-react";
 import { usePortalBills, usePortalCustomer } from "@/hooks/usePortalData";
 import { useState, useEffect } from "react";
@@ -99,7 +97,7 @@ export default function MobileBills() {
           </div>
           <div>
             <p className="font-semibold text-sm">Payment Successful!</p>
-            <p className="text-xs text-muted-foreground">Your bill has been paid.</p>
+            <p className="text-xs text-muted-foreground">Your connection will be restored shortly.</p>
           </div>
         </div>
       )}
@@ -110,12 +108,12 @@ export default function MobileBills() {
           </div>
           <div>
             <p className="font-semibold text-sm">Payment Cancelled</p>
-            <p className="text-xs text-muted-foreground">Please try again.</p>
+            <p className="text-xs text-muted-foreground">No charges were made. Please try again.</p>
           </div>
         </div>
       )}
 
-      {/* Due Summary */}
+      {/* Due Summary with Pay Now */}
       {totalDue > 0 && (
         <Card className="overflow-hidden border-0 shadow-xl rounded-2xl">
           <CardContent className="p-0">
@@ -141,6 +139,10 @@ export default function MobileBills() {
                   )}
                   {unpaidBills.length > 1 ? "Pay Oldest Bill" : "Pay Now"}
                 </Button>
+                <div className="flex items-center justify-center gap-1.5 mt-3 text-white/50 text-xs">
+                  <ShieldCheck className="w-3 h-3" />
+                  <span>Secure payment · Instant connection restore</span>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -228,7 +230,7 @@ export default function MobileBills() {
             </div>
             <p className="font-semibold">No Bills Yet</p>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Your bills will appear here
+              Your bills will appear here once generated
             </p>
           </div>
         )}
