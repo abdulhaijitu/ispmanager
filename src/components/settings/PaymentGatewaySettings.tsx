@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { CreditCard, Eye, EyeOff, ExternalLink, Shield } from "lucide-react";
+import { CreditCard, Eye, EyeOff, ExternalLink, Shield, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -34,7 +35,6 @@ export function PaymentGatewaySettings() {
   const [autoSuspendDays, setAutoSuspendDays] = useState("15");
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Load initial values from tenant
   useEffect(() => {
     if (tenant) {
       setApiKey((tenant as any).uddoktapay_api_key || "");
@@ -64,7 +64,7 @@ export function PaymentGatewaySettings() {
         <Card>
           <CardContent className="py-8">
             <div className="flex items-center justify-center text-muted-foreground">
-              লোড হচ্ছে...
+              Loading...
             </div>
           </CardContent>
         </Card>
@@ -77,29 +77,28 @@ export function PaymentGatewaySettings() {
 
   return (
     <div className="space-y-6">
-      {/* UddoktaPay Configuration */}
+      {/* Online Payment Gateway */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <CreditCard className="h-5 w-5" />
-                UddoktaPay পেমেন্ট গেটওয়ে
+                Online Payment Gateway
               </CardTitle>
               <CardDescription>
-                অনলাইন পেমেন্ট গ্রহণের জন্য UddoktaPay কনফিগার করুন
+                Let customers pay bills online — reduces manual collection effort and speeds up cash flow.
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
               {isConfigured ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 text-xs font-medium text-success">
-                  <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                  কনফিগার করা হয়েছে
-                </span>
+                <Badge variant="outline" className="bg-success/10 text-success border-success/20">
+                  Connected
+                </Badge>
               ) : (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                  কনফিগার করা হয়নি
-                </span>
+                <Badge variant="outline" className="text-muted-foreground">
+                  Not configured
+                </Badge>
               )}
             </div>
           </div>
@@ -107,7 +106,7 @@ export function PaymentGatewaySettings() {
         <CardContent className="space-y-6">
           {/* Environment Selection */}
           <div className="space-y-2">
-            <Label>এনভায়রনমেন্ট</Label>
+            <Label>Environment</Label>
             <Select
               value={baseUrl}
               onValueChange={(value) => {
@@ -120,16 +119,16 @@ export function PaymentGatewaySettings() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="https://sandbox.uddoktapay.com">
-                  🧪 Sandbox (টেস্ট মোড)
+                  🧪 Sandbox (Test mode — no real charges)
                 </SelectItem>
                 <SelectItem value="https://uddoktapay.com">
-                  🚀 Production (লাইভ)
+                  🚀 Production (Live payments)
                 </SelectItem>
               </SelectContent>
             </Select>
             {isSandbox && (
               <p className="text-xs text-muted-foreground">
-                Sandbox মোডে টেস্ট করুন, প্রকৃত টাকা কাটা হবে না
+                Test your setup safely — no real money is charged in sandbox mode
               </p>
             )}
           </div>
@@ -146,7 +145,7 @@ export function PaymentGatewaySettings() {
                   setApiKey(e.target.value);
                   handleChange();
                 }}
-                placeholder="আপনার UddoktaPay API Key দিন"
+                placeholder="Enter your UddoktaPay API key"
                 className="pr-10"
               />
               <Button
@@ -164,16 +163,15 @@ export function PaymentGatewaySettings() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              API Key পেতে{" "}
+              Get your API key from the{" "}
               <a
                 href="https://uddoktapay.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-primary hover:underline"
               >
-                UddoktaPay ড্যাশবোর্ড <ExternalLink className="h-3 w-3" />
-              </a>{" "}
-              থেকে সংগ্রহ করুন
+                UddoktaPay dashboard <ExternalLink className="h-3 w-3" />
+              </a>
             </p>
           </div>
 
@@ -182,9 +180,9 @@ export function PaymentGatewaySettings() {
           {/* Enable Online Payment */}
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>অনলাইন পেমেন্ট চালু করুন</Label>
+              <Label>Accept Online Payments</Label>
               <p className="text-sm text-muted-foreground">
-                গ্রাহকরা পোর্টাল থেকে অনলাইনে বিল পরিশোধ করতে পারবেন
+                Customers can pay directly from their portal via bKash, Nagad, cards & more
               </p>
             </div>
             <Switch
@@ -201,44 +199,34 @@ export function PaymentGatewaySettings() {
             <Alert>
               <Shield className="h-4 w-4" />
               <AlertDescription>
-                অনলাইন পেমেন্ট চালু করতে প্রথমে API Key কনফিগার করুন
+                Configure your API key first to enable online payments
               </AlertDescription>
             </Alert>
           )}
         </CardContent>
       </Card>
 
-      {/* Billing Automation */}
+      {/* Auto-Suspend — Billing Automation */}
       <Card>
         <CardHeader>
-          <CardTitle>বিলিং অটোমেশন</CardTitle>
-          <CardDescription>
-            স্বয়ংক্রিয় বিলিং সেটিংস কনফিগার করুন
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                Automatic Suspension
+              </CardTitle>
+              <CardDescription>
+                Automatically suspend unpaid connections — proven to reduce overdue bills significantly.
+              </CardDescription>
+            </div>
+            <Badge variant="outline" className="border-primary/30 text-primary text-[10px]">
+              <Zap className="h-3 w-3 mr-0.5" />
+              High Impact
+            </Badge>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>মাসিক বিল অটো-জেনারেট</Label>
-              <p className="text-sm text-muted-foreground">
-                প্রতি মাসের ১ তারিখে স্বয়ংক্রিয়ভাবে বিল তৈরি করুন
-              </p>
-            </div>
-            <Switch defaultChecked />
-          </div>
-          <Separator />
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>প্রোরেটেড বিলিং</Label>
-              <p className="text-sm text-muted-foreground">
-                মাসের মাঝখানে যোগদানের জন্য আনুপাতিক চার্জ গণনা করুন
-              </p>
-            </div>
-            <Switch defaultChecked />
-          </div>
-          <Separator />
           <div className="space-y-2">
-            <Label>অটো-সাসপেন্ড করুন (দিন পরে)</Label>
+            <Label>Suspend after overdue for</Label>
             <Select
               value={autoSuspendDays}
               onValueChange={(value) => {
@@ -250,33 +238,24 @@ export function PaymentGatewaySettings() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="7">৭ দিন</SelectItem>
-                <SelectItem value="15">১৫ দিন</SelectItem>
-                <SelectItem value="30">৩০ দিন</SelectItem>
-                <SelectItem value="0">কখনোই না (ম্যানুয়াল)</SelectItem>
+                <SelectItem value="7">7 days</SelectItem>
+                <SelectItem value="15">15 days</SelectItem>
+                <SelectItem value="30">30 days</SelectItem>
+                <SelectItem value="0">Never (manual only)</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-sm text-muted-foreground">
-              এত দিন বকেয়া থাকলে সংযোগ স্বয়ংক্রিয়ভাবে সাসপেন্ড করা হবে
+              Connections restore automatically once the customer pays
             </p>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Payment Options */}
-      <Card>
-        <CardHeader>
-          <CardTitle>পেমেন্ট অপশন</CardTitle>
-          <CardDescription>
-            গ্রাহকদের জন্য পেমেন্ট অপশন কনফিগার করুন
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+          <Separator />
+
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>আংশিক পেমেন্ট</Label>
+              <Label>Auto-generate monthly bills</Label>
               <p className="text-sm text-muted-foreground">
-                গ্রাহকদের আংশিক পেমেন্ট করার অনুমতি দিন
+                Bills are created on the 1st of each month for all active customers
               </p>
             </div>
             <Switch defaultChecked />
@@ -284,9 +263,40 @@ export function PaymentGatewaySettings() {
           <Separator />
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>অগ্রিম পেমেন্ট</Label>
+              <Label>Pro-rated billing</Label>
               <p className="text-sm text-muted-foreground">
-                গ্রাহকদের অগ্রিম পেমেন্ট করার অনুমতি দিন
+                Charge proportionally for customers who join mid-month
+              </p>
+            </div>
+            <Switch defaultChecked />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Payment Options */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Payment Options</CardTitle>
+          <CardDescription>
+            Control how customers can pay — flexible options improve collection rates.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Allow partial payments</Label>
+              <p className="text-sm text-muted-foreground">
+                Customers can pay part of the bill now and the rest later
+              </p>
+            </div>
+            <Switch defaultChecked />
+          </div>
+          <Separator />
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Allow advance payments</Label>
+              <p className="text-sm text-muted-foreground">
+                Customers can pay ahead and build a credit balance
               </p>
             </div>
             <Switch defaultChecked />
@@ -298,7 +308,7 @@ export function PaymentGatewaySettings() {
       {hasChanges && (
         <div className="flex justify-end">
           <Button onClick={handleSave} disabled={updateSettings.isPending}>
-            {updateSettings.isPending ? "সেভ হচ্ছে..." : "পরিবর্তন সেভ করুন"}
+            {updateSettings.isPending ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       )}

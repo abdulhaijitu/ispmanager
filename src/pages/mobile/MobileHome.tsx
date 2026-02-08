@@ -9,12 +9,12 @@ import {
   CreditCard,
   ChevronRight,
   CheckCircle,
-  AlertCircle,
   Clock,
   UserX,
   Bell,
   Package,
   ArrowRight,
+  ShieldCheck,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePortalCustomer, usePortalBills, usePortalPayments } from "@/hooks/usePortalData";
@@ -126,13 +126,19 @@ export default function MobileHome() {
               </p>
 
               {dueBalance > 0 ? (
-                <Button
-                  onClick={() => navigate("/app/bills")}
-                  className="w-full h-12 bg-white text-destructive font-semibold text-base hover:bg-white/90 active:scale-[0.98] touch-manipulation rounded-xl shadow-lg"
-                >
-                  Pay Now
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
+                <>
+                  <Button
+                    onClick={() => navigate("/app/bills")}
+                    className="w-full h-12 bg-white text-destructive font-semibold text-base hover:bg-white/90 active:scale-[0.98] touch-manipulation rounded-xl shadow-lg"
+                  >
+                    Pay Now
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                  <div className="flex items-center justify-center gap-1.5 mt-3 text-white/60 text-xs">
+                    <ShieldCheck className="w-3 h-3" />
+                    <span>Secure payment · Instant connection restore</span>
+                  </div>
+                </>
               ) : (
                 <div className="flex items-center gap-2 text-white/80 text-sm">
                   <CheckCircle className="w-4 h-4" />

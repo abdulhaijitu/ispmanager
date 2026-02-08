@@ -5,11 +5,9 @@ import {
   AlertCircle,
   UserPlus,
   ArrowDownRight,
-  Loader2,
   Plus,
   FileText,
-  CreditCard,
-  RefreshCw
+  Info,
 } from "lucide-react";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
@@ -22,6 +20,7 @@ import { useBills } from "@/hooks/useBills";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AlertBanner } from "@/components/shared/AlertBanner";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -37,7 +36,6 @@ export default function Dashboard() {
   const activeCustomers = customers.filter(c => c.connection_status === "active").length;
   const suspendedCustomers = customers.filter(c => c.connection_status === "suspended").length;
 
-  // This month's data
   const now = new Date();
   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -74,19 +72,21 @@ export default function Dashboard() {
     ? Math.round(((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100)
     : monthlyRevenue > 0 ? 100 : 0;
 
-  // Total due from customers
   const totalDue = customers.reduce((sum, c) => sum + (c.due_balance || 0), 0);
   const customersWithDue = customers.filter(c => (c.due_balance || 0) > 0).length;
 
-  // Total billed this month
   const monthlyBills = bills.filter(b => {
     const billDate = new Date(b.created_at);
     return billDate >= thisMonthStart;
   });
   const totalBilled = monthlyBills.reduce((sum, b) => sum + Number(b.amount), 0);
 
-  // Collection rate
   const collectionRate = totalBilled > 0 ? ((monthlyRevenue / totalBilled) * 100) : 0;
+
+  // Contextual guidance checks
+  const hasNoDue = totalDue === 0 && totalCustomers > 0;
+  const hasNoPaymentGateway = !currentTenant?.enable_online_payment;
+  const autoSuspendDays = currentTenant?.auto_suspend_days;
 
   if (isLoading) {
     return (
@@ -111,11 +111,10 @@ export default function Dashboard() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground text-sm mt-0.5">
-            Welcome back! Here's your ISP overview for {now.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+            {now.toLocaleDateString("en-US", { month: "long", year: "numeric" })} — your ISP at a glance
           </p>
         </div>
         
-        {/* Quick Actions */}
         <div className="flex items-center gap-2">
           <Button 
             variant="outline" 
@@ -137,16 +136,24 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Primary Metrics */}
+      {/* Contextual Guidance Banners */}
+      {hasNoPaymentGateway && totalCustomers > 0 && (
+        <AlertBanner variant="info" title="Collect payments faster">
+          Enable online payments so customers can pay directly from their portal — reducing manual collection effort.{" "}
+          <button onClick={() => navigate("/dashboard/settings")} className="font-semibold text-primary underline underline-offset-2">
+            Set up now →
+          </button>
+        </AlertBanner>
+      )}
+
+      {suspendedCustomers > 0 && autoSuspendDays && autoSuspendDays > 0 && (
+        <AlertBanner variant="warning" title={`${suspendedCustomers} connection${suspendedCustomers > 1 ? "s" : ""} suspended`}>
+          Unpaid customers are automatically suspended after {autoSuspendDays} days. Connections restore instantly once payment is received.
+        </AlertBanner>
+      )}
+
+      {/* Primary Metrics — Revenue & Due first */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Total Customers"
-          value={totalCustomers.toLocaleString()}
-          subtitle={`${activeCustomers} active connections`}
-          icon={Users}
-          trend={customerGrowth !== 0 ? { value: Math.abs(customerGrowth), isPositive: customerGrowth > 0 } : undefined}
-          variant="default"
-        />
         <MetricCard
           title="Monthly Revenue"
           value={`৳${monthlyRevenue.toLocaleString()}`}
@@ -156,18 +163,26 @@ export default function Dashboard() {
           variant="success"
         />
         <MetricCard
+          title="Outstanding Due"
+          value={`৳${totalDue.toLocaleString()}`}
+          subtitle={customersWithDue > 0 ? `From ${customersWithDue} customer${customersWithDue > 1 ? "s" : ""}` : "All caught up!"}
+          icon={AlertCircle}
+          variant={totalDue > 0 ? "warning" : "success"}
+        />
+        <MetricCard
+          title="Active Customers"
+          value={activeCustomers.toLocaleString()}
+          subtitle={`${totalCustomers} total`}
+          icon={Users}
+          trend={customerGrowth !== 0 ? { value: Math.abs(customerGrowth), isPositive: customerGrowth > 0 } : undefined}
+          variant="default"
+        />
+        <MetricCard
           title="Collection Rate"
           value={`${collectionRate.toFixed(0)}%`}
           subtitle="This month"
           icon={TrendingUp}
           variant={collectionRate >= 90 ? "success" : collectionRate >= 70 ? "warning" : "danger"}
-        />
-        <MetricCard
-          title="Total Due"
-          value={`৳${totalDue.toLocaleString()}`}
-          subtitle={`From ${customersWithDue} customers`}
-          icon={AlertCircle}
-          variant={totalDue > 0 ? "warning" : "success"}
         />
       </div>
 

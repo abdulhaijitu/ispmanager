@@ -1,5 +1,4 @@
 import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
 import { SettingsSection, SettingsRow } from "./SettingsSection";
 
 export function NotificationSettings() {
@@ -7,30 +6,30 @@ export function NotificationSettings() {
     <div className="space-y-6">
       <SettingsSection
         title="SMS Notifications"
-        description="Configure SMS alerts for your customers"
+        description="Keep customers informed about their bills and connection — reduces support calls and improves on-time payments."
       >
         <div className="divide-y divide-border">
           <SettingsRow
             label="Bill Generated"
-            description="Send SMS when a new bill is generated"
+            description="Notify customers instantly when a new bill is created"
           >
             <Switch defaultChecked />
           </SettingsRow>
           <SettingsRow
-            label="Payment Received"
-            description="Send SMS confirmation on payment"
+            label="Payment Confirmation"
+            description="Send confirmation when payment is received — builds trust"
           >
             <Switch defaultChecked />
           </SettingsRow>
           <SettingsRow
-            label="Due Reminder"
-            description="Send SMS reminder before due date"
+            label="Due Date Reminder"
+            description="Remind customers before the due date to avoid late payments"
           >
             <Switch defaultChecked />
           </SettingsRow>
           <SettingsRow
             label="Suspension Warning"
-            description="Send SMS warning before auto-suspension"
+            description="Warn customers before their connection is suspended"
           >
             <Switch defaultChecked />
           </SettingsRow>
@@ -39,24 +38,24 @@ export function NotificationSettings() {
 
       <SettingsSection
         title="Push Notifications"
-        description="Configure push notifications for the mobile app"
+        description="Reach customers on their phone instantly — works even without SMS credits."
       >
         <div className="divide-y divide-border">
           <SettingsRow
             label="New Bill Alert"
-            description="Notify when new bill is available"
+            description="Push notification when a new bill is ready"
           >
             <Switch defaultChecked />
           </SettingsRow>
           <SettingsRow
             label="Payment Confirmation"
-            description="Notify when payment is received"
+            description="Instant confirmation on successful payment"
           >
             <Switch defaultChecked />
           </SettingsRow>
           <SettingsRow
-            label="Connection Status"
-            description="Notify on connection status changes"
+            label="Connection Status Change"
+            description="Notify when their internet is activated or suspended"
           >
             <Switch defaultChecked />
           </SettingsRow>
@@ -64,25 +63,25 @@ export function NotificationSettings() {
       </SettingsSection>
 
       <SettingsSection
-        title="Email Notifications"
-        description="Configure email alerts for staff members"
+        title="Staff Email Alerts"
+        description="Keep your team updated on daily operations without logging in."
       >
         <div className="divide-y divide-border">
           <SettingsRow
-            label="Daily Summary"
-            description="Receive daily summary of bills and payments"
+            label="Daily Business Summary"
+            description="Receive a daily recap of bills, payments, and new customers"
           >
             <Switch defaultChecked />
           </SettingsRow>
           <SettingsRow
-            label="New Customer"
-            description="Notify when new customer is added"
+            label="New Customer Added"
+            description="Get notified when a new customer joins"
           >
             <Switch />
           </SettingsRow>
           <SettingsRow
-            label="Large Payment"
-            description="Notify on payments above threshold"
+            label="Large Payment Alert"
+            description="Get alerted on payments above a set threshold"
           >
             <Switch />
           </SettingsRow>
