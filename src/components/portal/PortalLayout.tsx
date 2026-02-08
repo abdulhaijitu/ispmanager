@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
+import { usePortalCustomer } from "@/hooks/usePortalData";
+import { useCustomerBranding } from "@/hooks/useBranding";
 
 const navItems = [
   { title: "Overview", href: "/portal", icon: LayoutDashboard },
@@ -26,6 +28,8 @@ export function PortalLayout() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: customer } = usePortalCustomer();
+  const { branding } = useCustomerBranding(customer?.id);
 
   const handleSignOut = async () => {
     await signOut();
@@ -46,10 +50,18 @@ export function PortalLayout() {
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <Building2 className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="font-semibold">Customer Portal</span>
+              {branding.logoUrl ? (
+                <img
+                  src={branding.logoUrl}
+                  alt={branding.brandName}
+                  className="h-9 w-9 rounded-lg object-contain"
+                />
+              ) : (
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+                  <Building2 className="h-5 w-5 text-primary-foreground" />
+                </div>
+              )}
+              <span className="font-semibold">{branding.brandName}</span>
             </div>
 
             {/* Desktop Navigation */}

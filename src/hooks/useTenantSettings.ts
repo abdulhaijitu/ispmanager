@@ -19,6 +19,11 @@ interface TenantSettingsUpdate {
   sender_email?: string | null;
   logo_url?: string | null;
   api_enabled?: boolean;
+  // Reseller branding controls
+  allow_reseller_branding?: boolean;
+  allow_reseller_logo?: boolean;
+  allow_reseller_name?: boolean;
+  allow_reseller_theme?: boolean;
 }
 
 export function useUpdateTenantSettings(tenantId: string | undefined) {

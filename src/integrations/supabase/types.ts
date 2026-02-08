@@ -1262,45 +1262,57 @@ export type Database = {
       }
       resellers: {
         Row: {
+          accent_color: string | null
           address: string | null
+          brand_name: string | null
           commission_type: string
           commission_value: number
           created_at: string
           email: string | null
           id: string
+          logo_url: string | null
           name: string
           notes: string | null
           phone: string
+          primary_color: string | null
           status: string
           tenant_id: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          accent_color?: string | null
           address?: string | null
+          brand_name?: string | null
           commission_type?: string
           commission_value?: number
           created_at?: string
           email?: string | null
           id?: string
+          logo_url?: string | null
           name: string
           notes?: string | null
           phone: string
+          primary_color?: string | null
           status?: string
           tenant_id: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          accent_color?: string | null
           address?: string | null
+          brand_name?: string | null
           commission_type?: string
           commission_value?: number
           created_at?: string
           email?: string | null
           id?: string
+          logo_url?: string | null
           name?: string
           notes?: string | null
           phone?: string
+          primary_color?: string | null
           status?: string
           tenant_id?: string
           updated_at?: string
@@ -1418,6 +1430,10 @@ export type Database = {
       tenants: {
         Row: {
           accent_color: string | null
+          allow_reseller_branding: boolean | null
+          allow_reseller_logo: boolean | null
+          allow_reseller_name: boolean | null
+          allow_reseller_theme: boolean | null
           api_enabled: boolean | null
           auto_suspend_days: number | null
           created_at: string
@@ -1441,6 +1457,10 @@ export type Database = {
         }
         Insert: {
           accent_color?: string | null
+          allow_reseller_branding?: boolean | null
+          allow_reseller_logo?: boolean | null
+          allow_reseller_name?: boolean | null
+          allow_reseller_theme?: boolean | null
           api_enabled?: boolean | null
           auto_suspend_days?: number | null
           created_at?: string
@@ -1464,6 +1484,10 @@ export type Database = {
         }
         Update: {
           accent_color?: string | null
+          allow_reseller_branding?: boolean | null
+          allow_reseller_logo?: boolean | null
+          allow_reseller_name?: boolean | null
+          allow_reseller_theme?: boolean | null
           api_enabled?: boolean | null
           auto_suspend_days?: number | null
           created_at?: string

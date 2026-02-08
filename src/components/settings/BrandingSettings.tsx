@@ -15,6 +15,8 @@ import { useCurrentTenant } from "@/hooks/useTenant";
 import { useUpdateTenantSettings } from "@/hooks/useTenantSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ResellerBrandingSettings } from "./ResellerBrandingSettings";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export function BrandingSettings() {
   const { data: currentTenant, isLoading: tenantLoading } = useCurrentTenant();
@@ -121,6 +123,9 @@ export function BrandingSettings() {
       setIsSaving(false);
     }
   };
+
+  const { data: userRole } = useUserRole();
+  const canManageResellerBranding = userRole === "isp_owner" || userRole === "super_admin";
 
   if (tenantLoading) {
     return (
@@ -321,6 +326,9 @@ export function BrandingSettings() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Reseller Branding Controls - ISP Owner only */}
+      {canManageResellerBranding && <ResellerBrandingSettings />}
     </div>
   );
 }

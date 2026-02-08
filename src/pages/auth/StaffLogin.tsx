@@ -113,9 +113,9 @@ export default function StaffLogin() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
             <Wifi className="h-6 w-6 text-primary-foreground" />
           </div>
-          <CardTitle className="text-2xl">Staff Portal</CardTitle>
+          <CardTitle className="text-2xl">ISP Management</CardTitle>
           <CardDescription>
-            ISP ম্যানেজমেন্ট ড্যাশবোর্ডে প্রবেশ করুন
+            আপনার ড্যাশবোর্ডে প্রবেশ করুন
           </CardDescription>
         </CardHeader>
         
