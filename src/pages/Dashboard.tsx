@@ -22,71 +22,78 @@ import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertBanner } from "@/components/shared/AlertBanner";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
+import { useDemoMode } from "@/contexts/DemoModeContext";
+import { demoMetrics } from "@/data/demoData";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { currentTenant, isLoading: tenantLoading } = useTenantContext();
+  const { isDemoMode } = useDemoMode();
   const { data: customers = [], isLoading: customersLoading } = useCustomers(currentTenant?.id);
   const { data: payments = [], isLoading: paymentsLoading } = usePayments(currentTenant?.id);
   const { data: bills = [], isLoading: billsLoading } = useBills(currentTenant?.id);
 
-  const isLoading = tenantLoading || customersLoading || paymentsLoading || billsLoading;
+  const isLoading = !isDemoMode && (tenantLoading || customersLoading || paymentsLoading || billsLoading);
 
-  // Calculate metrics
-  const totalCustomers = customers.length;
-  const activeCustomers = customers.filter(c => c.connection_status === "active").length;
-  const suspendedCustomers = customers.filter(c => c.connection_status === "suspended").length;
+  // Calculate metrics — use demo data when in demo mode
+  const totalCustomers = isDemoMode ? demoMetrics.totalCustomers : customers.length;
+  const activeCustomers = isDemoMode ? demoMetrics.activeCustomers : customers.filter(c => c.connection_status === "active").length;
+  const suspendedCustomers = isDemoMode ? demoMetrics.suspendedCustomers : customers.filter(c => c.connection_status === "suspended").length;
 
   const now = new Date();
   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
   
-  const newCustomersThisMonth = customers.filter(c => {
+  const newCustomersThisMonth = isDemoMode ? demoMetrics.newCustomersThisMonth : customers.filter(c => {
     const joinDate = new Date(c.join_date);
     return joinDate >= thisMonthStart;
   }).length;
 
-  const newCustomersLastMonth = customers.filter(c => {
-    const joinDate = new Date(c.join_date);
-    return joinDate >= lastMonthStart && joinDate <= lastMonthEnd;
-  }).length;
+  const customerGrowth = isDemoMode ? demoMetrics.customerGrowth : (() => {
+    const newCustomersLastMonth = customers.filter(c => {
+      const joinDate = new Date(c.join_date);
+      return joinDate >= lastMonthStart && joinDate <= lastMonthEnd;
+    }).length;
+    return newCustomersLastMonth > 0 
+      ? Math.round(((newCustomersThisMonth - newCustomersLastMonth) / newCustomersLastMonth) * 100)
+      : newCustomersThisMonth > 0 ? 100 : 0;
+  })();
 
-  const customerGrowth = newCustomersLastMonth > 0 
-    ? Math.round(((newCustomersThisMonth - newCustomersLastMonth) / newCustomersLastMonth) * 100)
-    : newCustomersThisMonth > 0 ? 100 : 0;
+  const monthlyRevenue = isDemoMode ? demoMetrics.monthlyRevenue : (() => {
+    const monthlyPayments = payments.filter(p => {
+      const paymentDate = new Date(p.created_at);
+      return paymentDate >= thisMonthStart;
+    });
+    return monthlyPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+  })();
 
-  const monthlyPayments = payments.filter(p => {
-    const paymentDate = new Date(p.created_at);
-    return paymentDate >= thisMonthStart;
-  });
-  
-  const monthlyRevenue = monthlyPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+  const revenueGrowth = isDemoMode ? demoMetrics.revenueGrowth : (() => {
+    const thisMonthPayments = payments.filter(p => new Date(p.created_at) >= thisMonthStart);
+    const lastMonthPay = payments.filter(p => {
+      const d = new Date(p.created_at);
+      return d >= lastMonthStart && d <= lastMonthEnd;
+    });
+    const lastMonthRev = lastMonthPay.reduce((sum, p) => sum + Number(p.amount), 0);
+    const thisMonthRev = thisMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    return lastMonthRev > 0
+      ? Math.round(((thisMonthRev - lastMonthRev) / lastMonthRev) * 100)
+      : thisMonthRev > 0 ? 100 : 0;
+  })();
 
-  const lastMonthPayments = payments.filter(p => {
-    const paymentDate = new Date(p.created_at);
-    return paymentDate >= lastMonthStart && paymentDate <= lastMonthEnd;
-  });
-  const lastMonthRevenue = lastMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-  
-  const revenueGrowth = lastMonthRevenue > 0
-    ? Math.round(((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100)
-    : monthlyRevenue > 0 ? 100 : 0;
+  const totalDue = isDemoMode ? demoMetrics.totalDue : customers.reduce((sum, c) => sum + (c.due_balance || 0), 0);
+  const customersWithDue = isDemoMode ? demoMetrics.customersWithDue : customers.filter(c => (c.due_balance || 0) > 0).length;
 
-  const totalDue = customers.reduce((sum, c) => sum + (c.due_balance || 0), 0);
-  const customersWithDue = customers.filter(c => (c.due_balance || 0) > 0).length;
-
-  const monthlyBills = bills.filter(b => {
+  const monthlyBillsCount = isDemoMode ? demoMetrics.monthlyBillsCount : bills.filter(b => {
     const billDate = new Date(b.created_at);
     return billDate >= thisMonthStart;
-  });
-  const totalBilled = monthlyBills.reduce((sum, b) => sum + Number(b.amount), 0);
+  }).length;
 
-  const collectionRate = totalBilled > 0 ? ((monthlyRevenue / totalBilled) * 100) : 0;
+  const totalBilled = isDemoMode ? 9300 : bills.filter(b => new Date(b.created_at) >= thisMonthStart).reduce((sum, b) => sum + Number(b.amount), 0);
+  const collectionRate = isDemoMode ? demoMetrics.collectionRate : (totalBilled > 0 ? ((monthlyRevenue / totalBilled) * 100) : 0);
 
   // Contextual guidance checks
-  const hasNoDue = totalDue === 0 && totalCustomers > 0;
-  const hasNoPaymentGateway = !currentTenant?.enable_online_payment;
+  const hasNoPaymentGateway = !isDemoMode && !currentTenant?.enable_online_payment;
   const autoSuspendDays = currentTenant?.auto_suspend_days;
 
   if (isLoading) {
@@ -208,7 +215,7 @@ export default function Dashboard() {
         />
         <MetricCard
           title="Bills Generated"
-          value={monthlyBills.length.toString()}
+          value={monthlyBillsCount.toString()}
           icon={FileText}
           variant="default"
           className="py-4"

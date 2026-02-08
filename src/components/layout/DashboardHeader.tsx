@@ -1,4 +1,4 @@
-import { Bell, Search, LogOut, User, Settings, HelpCircle, ChevronDown } from "lucide-react";
+import { Bell, Search, LogOut, User, Settings, HelpCircle, ChevronDown, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { TenantSwitcher } from "./TenantSwitcher";
+import { DemoModeToggle } from "@/components/demo/DemoModeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -92,6 +93,8 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
       {/* Right side actions */}
       <div className="flex flex-1 items-center justify-end gap-2">
+        {/* Demo Mode Toggle */}
+        <DemoModeToggle />
         {/* Mobile search button */}
         <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
           <Search className="h-4 w-4" />
