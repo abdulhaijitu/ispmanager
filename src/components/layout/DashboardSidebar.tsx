@@ -39,6 +39,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useResellerImpersonation } from "@/contexts/ResellerImpersonationContext";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useISPBranding } from "@/hooks/useBranding";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
@@ -100,6 +101,7 @@ export function DashboardSidebar() {
   const { user, signOut } = useAuth();
   const { data: role, isLoading: roleLoading } = useUserRole();
   const { isImpersonatingReseller } = useResellerImpersonation();
+  const { branding } = useISPBranding();
 
   const handleLogout = async () => {
     await signOut();
@@ -212,13 +214,21 @@ export function DashboardSidebar() {
           "flex items-center gap-3 transition-all duration-200",
           collapsed && "justify-center"
         )}>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sidebar-primary to-sidebar-primary/80 shadow-md">
-            <Building2 className="h-5 w-5 text-sidebar-primary-foreground" />
-          </div>
+          {branding.logoUrl ? (
+            <img
+              src={branding.logoUrl}
+              alt={branding.brandName}
+              className="h-10 w-10 shrink-0 rounded-xl object-contain shadow-md"
+            />
+          ) : (
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sidebar-primary to-sidebar-primary/80 shadow-md">
+              <Building2 className="h-5 w-5 text-sidebar-primary-foreground" />
+            </div>
+          )}
           {!collapsed && (
             <div className="flex flex-col animate-fade-in">
               <span className="text-sm font-bold tracking-tight text-sidebar-foreground">
-                NetPulse
+                {branding.brandName}
               </span>
               <span className="text-[11px] text-sidebar-foreground/50">
                 ISP Management
