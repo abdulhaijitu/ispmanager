@@ -6,6 +6,7 @@ import { MobileBottomNav } from "./MobileBottomNav";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useTenantContext } from "@/contexts/TenantContext";
 import { useResellerImpersonation } from "@/contexts/ResellerImpersonationContext";
+import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, X, UserCheck } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -33,6 +34,9 @@ export function DashboardLayout() {
         <DashboardSidebar />
         
         <div className="flex flex-1 flex-col min-w-0">
+          {/* Demo Mode Banner */}
+          <DemoModeBanner />
+
           {/* Tenant Impersonation Banner */}
           {isImpersonating && !isImpersonatingReseller && (
             <div className="bg-warning/15 text-warning-foreground px-4 py-2.5 flex items-center justify-between border-b border-warning/20 animate-fade-in">

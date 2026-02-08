@@ -14,6 +14,7 @@ import { SuperAdminRoute } from "@/components/SuperAdminRoute";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TenantProvider } from "@/contexts/TenantContext";
 import { ResellerImpersonationProvider } from "@/contexts/ResellerImpersonationContext";
+import { DemoModeProvider } from "@/contexts/DemoModeContext";
 
 // Dashboard Pages
 import Dashboard from "@/pages/Dashboard";
@@ -83,6 +84,7 @@ const App = () => (
     <AuthProvider>
       <TenantProvider>
         <ResellerImpersonationProvider>
+        <DemoModeProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -201,6 +203,7 @@ const App = () => (
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
+        </DemoModeProvider>
         </ResellerImpersonationProvider>
       </TenantProvider>
     </AuthProvider>
