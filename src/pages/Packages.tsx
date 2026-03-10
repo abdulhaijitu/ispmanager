@@ -51,13 +51,35 @@ export default function Packages() {
   const { currentTenant } = useTenantContext();
   const { data: packages = [], isLoading } = usePackages(currentTenant?.id);
   const { data: customers = [] } = useCustomers(currentTenant?.id);
+  const { data: hasMikrotik = false } = useHasMikrotikIntegration(currentTenant?.id);
+  const packageSync = usePackageSync();
   const createPackage = useCreatePackage();
   const updatePackage = useUpdatePackage();
   const deletePackage = useDeletePackage();
 
+  // Get the first active mikrotik integration id for sync
+  const { data: mikrotikIntegration } = useQuery({
+    queryKey: ["mikrotik-integration-id", currentTenant?.id],
+    queryFn: async () => {
+      if (!currentTenant?.id) return null;
+      const { data } = await supabase
+        .from("network_integrations")
+        .select("id")
+        .eq("tenant_id", currentTenant.id)
+        .eq("provider_type", "mikrotik")
+        .eq("is_enabled", true)
+        .limit(1)
+        .single();
+      return data;
+    },
+    enabled: !!currentTenant?.id && hasMikrotik,
+  });
+
   const [viewMode, setViewMode] = useState<ViewMode>("cards");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingPackage, setDeletingPackage] = useState<Package | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingPackage, setDeletingPackage] = useState<Package | null>(null);
 
