@@ -80,8 +80,6 @@ export default function Packages() {
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingPackage, setDeletingPackage] = useState<Package | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deletingPackage, setDeletingPackage] = useState<Package | null>(null);
 
   const activePackages = packages.filter((p) => p.is_active);
   const inactivePackages = packages.filter((p) => !p.is_active);
