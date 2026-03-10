@@ -12,6 +12,7 @@ import {
   Network,
   UserPlus,
   Wallet,
+  Server,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
