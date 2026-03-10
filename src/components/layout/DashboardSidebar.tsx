@@ -12,6 +12,7 @@ import {
   Network,
   UserPlus,
   Wallet,
+  Server,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ const mainNavItems: NavItem[] = [
 const systemNavItems: NavItem[] = [
   { title: "Resellers", href: "/dashboard/resellers", icon: UserPlus, roles: ["super_admin", "isp_owner", "admin", "manager"] },
   { title: "Network", href: "/dashboard/network", icon: Network, roles: ["super_admin", "isp_owner", "admin"] },
+  { title: "OLT Devices", href: "/dashboard/olt", icon: Server, roles: ["super_admin", "isp_owner", "admin"] },
   { title: "Notifications", href: "/dashboard/notifications", icon: Bell, roles: ["super_admin", "isp_owner", "admin", "manager", "staff", "accountant", "marketing"] },
   { title: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["super_admin", "isp_owner", "admin"] },
 ];

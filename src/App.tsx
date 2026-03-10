@@ -26,6 +26,7 @@ import Payments from "@/pages/Payments";
 import Settings from "@/pages/Settings";
 import Reports from "@/pages/Reports";
 import NetworkPage from "@/pages/NetworkPage";
+import OltDevicesPage from "@/pages/OltDevicesPage";
 import Notifications from "@/pages/Notifications";
 import Resellers from "@/pages/Resellers";
 import ResellerDetail from "@/pages/ResellerDetail";
@@ -116,6 +117,7 @@ const App = () => (
                 <Route path="/dashboard/payments" element={<Payments />} />
                 <Route path="/dashboard/reports" element={<Reports />} />
                 <Route path="/dashboard/network" element={<NetworkPage />} />
+                <Route path="/dashboard/olt" element={<OltDevicesPage />} />
                 <Route path="/dashboard/notifications" element={<Notifications />} />
                 <Route path="/dashboard/resellers" element={<Resellers />} />
                 <Route path="/dashboard/resellers/:resellerId" element={<ResellerDetail />} />
