@@ -88,7 +88,7 @@ export function useUnassignCustomer() {
       toast.success("Customer removed from reseller");
     },
     onError: (error: any) => {
-      toast.error(error.message || "গ্রাহক সরাতে ত্রুটি");
+      toast.error(error.message || "Failed to remove customer");
     },
   });
 }
