@@ -133,7 +133,28 @@ export default function NetworkPage() {
             </Button>
           </div>
         ) : (
-...
+          <div className="grid gap-4 lg:grid-cols-2">
+            {integrations?.map((integration) => (
+              <IntegrationCard key={integration.id} integration={integration} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Tabs for Queue & Logs */}
+      <Tabs defaultValue="logs">
+        <TabsList>
+          <TabsTrigger value="logs">Sync Logs</TabsTrigger>
+          <TabsTrigger value="queue">
+            Sync Queue
+            {pendingQueue > 0 && (
+              <span className="ml-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500/20 px-1.5 text-[10px] font-semibold text-amber-600">
+                {pendingQueue}
+              </span>
+            )}
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="logs" className="mt-4">
           <SyncLogTable
             logs={syncLogs || []}
             isLoading={logsLoading}
