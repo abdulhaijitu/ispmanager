@@ -112,8 +112,12 @@ export function useCustomerOnu(customerId?: string) {
         .select("*, customers(name, phone, connection_status), olt_ports(slot, port, port_label, olt_devices:olt_device_id(name))")
         .eq("tenant_id", currentTenant.id);
       if (customerId) {
-        query = query.eq("customer_id", customerId).maybeSingle();
-        const { data, error } = await query;
+        const { data, error } = await supabase
+          .from("customer_onu")
+          .select("*, customers(name, phone, connection_status), olt_ports(slot, port, port_label, olt_devices:olt_device_id(name))")
+          .eq("tenant_id", currentTenant.id)
+          .eq("customer_id", customerId)
+          .maybeSingle();
         if (error) throw error;
         return data as CustomerOnu | null;
       }
