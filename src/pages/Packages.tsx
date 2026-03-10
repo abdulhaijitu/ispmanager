@@ -119,6 +119,10 @@ export default function Packages() {
     monthly_price: number;
     validity_days: number;
     is_active: boolean;
+    mikrotik_profile_name: string | null;
+    mikrotik_rate_limit: string | null;
+    mikrotik_address_pool: string | null;
+    mikrotik_queue_type: string | null;
   }) => {
     try {
       if (editingPackage) {
@@ -143,6 +147,21 @@ export default function Packages() {
       toast.error("Something went wrong");
       console.error(error);
     }
+  };
+
+  const handleSyncPackage = async (pkg: Package) => {
+    if (!mikrotikIntegration?.id) {
+      toast.error("No active MikroTik integration found");
+      return;
+    }
+    if (!pkg.mikrotik_profile_name) {
+      toast.error("এই প্যাকেজে MikroTik profile কনফিগার করা নেই");
+      return;
+    }
+    packageSync.mutate({
+      integrationId: mikrotikIntegration.id,
+      packageId: pkg.id,
+    });
   };
 
   const handleToggleActive = async (pkg: Package) => {
