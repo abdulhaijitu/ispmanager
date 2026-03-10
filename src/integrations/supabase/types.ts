@@ -596,6 +596,10 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean | null
+          mikrotik_address_pool: string | null
+          mikrotik_profile_name: string | null
+          mikrotik_queue_type: string | null
+          mikrotik_rate_limit: string | null
           monthly_price: number
           name: string
           speed_label: string
@@ -607,6 +611,10 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean | null
+          mikrotik_address_pool?: string | null
+          mikrotik_profile_name?: string | null
+          mikrotik_queue_type?: string | null
+          mikrotik_rate_limit?: string | null
           monthly_price: number
           name: string
           speed_label: string
@@ -618,6 +626,10 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean | null
+          mikrotik_address_pool?: string | null
+          mikrotik_profile_name?: string | null
+          mikrotik_queue_type?: string | null
+          mikrotik_rate_limit?: string | null
           monthly_price?: number
           name?: string
           speed_label?: string

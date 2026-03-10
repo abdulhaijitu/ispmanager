@@ -2,7 +2,7 @@ import { useState } from "react";
 import { 
   Plus, Edit, Trash2, MoreHorizontal, Zap, Loader2, 
   LayoutGrid, List, Users, TrendingUp, Package as PackageIcon,
-  ToggleLeft, ToggleRight, Eye
+  ToggleLeft, ToggleRight, Eye, RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +39,10 @@ import { useTenantContext } from "@/contexts/TenantContext";
 import { useCustomers } from "@/hooks/useCustomers";
 import { PackageFormDialog } from "@/components/packages/PackageFormDialog";
 import { DeletePackageDialog } from "@/components/packages/DeletePackageDialog";
+import { useHasMikrotikIntegration } from "@/hooks/useNetworkIntegrations";
+import { usePackageSync } from "@/hooks/usePackageSync";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 type ViewMode = "cards" | "table";
@@ -47,9 +51,29 @@ export default function Packages() {
   const { currentTenant } = useTenantContext();
   const { data: packages = [], isLoading } = usePackages(currentTenant?.id);
   const { data: customers = [] } = useCustomers(currentTenant?.id);
+  const { data: hasMikrotik = false } = useHasMikrotikIntegration(currentTenant?.id);
+  const packageSync = usePackageSync();
   const createPackage = useCreatePackage();
   const updatePackage = useUpdatePackage();
   const deletePackage = useDeletePackage();
+
+  // Get the first active mikrotik integration id for sync
+  const { data: mikrotikIntegration } = useQuery({
+    queryKey: ["mikrotik-integration-id", currentTenant?.id],
+    queryFn: async () => {
+      if (!currentTenant?.id) return null;
+      const { data } = await supabase
+        .from("network_integrations")
+        .select("id")
+        .eq("tenant_id", currentTenant.id)
+        .eq("provider_type", "mikrotik")
+        .eq("is_enabled", true)
+        .limit(1)
+        .single();
+      return data;
+    },
+    enabled: !!currentTenant?.id && hasMikrotik,
+  });
 
   const [viewMode, setViewMode] = useState<ViewMode>("cards");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -95,6 +119,10 @@ export default function Packages() {
     monthly_price: number;
     validity_days: number;
     is_active: boolean;
+    mikrotik_profile_name: string | null;
+    mikrotik_rate_limit: string | null;
+    mikrotik_address_pool: string | null;
+    mikrotik_queue_type: string | null;
   }) => {
     try {
       if (editingPackage) {
@@ -119,6 +147,21 @@ export default function Packages() {
       toast.error("Something went wrong");
       console.error(error);
     }
+  };
+
+  const handleSyncPackage = async (pkg: Package) => {
+    if (!mikrotikIntegration?.id) {
+      toast.error("No active MikroTik integration found");
+      return;
+    }
+    if (!pkg.mikrotik_profile_name) {
+      toast.error("এই প্যাকেজে MikroTik profile কনফিগার করা নেই");
+      return;
+    }
+    packageSync.mutate({
+      integrationId: mikrotikIntegration.id,
+      packageId: pkg.id,
+    });
   };
 
   const handleToggleActive = async (pkg: Package) => {
@@ -360,6 +403,12 @@ export default function Packages() {
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit
                               </DropdownMenuItem>
+                              {hasMikrotik && pkg.mikrotik_profile_name && (
+                                <DropdownMenuItem onClick={() => handleSyncPackage(pkg)}>
+                                  <RefreshCw className={cn("mr-2 h-4 w-4", packageSync.isPending && "animate-spin")} />
+                                  Sync to MikroTik
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuItem onClick={() => handleToggleActive(pkg)}>
                                 <ToggleLeft className="mr-2 h-4 w-4" />
                                 Deactivate
@@ -563,6 +612,12 @@ export default function Packages() {
                               <Edit className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
+                            {hasMikrotik && pkg.mikrotik_profile_name && (
+                              <DropdownMenuItem onClick={() => handleSyncPackage(pkg)}>
+                                <RefreshCw className={cn("mr-2 h-4 w-4", packageSync.isPending && "animate-spin")} />
+                                Sync to MikroTik
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem onClick={() => handleToggleActive(pkg)}>
                               {pkg.is_active ? (
                                 <>
@@ -602,6 +657,7 @@ export default function Packages() {
         package={editingPackage}
         onSubmit={handleSubmit}
         isLoading={createPackage.isPending || updatePackage.isPending}
+        hasMikrotikIntegration={hasMikrotik}
       />
 
       <DeletePackageDialog
