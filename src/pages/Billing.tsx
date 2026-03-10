@@ -290,7 +290,7 @@ export default function Billing() {
               </div>
               <div className="rounded-lg bg-muted p-3">
                 <p className="text-sm text-muted-foreground">
-                  সক্রিয় গ্রাহকদের জন্য তাদের প্যাকেজ মূল্যের উপর ভিত্তি করে ইনভয়েস তৈরি হবে।
+                  Invoices will be generated for active customers based on their package price.
                 </p>
               </div>
             </div>
