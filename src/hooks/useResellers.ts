@@ -180,7 +180,7 @@ export function useToggleResellerStatus() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["resellers"] });
-      toast.success("স্ট্যাটাস পরিবর্তন হয়েছে");
+      toast.success("Status updated");
     },
   });
 }
