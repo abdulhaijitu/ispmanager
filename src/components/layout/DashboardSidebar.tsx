@@ -178,7 +178,7 @@ export function DashboardSidebar() {
             ) : (
               <span className="text-[11px] font-semibold text-sidebar-primary-foreground">{initials}</span>
             )}
-            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-sidebar bg-green-500" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-sidebar bg-success" />
           </div>
           <motion.div
             animate={{ display: open ? "flex" : "none", opacity: open ? 1 : 0 }}
