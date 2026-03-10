@@ -62,7 +62,7 @@ export function useAssignCustomers() {
       queryClient.invalidateQueries({ queryKey: ["resellerCustomers"] });
       queryClient.invalidateQueries({ queryKey: ["assignableCustomers"] });
       queryClient.invalidateQueries({ queryKey: ["resellers"] });
-      toast.success("গ্রাহক সফলভাবে অ্যাসাইন হয়েছে");
+      toast.success("Customers assigned successfully");
     },
     onError: (error: any) => {
       toast.error(error.message || "গ্রাহক অ্যাসাইনে ত্রুটি");
