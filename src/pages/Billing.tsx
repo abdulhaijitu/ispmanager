@@ -164,7 +164,7 @@ export default function Billing() {
       setIsGenerateDialogOpen(false);
     } catch (error: any) {
       toast({
-        title: "বিল তৈরি করতে ব্যর্থ",
+        title: "Failed to generate bills",
         description: error.message,
         variant: "destructive",
       });
