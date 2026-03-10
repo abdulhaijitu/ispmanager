@@ -17,9 +17,9 @@ interface CollectionReportProps {
 }
 
 const METHOD_LABELS: Record<string, string> = {
-  cash: "নগদ",
-  online: "অনলাইন",
-  bank_transfer: "ব্যাংক ট্রান্সফার",
+  cash: "Cash",
+  online: "Online",
+  bank_transfer: "Bank Transfer",
 };
 
 const METHOD_COLORS = ["hsl(var(--primary))", "#10b981", "#f59e0b"];
@@ -48,8 +48,8 @@ export function CollectionReport({ payments }: CollectionReportProps) {
             <Wallet className="h-5 w-5 text-blue-600" />
           </div>
           <div>
-            <CardTitle className="text-base">আদায় পদ্ধতি</CardTitle>
-            <CardDescription>পেমেন্ট মেথড অনুযায়ী আদায়</CardDescription>
+            <CardTitle className="text-base">Collection Method</CardTitle>
+            <CardDescription>Collection by payment method</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -66,7 +66,7 @@ export function CollectionReport({ payments }: CollectionReportProps) {
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "8px",
                 }}
-                formatter={(value: number) => [`৳${value.toLocaleString()}`, "আদায়"]}
+                formatter={(value: number) => [`৳${value.toLocaleString()}`, "Collected"]}
               />
               <Bar dataKey="amount" radius={[6, 6, 0, 0]}>
                 {data.map((_, index) => (
@@ -76,7 +76,6 @@ export function CollectionReport({ payments }: CollectionReportProps) {
             </BarChart>
           </ResponsiveContainer>
         </div>
-        {/* Summary */}
         <div className="grid grid-cols-3 gap-3 mt-4">
           {data.map((d, i) => (
             <div key={d.method} className="rounded-lg bg-muted/50 p-3 text-center">

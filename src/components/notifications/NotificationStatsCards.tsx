@@ -16,28 +16,28 @@ interface StatsProps {
 export function NotificationStatsCards({ stats, isLoading }: StatsProps) {
   const cards = [
     {
-      label: "মোট নোটিফিকেশন",
+      label: "Total Notifications",
       value: stats?.total ?? 0,
       icon: Bell,
       color: "text-primary",
       bg: "bg-primary/10",
     },
     {
-      label: "সফলভাবে পাঠানো",
+      label: "Successfully Sent",
       value: stats?.sent ?? 0,
       icon: CheckCircle,
       color: "text-success",
       bg: "bg-success/10",
     },
     {
-      label: "ব্যর্থ",
+      label: "Failed",
       value: stats?.failed ?? 0,
       icon: XCircle,
       color: "text-destructive",
       bg: "bg-destructive/10",
     },
     {
-      label: "সাফল্যের হার",
+      label: "Success Rate",
       value: `${stats?.successRate ?? 0}%`,
       icon: TrendingUp,
       color: "text-accent-foreground",

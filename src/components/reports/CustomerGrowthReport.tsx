@@ -11,7 +11,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
-import { bn } from "date-fns/locale";
 
 interface CustomerGrowthReportProps {
   customers: any[];
@@ -22,7 +21,6 @@ export function CustomerGrowthReport({ customers }: CustomerGrowthReportProps) {
     const months: { label: string; newCustomers: number; cumulative: number }[] = [];
     let cumulative = 0;
 
-    // Count customers before the 6-month window
     const sixMonthsAgo = startOfMonth(subMonths(new Date(), 5));
     cumulative = (customers || []).filter((c) => {
       const d = parseISO(c.join_date);
@@ -33,7 +31,7 @@ export function CustomerGrowthReport({ customers }: CustomerGrowthReportProps) {
       const date = subMonths(new Date(), i);
       const start = startOfMonth(date);
       const end = endOfMonth(date);
-      const label = format(date, "MMM yy", { locale: bn });
+      const label = format(date, "MMM yy");
 
       const newCustomers = (customers || []).filter((c) => {
         const d = parseISO(c.join_date);
@@ -58,13 +56,13 @@ export function CustomerGrowthReport({ customers }: CustomerGrowthReportProps) {
               <Users className="h-5 w-5 text-violet-600" />
             </div>
             <div>
-              <CardTitle className="text-base">কাস্টমার গ্রোথ</CardTitle>
-              <CardDescription>গত ৬ মাসের কাস্টমার বৃদ্ধি</CardDescription>
+              <CardTitle className="text-base">Customer Growth</CardTitle>
+              <CardDescription>Last 6 months customer growth</CardDescription>
             </div>
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold">{totalCustomers}</p>
-            <p className="text-xs text-muted-foreground">সক্রিয়: {activeCustomers}</p>
+            <p className="text-xs text-muted-foreground">Active: {activeCustomers}</p>
           </div>
         </div>
       </CardHeader>
@@ -83,7 +81,7 @@ export function CustomerGrowthReport({ customers }: CustomerGrowthReportProps) {
                 }}
                 formatter={(value: number, name: string) => [
                   value,
-                  name === "cumulative" ? "মোট" : "নতুন",
+                  name === "cumulative" ? "Total" : "New",
                 ]}
               />
               <Line type="monotone" dataKey="cumulative" name="cumulative" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ r: 4, fill: "hsl(var(--primary))" }} />

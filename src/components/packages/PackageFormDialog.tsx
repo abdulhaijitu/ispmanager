@@ -74,41 +74,41 @@ export function PackageFormDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
-              {pkg ? "প্যাকেজ সম্পাদনা" : "নতুন প্যাকেজ তৈরি"}
+              {pkg ? "Edit Package" : "Create New Package"}
             </DialogTitle>
             <DialogDescription>
               {pkg
-                ? "প্যাকেজের তথ্য আপডেট করুন"
-                : "নতুন ইন্টারনেট প্যাকেজ যোগ করুন"}
+                ? "Update the package details"
+                : "Add a new internet service package"}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">প্যাকেজের নাম</Label>
+              <Label htmlFor="name">Package Name</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="যেমন: Basic, Pro, Premium"
+                placeholder="e.g. Basic, Pro, Premium"
                 required
               />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="speed">স্পিড</Label>
+              <Label htmlFor="speed">Speed</Label>
               <Input
                 id="speed"
                 value={speedLabel}
                 onChange={(e) => setSpeedLabel(e.target.value)}
-                placeholder="যেমন: 20 Mbps"
+                placeholder="e.g. 20 Mbps"
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="price">মাসিক মূল্য (৳)</Label>
+                <Label htmlFor="price">Monthly Price (৳)</Label>
                 <Input
                   id="price"
                   type="number"
@@ -121,7 +121,7 @@ export function PackageFormDialog({
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="validity">মেয়াদ (দিন)</Label>
+                <Label htmlFor="validity">Validity (Days)</Label>
                 <Input
                   id="validity"
                   type="number"
@@ -135,7 +135,7 @@ export function PackageFormDialog({
             </div>
 
             <div className="flex items-center justify-between">
-              <Label htmlFor="active">সক্রিয় প্যাকেজ</Label>
+              <Label htmlFor="active">Active Package</Label>
               <Switch
                 id="active"
                 checked={isActive}
@@ -150,11 +150,11 @@ export function PackageFormDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              বাতিল
+              Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {pkg ? "আপডেট করুন" : "তৈরি করুন"}
+              {pkg ? "Update" : "Create"}
             </Button>
           </DialogFooter>
         </form>

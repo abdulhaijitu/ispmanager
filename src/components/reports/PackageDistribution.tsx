@@ -31,7 +31,7 @@ export function PackageDistribution({ customers, packages }: PackageDistribution
       .map(([pkgId, count]) => {
         const pkg = (packages || []).find((p) => p.id === pkgId);
         return {
-          name: pkg ? pkg.name : "অনির্ধারিত",
+          name: pkg ? pkg.name : "Unassigned",
           value: count,
           speed: pkg?.speed_label || "",
         };
@@ -49,8 +49,8 @@ export function PackageDistribution({ customers, packages }: PackageDistribution
             <Package className="h-5 w-5 text-amber-600" />
           </div>
           <div>
-            <CardTitle className="text-base">প্যাকেজ বিতরণ</CardTitle>
-            <CardDescription>কাস্টমার ভিত্তিক প্যাকেজ ব্যবহার</CardDescription>
+            <CardTitle className="text-base">Package Distribution</CardTitle>
+            <CardDescription>Customer distribution by package</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -79,7 +79,7 @@ export function PackageDistribution({ customers, packages }: PackageDistribution
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "8px",
                   }}
-                  formatter={(value: number, name: string) => [`${value} জন`, name]}
+                  formatter={(value: number, name: string) => [`${value} customers`, name]}
                 />
               </PieChart>
             </ResponsiveContainer>

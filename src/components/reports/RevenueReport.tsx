@@ -11,7 +11,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
 import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
-import { bn } from "date-fns/locale";
 
 interface RevenueReportProps {
   payments: any[];
@@ -26,7 +25,7 @@ export function RevenueReport({ payments, bills }: RevenueReportProps) {
       const start = startOfMonth(date);
       const end = endOfMonth(date);
       const monthKey = format(date, "yyyy-MM");
-      const label = format(date, "MMM yy", { locale: bn });
+      const label = format(date, "MMM yy");
 
       const collected = (payments || [])
         .filter((p) => {
@@ -60,13 +59,13 @@ export function RevenueReport({ payments, bills }: RevenueReportProps) {
               <TrendingUp className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
-              <CardTitle className="text-base">রাজস্ব রিপোর্ট</CardTitle>
-              <CardDescription>গত ৬ মাসের বিল ও আদায়</CardDescription>
+              <CardTitle className="text-base">Revenue Report</CardTitle>
+              <CardDescription>Last 6 months billing & collection</CardDescription>
             </div>
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold">৳{totalCollected.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">আদায় হার: {collectionRate}%</p>
+            <p className="text-xs text-muted-foreground">Collection Rate: {collectionRate}%</p>
           </div>
         </div>
       </CardHeader>
@@ -95,7 +94,7 @@ export function RevenueReport({ payments, bills }: RevenueReportProps) {
                 }}
                 formatter={(value: number, name: string) => [
                   `৳${value.toLocaleString()}`,
-                  name === "billed" ? "বিল" : "আদায়",
+                  name === "billed" ? "Billed" : "Collected",
                 ]}
               />
               <Area type="monotone" dataKey="billed" name="billed" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorBilled)" strokeWidth={2} />
@@ -106,11 +105,11 @@ export function RevenueReport({ payments, bills }: RevenueReportProps) {
         <div className="flex items-center justify-center gap-6 mt-3">
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-primary" />
-            <span className="text-xs text-muted-foreground">বিল</span>
+            <span className="text-xs text-muted-foreground">Billed</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-emerald-500" />
-            <span className="text-xs text-muted-foreground">আদায়</span>
+            <span className="text-xs text-muted-foreground">Collected</span>
           </div>
         </div>
       </CardContent>
