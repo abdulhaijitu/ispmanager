@@ -138,7 +138,7 @@ export function useCreateReseller() {
       toast.success("Reseller created successfully");
     },
     onError: (error: any) => {
-      toast.error(error.message || "রিসেলার তৈরিতে ত্রুটি");
+      toast.error(error.message || "Failed to create reseller");
     },
   });
 }
