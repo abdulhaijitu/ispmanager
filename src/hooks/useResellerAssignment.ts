@@ -85,7 +85,7 @@ export function useUnassignCustomer() {
       queryClient.invalidateQueries({ queryKey: ["resellerCustomers"] });
       queryClient.invalidateQueries({ queryKey: ["assignableCustomers"] });
       queryClient.invalidateQueries({ queryKey: ["resellers"] });
-      toast.success("গ্রাহক রিসেলার থেকে সরানো হয়েছে");
+      toast.success("Customer removed from reseller");
     },
     onError: (error: any) => {
       toast.error(error.message || "গ্রাহক সরাতে ত্রুটি");
