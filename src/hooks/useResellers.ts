@@ -162,7 +162,7 @@ export function useUpdateReseller() {
       toast.success("Reseller updated");
     },
     onError: (error: any) => {
-      toast.error(error.message || "আপডেটে ত্রুটি");
+      toast.error(error.message || "Update failed");
     },
   });
 }
