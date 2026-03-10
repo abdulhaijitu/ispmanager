@@ -91,7 +91,7 @@ export default function OltDevicesPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
                     {device.is_enabled ? (
-                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <CheckCircle className="h-4 w-4 text-primary" />
                     ) : (
                       <XCircle className="h-4 w-4 text-muted-foreground" />
                     )}
