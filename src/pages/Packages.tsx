@@ -2,7 +2,7 @@ import { useState } from "react";
 import { 
   Plus, Edit, Trash2, MoreHorizontal, Zap, Loader2, 
   LayoutGrid, List, Users, TrendingUp, Package as PackageIcon,
-  ToggleLeft, ToggleRight, Eye
+  ToggleLeft, ToggleRight, Eye, RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
