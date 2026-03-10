@@ -612,6 +612,12 @@ export default function Packages() {
                               <Edit className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
+                            {hasMikrotik && pkg.mikrotik_profile_name && (
+                              <DropdownMenuItem onClick={() => handleSyncPackage(pkg)}>
+                                <RefreshCw className={cn("mr-2 h-4 w-4", packageSync.isPending && "animate-spin")} />
+                                Sync to MikroTik
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem onClick={() => handleToggleActive(pkg)}>
                               {pkg.is_active ? (
                                 <>
