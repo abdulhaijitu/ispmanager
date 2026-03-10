@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { Bell, Search, LogOut, User, Settings, HelpCircle, ChevronDown, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
