@@ -34,25 +34,25 @@ export function DeletePackageDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {hasCustomers ? "প্যাকেজ ডিলিট করা যাচ্ছে না" : "প্যাকেজ ডিলিট করুন"}
+            {hasCustomers ? "Cannot Delete Package" : "Delete Package"}
           </AlertDialogTitle>
           <AlertDialogDescription>
             {hasCustomers ? (
               <>
-                <strong>"{packageName}"</strong> প্যাকেজে বর্তমানে{" "}
-                <strong>{customerCount}</strong> জন গ্রাহক আছে। ডিলিট করতে হলে
-                প্রথমে গ্রাহকদের অন্য প্যাকেজে সরান।
+                The package <strong>"{packageName}"</strong> currently has{" "}
+                <strong>{customerCount}</strong> customer(s). Please move the
+                customers to another package before deleting.
               </>
             ) : (
               <>
-                আপনি কি নিশ্চিত যে <strong>"{packageName}"</strong> প্যাকেজটি
-                ডিলিট করতে চান? এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।
+                Are you sure you want to delete the package{" "}
+                <strong>"{packageName}"</strong>? This action cannot be undone.
               </>
             )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>বাতিল</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           {!hasCustomers && (
             <AlertDialogAction
               onClick={onConfirm}
@@ -60,7 +60,7 @@ export function DeletePackageDialog({
               disabled={isLoading}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              ডিলিট করুন
+              Delete
             </AlertDialogAction>
           )}
         </AlertDialogFooter>

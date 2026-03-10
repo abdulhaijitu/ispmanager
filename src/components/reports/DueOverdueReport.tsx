@@ -18,7 +18,6 @@ export function DueOverdueReport({ customers, bills }: DueOverdueReportProps) {
     const paidBills = (bills || []).filter((b) => b.status === "paid");
     const totalBills = bills?.length || 0;
 
-    // Top due customers
     const topDue = [...customersWithDue]
       .sort((a, b) => Number(b.due_balance) - Number(a.due_balance))
       .slice(0, 5);
@@ -45,43 +44,40 @@ export function DueOverdueReport({ customers, bills }: DueOverdueReportProps) {
             <AlertTriangle className="h-5 w-5 text-destructive" />
           </div>
           <div>
-            <CardTitle className="text-base">বকেয়া রিপোর্ট</CardTitle>
-            <CardDescription>বকেয়া ও ওভারডিউ বিলের সারসংক্ষেপ</CardDescription>
+            <CardTitle className="text-base">Due & Overdue Report</CardTitle>
+            <CardDescription>Summary of due and overdue bills</CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Summary Stats */}
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-lg bg-destructive/5 border border-destructive/10 p-3">
-            <p className="text-xs text-muted-foreground">মোট বকেয়া</p>
+            <p className="text-xs text-muted-foreground">Total Due</p>
             <p className="text-xl font-bold text-destructive">৳{stats.totalDue.toLocaleString()}</p>
-            <p className="text-[10px] text-muted-foreground">{stats.customersWithDueCount} জন কাস্টমার</p>
+            <p className="text-[10px] text-muted-foreground">{stats.customersWithDueCount} customers</p>
           </div>
           <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/10 p-3">
-            <p className="text-xs text-muted-foreground">মোট অগ্রিম</p>
+            <p className="text-xs text-muted-foreground">Total Advance</p>
             <p className="text-xl font-bold text-emerald-600">৳{stats.totalAdvance.toLocaleString()}</p>
           </div>
         </div>
 
-        {/* Bill Status */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">বিল আদায় হার</span>
+            <span className="text-muted-foreground">Collection Rate</span>
             <span className="font-medium">{paidPercent}%</span>
           </div>
           <Progress value={paidPercent} className="h-2" />
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>পেইড: {stats.paidBillsCount}</span>
-            <span>ডিউ: {stats.dueBillsCount}</span>
-            <span>ওভারডিউ: {stats.overdueBillsCount}</span>
+            <span>Paid: {stats.paidBillsCount}</span>
+            <span>Due: {stats.dueBillsCount}</span>
+            <span>Overdue: {stats.overdueBillsCount}</span>
           </div>
         </div>
 
-        {/* Top Due Customers */}
         {stats.topDue.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-muted-foreground mb-2">শীর্ষ বকেয়াদার</p>
+            <p className="text-xs font-medium text-muted-foreground mb-2">Top Defaulters</p>
             <div className="space-y-1.5">
               {stats.topDue.map((c) => (
                 <div key={c.id} className="flex items-center justify-between rounded-md bg-muted/50 px-3 py-2">

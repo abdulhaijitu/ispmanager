@@ -30,7 +30,7 @@ export function NotificationFilters({
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="নোটিফিকেশন খুঁজুন..."
+          placeholder="Search notifications..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-9"
@@ -38,25 +38,25 @@ export function NotificationFilters({
       </div>
       <Select value={type} onValueChange={onTypeChange}>
         <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue placeholder="ধরন ফিল্টার" />
+          <SelectValue placeholder="Filter by type" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">সব ধরন</SelectItem>
-          <SelectItem value="billing_reminder">বিলিং রিমাইন্ডার</SelectItem>
-          <SelectItem value="payment_confirmation">পেমেন্ট নিশ্চিতকরণ</SelectItem>
-          <SelectItem value="connection_status">কানেকশন স্ট্যাটাস</SelectItem>
-          <SelectItem value="general">সাধারণ</SelectItem>
+          <SelectItem value="all">All Types</SelectItem>
+          <SelectItem value="billing_reminder">Billing Reminder</SelectItem>
+          <SelectItem value="payment_confirmation">Payment Confirmation</SelectItem>
+          <SelectItem value="connection_status">Connection Status</SelectItem>
+          <SelectItem value="general">General</SelectItem>
         </SelectContent>
       </Select>
       <Select value={status} onValueChange={onStatusChange}>
         <SelectTrigger className="w-full sm:w-[160px]">
-          <SelectValue placeholder="স্ট্যাটাস ফিল্টার" />
+          <SelectValue placeholder="Filter by status" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">সব স্ট্যাটাস</SelectItem>
-          <SelectItem value="sent">পাঠানো হয়েছে</SelectItem>
-          <SelectItem value="failed">ব্যর্থ</SelectItem>
-          <SelectItem value="pending">অপেক্ষমাণ</SelectItem>
+          <SelectItem value="all">All Statuses</SelectItem>
+          <SelectItem value="sent">Sent</SelectItem>
+          <SelectItem value="failed">Failed</SelectItem>
+          <SelectItem value="pending">Pending</SelectItem>
         </SelectContent>
       </Select>
     </div>

@@ -60,7 +60,6 @@ export default function Packages() {
   const activePackages = packages.filter((p) => p.is_active);
   const inactivePackages = packages.filter((p) => !p.is_active);
 
-  // Count customers per package
   const getCustomerCount = (packageId: string) => {
     return customers.filter((c) => c.package_id === packageId).length;
   };
@@ -74,7 +73,6 @@ export default function Packages() {
     ? Math.round(totalMonthlyRevenue / totalSubscriptions)
     : 0;
 
-  // Find most popular package
   const mostPopularPackageId = activePackages.length > 0
     ? activePackages.reduce((a, b) => 
         getCustomerCount(a.id) > getCustomerCount(b.id) ? a : b
@@ -104,21 +102,21 @@ export default function Packages() {
           id: editingPackage.id,
           updates: data,
         });
-        toast.success("প্যাকেজ আপডেট হয়েছে");
+        toast.success("Package updated successfully");
       } else {
         if (!currentTenant?.id) {
-          toast.error("টেন্যান্ট পাওয়া যায়নি");
+          toast.error("Tenant not found");
           return;
         }
         await createPackage.mutateAsync({
           ...data,
           tenant_id: currentTenant.id,
         });
-        toast.success("নতুন প্যাকেজ তৈরি হয়েছে");
+        toast.success("New package created successfully");
       }
       setDialogOpen(false);
     } catch (error) {
-      toast.error("কিছু একটা সমস্যা হয়েছে");
+      toast.error("Something went wrong");
       console.error(error);
     }
   };
@@ -129,9 +127,9 @@ export default function Packages() {
         id: pkg.id,
         updates: { is_active: !pkg.is_active },
       });
-      toast.success(pkg.is_active ? "প্যাকেজ নিষ্ক্রিয় করা হয়েছে" : "প্যাকেজ সক্রিয় করা হয়েছে");
+      toast.success(pkg.is_active ? "Package deactivated" : "Package activated");
     } catch (error) {
-      toast.error("কিছু একটা সমস্যা হয়েছে");
+      toast.error("Something went wrong");
       console.error(error);
     }
   };
@@ -145,11 +143,11 @@ export default function Packages() {
     if (!deletingPackage) return;
     try {
       await deletePackage.mutateAsync(deletingPackage.id);
-      toast.success("প্যাকেজ ডিলিট হয়েছে");
+      toast.success("Package deleted successfully");
       setDeleteDialogOpen(false);
       setDeletingPackage(null);
     } catch (error) {
-      toast.error("প্যাকেজ ডিলিট করা যায়নি");
+      toast.error("Failed to delete package");
       console.error(error);
     }
   };
@@ -167,13 +165,12 @@ export default function Packages() {
       {/* Page Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">প্যাকেজসমূহ</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Packages</h1>
           <p className="text-muted-foreground">
-            আপনার ইন্টারনেট সার্ভিস প্যাকেজ ম্যানেজ করুন
+            Manage your internet service packages
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {/* View Toggle */}
           <ToggleGroup 
             type="single" 
             value={viewMode} 
@@ -198,7 +195,7 @@ export default function Packages() {
           
           <Button className="gap-2" onClick={handleCreatePackage}>
             <Plus className="h-4 w-4" />
-            নতুন প্যাকেজ
+            New Package
           </Button>
         </div>
       </div>
@@ -212,13 +209,13 @@ export default function Packages() {
               <div className="p-2 bg-primary/10 rounded-lg">
                 <PackageIcon className="h-4 w-4 text-primary" />
               </div>
-              <CardDescription>সক্রিয় প্যাকেজ</CardDescription>
+              <CardDescription>Active Packages</CardDescription>
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{activePackages.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              মোট {packages.length} প্যাকেজের মধ্যে
+              Out of {packages.length} total packages
             </p>
           </CardContent>
         </Card>
@@ -230,13 +227,13 @@ export default function Packages() {
               <div className="p-2 bg-blue-500/10 rounded-lg">
                 <Users className="h-4 w-4 text-blue-500" />
               </div>
-              <CardDescription>মোট সাবস্ক্রিপশন</CardDescription>
+              <CardDescription>Total Subscriptions</CardDescription>
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{totalSubscriptions.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              সক্রিয় গ্রাহক সংখ্যা
+              Active customer count
             </p>
           </CardContent>
         </Card>
@@ -248,13 +245,13 @@ export default function Packages() {
               <div className="p-2 bg-green-500/10 rounded-lg">
                 <TrendingUp className="h-4 w-4 text-green-500" />
               </div>
-              <CardDescription>মাসিক আয়</CardDescription>
+              <CardDescription>Monthly Revenue</CardDescription>
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">৳{totalMonthlyRevenue.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              প্যাকেজ থেকে প্রত্যাশিত
+              Expected from packages
             </p>
           </CardContent>
         </Card>
@@ -266,13 +263,13 @@ export default function Packages() {
               <div className="p-2 bg-orange-500/10 rounded-lg">
                 <Zap className="h-4 w-4 text-orange-500" />
               </div>
-              <CardDescription>গড় আয়/গ্রাহক</CardDescription>
+              <CardDescription>Avg. Revenue/Customer</CardDescription>
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">৳{avgRevenuePerPackage.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              প্রতি মাসে
+              Per month
             </p>
           </CardContent>
         </Card>
@@ -280,12 +277,11 @@ export default function Packages() {
 
       {/* Packages Content */}
       {viewMode === "cards" ? (
-        // Card View
         <div className="space-y-6">
           {/* Active Packages */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-lg font-semibold">সক্রিয় প্যাকেজ</h2>
+              <h2 className="text-lg font-semibold">Active Packages</h2>
               <Badge variant="secondary">{activePackages.length}</Badge>
             </div>
             
@@ -328,12 +324,11 @@ export default function Packages() {
                       {isPopular && (
                         <div className="absolute -top-3 left-4 z-10">
                           <Badge className="bg-primary text-primary-foreground shadow-lg">
-                            ⭐ সবচেয়ে জনপ্রিয়
+                            ⭐ Most Popular
                           </Badge>
                         </div>
                       )}
                       
-                      {/* Gradient Top Border */}
                       <div className={cn(
                         "absolute top-0 left-0 right-0 h-1 rounded-t-lg",
                         isPopular ? "bg-gradient-to-r from-primary to-primary/50" : "bg-gradient-to-r from-muted-foreground/20 to-transparent"
@@ -363,11 +358,11 @@ export default function Packages() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => handleEditPackage(pkg)}>
                                 <Edit className="mr-2 h-4 w-4" />
-                                সম্পাদনা
+                                Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleToggleActive(pkg)}>
                                 <ToggleLeft className="mr-2 h-4 w-4" />
-                                নিষ্ক্রিয় করুন
+                                Deactivate
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem 
@@ -375,7 +370,7 @@ export default function Packages() {
                                 onClick={() => handleDeletePackage(pkg)}
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                ডিলিট করুন
+                                Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -383,18 +378,16 @@ export default function Packages() {
                       </CardHeader>
                       
                       <CardContent className="space-y-4">
-                        {/* Price */}
                         <div className="flex items-baseline gap-1">
                           <span className="text-3xl font-bold">৳{pkg.monthly_price.toLocaleString()}</span>
-                          <span className="text-muted-foreground text-sm">/মাস</span>
+                          <span className="text-muted-foreground text-sm">/month</span>
                         </div>
 
-                        {/* Stats */}
                         <div className="space-y-3 pt-2 border-t">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <Users className="h-4 w-4" />
-                              <span>সক্রিয় গ্রাহক</span>
+                              <span>Active Customers</span>
                             </div>
                             <span className="font-semibold">{customerCount.toLocaleString()}</span>
                           </div>
@@ -402,18 +395,17 @@ export default function Packages() {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <TrendingUp className="h-4 w-4" />
-                              <span>মাসিক আয়</span>
+                              <span>Monthly Revenue</span>
                             </div>
                             <span className="font-semibold text-green-600">
                               ৳{(pkg.monthly_price * customerCount).toLocaleString()}
                             </span>
                           </div>
 
-                          {/* Revenue Share */}
                           {revenuePercentage > 0 && (
                             <div className="space-y-1.5">
                               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                <span>আয়ের অংশ</span>
+                                <span>Revenue Share</span>
                                 <span>{revenuePercentage}%</span>
                               </div>
                               <Progress value={revenuePercentage} className="h-1.5" />
@@ -432,7 +424,7 @@ export default function Packages() {
           {inactivePackages.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <h2 className="text-lg font-semibold text-muted-foreground">নিষ্ক্রিয় প্যাকেজ</h2>
+                <h2 className="text-lg font-semibold text-muted-foreground">Inactive Packages</h2>
                 <Badge variant="outline">{inactivePackages.length}</Badge>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -448,7 +440,7 @@ export default function Packages() {
                           </div>
                         </div>
                         <Badge variant="outline" className="text-muted-foreground">
-                          নিষ্ক্রিয়
+                          Inactive
                         </Badge>
                       </div>
                     </CardHeader>
@@ -457,7 +449,7 @@ export default function Packages() {
                         <span className="text-2xl font-bold text-muted-foreground">
                           ৳{pkg.monthly_price.toLocaleString()}
                         </span>
-                        <span className="text-muted-foreground text-sm">/মাস</span>
+                        <span className="text-muted-foreground text-sm">/month</span>
                       </div>
                       <Button 
                         variant="outline" 
@@ -466,7 +458,7 @@ export default function Packages() {
                         onClick={() => handleToggleActive(pkg)}
                       >
                         <ToggleRight className="h-4 w-4" />
-                        পুনরায় সক্রিয় করুন
+                        Reactivate
                       </Button>
                     </CardContent>
                   </Card>
@@ -481,12 +473,12 @@ export default function Packages() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>প্যাকেজ</TableHead>
-                <TableHead>স্পিড</TableHead>
-                <TableHead className="text-right">মাসিক মূল্য</TableHead>
-                <TableHead className="text-right">গ্রাহক</TableHead>
-                <TableHead className="text-right">মাসিক আয়</TableHead>
-                <TableHead>স্ট্যাটাস</TableHead>
+                <TableHead>Package</TableHead>
+                <TableHead>Speed</TableHead>
+                <TableHead className="text-right">Monthly Price</TableHead>
+                <TableHead className="text-right">Customers</TableHead>
+                <TableHead className="text-right">Monthly Revenue</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="w-[80px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -496,10 +488,10 @@ export default function Packages() {
                   <TableCell colSpan={7} className="h-32 text-center">
                     <div className="flex flex-col items-center gap-2">
                       <PackageIcon className="h-8 w-8 text-muted-foreground" />
-                      <p className="text-muted-foreground">কোনো প্যাকেজ নেই</p>
+                      <p className="text-muted-foreground">No packages found</p>
                       <Button size="sm" onClick={handleCreatePackage}>
                         <Plus className="h-4 w-4 mr-2" />
-                        প্যাকেজ তৈরি করুন
+                        Create Package
                       </Button>
                     </div>
                   </TableCell>
@@ -527,7 +519,7 @@ export default function Packages() {
                           <span className="font-medium">{pkg.name}</span>
                           {isPopular && (
                             <Badge variant="secondary" className="text-xs">
-                              ⭐ জনপ্রিয়
+                              ⭐ Popular
                             </Badge>
                           )}
                         </div>
@@ -556,7 +548,7 @@ export default function Packages() {
                               : "text-muted-foreground"
                           )}
                         >
-                          {pkg.is_active ? "সক্রিয়" : "নিষ্ক্রিয়"}
+                          {pkg.is_active ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -569,18 +561,18 @@ export default function Packages() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleEditPackage(pkg)}>
                               <Edit className="mr-2 h-4 w-4" />
-                              সম্পাদনা
+                              Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleToggleActive(pkg)}>
                               {pkg.is_active ? (
                                 <>
                                   <ToggleLeft className="mr-2 h-4 w-4" />
-                                  নিষ্ক্রিয় করুন
+                                  Deactivate
                                 </>
                               ) : (
                                 <>
                                   <ToggleRight className="mr-2 h-4 w-4" />
-                                  সক্রিয় করুন
+                                  Activate
                                 </>
                               )}
                             </DropdownMenuItem>
@@ -590,7 +582,7 @@ export default function Packages() {
                               onClick={() => handleDeletePackage(pkg)}
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
-                              ডিলিট করুন
+                              Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -604,7 +596,6 @@ export default function Packages() {
         </Card>
       )}
 
-      {/* Package Form Dialog */}
       <PackageFormDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
@@ -613,7 +604,6 @@ export default function Packages() {
         isLoading={createPackage.isPending || updatePackage.isPending}
       />
 
-      {/* Delete Confirmation Dialog */}
       <DeletePackageDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}

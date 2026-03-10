@@ -1,5 +1,4 @@
 import { format } from "date-fns";
-import { bn } from "date-fns/locale";
 import { CheckCircle, XCircle, Clock, Send, User, MessageSquare } from "lucide-react";
 import {
   Table,
@@ -27,18 +26,18 @@ interface Props {
 }
 
 const statusConfig: Record<string, { icon: typeof CheckCircle; label: string; variant: "default" | "destructive" | "secondary" | "outline" }> = {
-  sent: { icon: CheckCircle, label: "পাঠানো হয়েছে", variant: "default" },
-  failed: { icon: XCircle, label: "ব্যর্থ", variant: "destructive" },
-  pending: { icon: Clock, label: "অপেক্ষমাণ", variant: "secondary" },
+  sent: { icon: CheckCircle, label: "Sent", variant: "default" },
+  failed: { icon: XCircle, label: "Failed", variant: "destructive" },
+  pending: { icon: Clock, label: "Pending", variant: "secondary" },
 };
 
 const typeLabels: Record<string, string> = {
-  billing_reminder: "বিলিং রিমাইন্ডার",
-  payment_confirmation: "পেমেন্ট নিশ্চিতকরণ",
-  connection_status: "কানেকশন স্ট্যাটাস",
-  general: "সাধারণ",
-  welcome: "স্বাগতম",
-  overdue: "ওভারডিউ",
+  billing_reminder: "Billing Reminder",
+  payment_confirmation: "Payment Confirmation",
+  connection_status: "Connection Status",
+  general: "General",
+  welcome: "Welcome",
+  overdue: "Overdue",
 };
 
 export function NotificationLogTable({ logs, isLoading, onResend }: Props) {
@@ -56,8 +55,8 @@ export function NotificationLogTable({ logs, isLoading, onResend }: Props) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
         <MessageSquare className="h-12 w-12 mb-3 opacity-30" />
-        <p className="text-sm font-medium">কোনো নোটিফিকেশন লগ পাওয়া যায়নি</p>
-        <p className="text-xs mt-1">ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন</p>
+        <p className="text-sm font-medium">No notification logs found</p>
+        <p className="text-xs mt-1">Try changing the filters and search again</p>
       </div>
     );
   }
@@ -67,12 +66,12 @@ export function NotificationLogTable({ logs, isLoading, onResend }: Props) {
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/30">
-            <TableHead className="w-[180px]">তারিখ</TableHead>
-            <TableHead>শিরোনাম ও বার্তা</TableHead>
-            <TableHead className="w-[150px]">গ্রাহক</TableHead>
-            <TableHead className="w-[140px]">ধরন</TableHead>
-            <TableHead className="w-[120px]">স্ট্যাটাস</TableHead>
-            <TableHead className="w-[80px] text-right">অ্যাকশন</TableHead>
+            <TableHead className="w-[180px]">Date</TableHead>
+            <TableHead>Title & Message</TableHead>
+            <TableHead className="w-[150px]">Customer</TableHead>
+            <TableHead className="w-[140px]">Type</TableHead>
+            <TableHead className="w-[120px]">Status</TableHead>
+            <TableHead className="w-[80px] text-right">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -136,7 +135,7 @@ export function NotificationLogTable({ logs, isLoading, onResend }: Props) {
                             <Send className="h-3.5 w-3.5" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>পুনরায় পাঠান</TooltipContent>
+                        <TooltipContent>Resend</TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   )}
