@@ -32,9 +32,10 @@ interface CustomerSyncData {
 }
 
 interface SyncRequest {
-  action: "test_connection" | "enable" | "disable" | "update_speed" | "sync_all";
+  action: "test_connection" | "enable" | "disable" | "update_speed" | "sync_all" | "sync_package";
   integration_id: string;
   customer_id?: string;
+  package_id?: string;
   triggered_by?: string;
 }
 
