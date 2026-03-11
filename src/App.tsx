@@ -28,6 +28,7 @@ import Settings from "@/pages/Settings";
 import Reports from "@/pages/Reports";
 import NetworkPage from "@/pages/NetworkPage";
 import MikrotikServersPage from "@/pages/network/MikrotikServersPage";
+import MikrotikBackupPage from "@/pages/network/MikrotikBackupPage";
 import OltDevicesPage from "@/pages/OltDevicesPage";
 import Notifications from "@/pages/Notifications";
 import Resellers from "@/pages/Resellers";
