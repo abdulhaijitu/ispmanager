@@ -49,6 +49,7 @@ import CompanySetupPage from "@/pages/system/CompanySetupPage";
 import AppUsersPage from "@/pages/system/AppUsersPage";
 import InvoiceSetupPage from "@/pages/system/InvoiceSetupPage";
 import PeriodsSetupPage from "@/pages/system/PeriodsSetupPage";
+import PaymentGatewaysPage from "@/pages/system/PaymentGatewaysPage";
 import TaskManagementPage from "@/pages/support/TaskManagementPage";
 import SupportCategoryPage from "@/pages/support/SupportCategoryPage";
 import TaskCategoryPage from "@/pages/support/TaskCategoryPage";
@@ -264,7 +265,7 @@ const App = () => (
                 <Route path="/dashboard/system/company-setup" element={<CompanySetupPage />} />
                 <Route path="/dashboard/system/invoice-setup" element={<InvoiceSetupPage />} />
                 <Route path="/dashboard/system/periods-setup" element={<PeriodsSetupPage />} />
-                <Route path="/dashboard/system/payment-gateways" element={<PH title="Payment Gateways" />} />
+                <Route path="/dashboard/system/payment-gateways" element={<PaymentGatewaysPage />} />
                 <Route path="/dashboard/system/email-setup" element={<PH title="Email Setup" />} />
                 <Route path="/dashboard/system/system-setup" element={<PH title="System Setup" />} />
                 <Route path="/dashboard/system/processing-fee" element={<PH title="P. Processing Fee" />} />
