@@ -13,7 +13,7 @@ import { useBills } from "@/hooks/useBills";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertBanner } from "@/components/shared/AlertBanner";
+
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { useDemoMode } from "@/contexts/DemoModeContext";
 import { demoMetrics } from "@/data/demoData";
@@ -57,9 +57,6 @@ export default function Dashboard() {
   const totalDue = isDemoMode ? demoMetrics.totalDue : customers.reduce((sum, c) => sum + (c.due_balance || 0), 0);
   const customersWithDue = isDemoMode ? demoMetrics.customersWithDue : customers.filter(c => (c.due_balance || 0) > 0).length;
 
-  // Contextual guidance
-  const hasNoPaymentGateway = !isDemoMode && !currentTenant?.enable_online_payment;
-  const autoSuspendDays = currentTenant?.auto_suspend_days;
 
   if (isLoading) {
     return (
@@ -102,21 +99,6 @@ export default function Dashboard() {
       {/* Onboarding Checklist */}
       <OnboardingChecklist />
 
-      {/* Contextual Guidance Banners */}
-      {hasNoPaymentGateway && totalCustomers > 0 && (
-        <AlertBanner variant="info" title="Collect payments faster">
-          Enable online payments so customers can pay directly from their portal.{" "}
-          <button onClick={() => navigate("/dashboard/settings")} className="font-semibold text-primary underline underline-offset-2">
-            Set up now →
-          </button>
-        </AlertBanner>
-      )}
-
-      {suspendedCustomers > 0 && autoSuspendDays && autoSuspendDays > 0 && (
-        <AlertBanner variant="warning" title={`${suspendedCustomers} connection${suspendedCustomers > 1 ? "s" : ""} suspended`}>
-          Unpaid customers are automatically suspended after {autoSuspendDays} days.
-        </AlertBanner>
-      )}
 
       {/* Stats Grid — 4×5 colorful cards */}
       <DashboardStatGrid
