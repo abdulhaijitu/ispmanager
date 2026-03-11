@@ -263,7 +263,7 @@ const App = () => (
                 <Route path="/dashboard/system/app-users" element={<AppUsersPage />} />
                 <Route path="/dashboard/system/company-setup" element={<CompanySetupPage />} />
                 <Route path="/dashboard/system/invoice-setup" element={<InvoiceSetupPage />} />
-                <Route path="/dashboard/system/periods-setup" element={<PH title="Periods Setup" />} />
+                <Route path="/dashboard/system/periods-setup" element={<PeriodsSetupPage />} />
                 <Route path="/dashboard/system/payment-gateways" element={<PH title="Payment Gateways" />} />
                 <Route path="/dashboard/system/email-setup" element={<PH title="Email Setup" />} />
                 <Route path="/dashboard/system/system-setup" element={<PH title="System Setup" />} />
