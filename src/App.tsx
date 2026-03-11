@@ -183,7 +183,7 @@ const App = () => (
                 {/* Network */}
                 <Route path="/dashboard/network" element={<NetworkPage />} />
                 <Route path="/dashboard/mikrotik/servers" element={<MikrotikServersPage />} />
-                <Route path="/dashboard/mikrotik/backup" element={<PH title="Server Backup" />} />
+                <Route path="/dashboard/mikrotik/backup" element={<MikrotikBackupPage />} />
                 <Route path="/dashboard/mikrotik/import" element={<PH title="Import from MikroTik" />} />
                 <Route path="/dashboard/mikrotik/bulk-import" element={<PH title="Bulk Clients Import" />} />
                 <Route path="/dashboard/olt" element={<OltDevicesPage />} />
