@@ -30,7 +30,7 @@ const countries = [
 
 function SectionHeader({ title }: { title: string }) {
   return (
-    <div className="bg-slate-800 text-white px-4 py-2.5 rounded-t-lg font-semibold text-sm">
+    <div className="bg-primary text-primary-foreground px-4 py-2.5 rounded-t-lg font-semibold text-sm">
       {title}
     </div>
   );
