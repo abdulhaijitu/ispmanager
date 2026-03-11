@@ -42,6 +42,7 @@ import ResellerPaymentsPage from "@/pages/reseller/ResellerPaymentsPage";
 import ResellerWalletPage from "@/pages/reseller/ResellerWalletPage";
 import NotFound from "@/pages/NotFound";
 import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
+import TaskManagementPage from "@/pages/support/TaskManagementPage";
 import SupportCategoryPage from "@/pages/support/SupportCategoryPage";
 import ClientSupportPage from "@/pages/support/ClientSupportPage";
 import SupportHistoryPage from "@/pages/support/SupportHistoryPage";
@@ -202,7 +203,7 @@ const App = () => (
                 <Route path="/dashboard/support/history" element={<SupportHistoryPage />} />
 
                 {/* Task Management */}
-                <Route path="/dashboard/tasks" element={<PH title="Tasks" />} />
+                <Route path="/dashboard/tasks" element={<TaskManagementPage />} />
                 <Route path="/dashboard/tasks/category" element={<PH title="Task Category" />} />
                 <Route path="/dashboard/tasks/history" element={<PH title="Task History" />} />
 
