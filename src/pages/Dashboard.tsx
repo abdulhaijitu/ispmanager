@@ -57,9 +57,6 @@ export default function Dashboard() {
   const totalDue = isDemoMode ? demoMetrics.totalDue : customers.reduce((sum, c) => sum + (c.due_balance || 0), 0);
   const customersWithDue = isDemoMode ? demoMetrics.customersWithDue : customers.filter(c => (c.due_balance || 0) > 0).length;
 
-  // Contextual guidance
-  const hasNoPaymentGateway = !isDemoMode && !currentTenant?.enable_online_payment;
-  const autoSuspendDays = currentTenant?.auto_suspend_days;
 
   if (isLoading) {
     return (
