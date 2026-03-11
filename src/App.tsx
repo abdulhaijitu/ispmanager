@@ -44,6 +44,7 @@ import NotFound from "@/pages/NotFound";
 import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
 import SupportCategoryPage from "@/pages/support/SupportCategoryPage";
 import ClientSupportPage from "@/pages/support/ClientSupportPage";
+import SupportHistoryPage from "@/pages/support/SupportHistoryPage";
 import ZonesPage from "@/pages/config/ZonesPage";
 import ConnectionTypePage from "@/pages/config/ConnectionTypePage";
 import ClientTypePage from "@/pages/config/ClientTypePage";
@@ -198,7 +199,7 @@ const App = () => (
                 {/* Support & Ticketing */}
                 <Route path="/dashboard/support" element={<ClientSupportPage />} />
                 <Route path="/dashboard/support/category" element={<SupportCategoryPage />} />
-                <Route path="/dashboard/support/history" element={<PH title="Support History" />} />
+                <Route path="/dashboard/support/history" element={<SupportHistoryPage />} />
 
                 {/* Task Management */}
                 <Route path="/dashboard/tasks" element={<PH title="Tasks" />} />
