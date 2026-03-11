@@ -48,6 +48,7 @@ import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
 import CompanySetupPage from "@/pages/system/CompanySetupPage";
 import AppUsersPage from "@/pages/system/AppUsersPage";
 import InvoiceSetupPage from "@/pages/system/InvoiceSetupPage";
+import PeriodsSetupPage from "@/pages/system/PeriodsSetupPage";
 import TaskManagementPage from "@/pages/support/TaskManagementPage";
 import SupportCategoryPage from "@/pages/support/SupportCategoryPage";
 import TaskCategoryPage from "@/pages/support/TaskCategoryPage";
