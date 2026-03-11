@@ -122,16 +122,16 @@ export default function DailyAccountClosingPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-t-4 border-t-emerald-500">
+        <Card className="border-t-4" style={{ borderTopColor: "hsl(var(--primary))" }}>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="rounded-full bg-emerald-500/10 p-2.5">
-                <TrendingUp className="h-5 w-5 text-emerald-500" />
+              <div className="rounded-full bg-primary/10 p-2.5">
+                <TrendingUp className="h-5 w-5 text-primary" />
               </div>
               <h3 className="text-lg font-semibold">Service Income</h3>
             </div>
             <div className="text-sm text-muted-foreground mb-1">Sum</div>
-            <div className="text-3xl font-bold text-emerald-600">
+            <div className="text-3xl font-bold text-primary">
               ৳ {summary.income.toLocaleString("en-BD")}
             </div>
           </CardContent>

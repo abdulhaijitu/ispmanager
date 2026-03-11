@@ -160,7 +160,7 @@ const App = () => (
                 {/* Income & Expense */}
                 <Route path="/dashboard/finance/income" element={<DailyIncomePage />} />
                 <Route path="/dashboard/finance/expense" element={<DailyExpensePage />} />
-                <Route path="/dashboard/finance/closing" element={<PH title="Account Closing" />} />
+                <Route path="/dashboard/finance/closing" element={<DailyAccountClosingPage />} />
                 <Route path="/dashboard/finance/history" element={<PH title="Financial History" />} />
 
                 {/* Accounting */}
