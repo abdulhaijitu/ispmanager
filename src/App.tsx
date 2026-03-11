@@ -48,6 +48,7 @@ import TaskCategoryPage from "@/pages/support/TaskCategoryPage";
 import ClientSupportPage from "@/pages/support/ClientSupportPage";
 import SupportHistoryPage from "@/pages/support/SupportHistoryPage";
 import TaskHistoryPage from "@/pages/support/TaskHistoryPage";
+import EmployeeListPage from "@/pages/hr/EmployeeListPage";
 import ZonesPage from "@/pages/config/ZonesPage";
 import ConnectionTypePage from "@/pages/config/ConnectionTypePage";
 import ClientTypePage from "@/pages/config/ClientTypePage";
@@ -210,7 +211,7 @@ const App = () => (
                 <Route path="/dashboard/tasks/history" element={<TaskHistoryPage />} />
 
                 {/* HR & Payroll */}
-                <Route path="/dashboard/hr/employees" element={<PH title="Employee List" />} />
+                <Route path="/dashboard/hr/employees" element={<EmployeeListPage />} />
                 <Route path="/dashboard/hr/department" element={<PH title="Department" />} />
                 <Route path="/dashboard/hr/salary" element={<PH title="Salary Sheet" />} />
                 <Route path="/dashboard/hr/attendance" element={<PH title="Attendance" />} />
