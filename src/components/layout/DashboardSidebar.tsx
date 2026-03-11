@@ -415,9 +415,9 @@ export function DashboardSidebar() {
   };
 
   return (
-    <SidebarBody className="justify-between gap-4 overflow-hidden">
+    <SidebarBody className="gap-0 overflow-hidden">
       {/* Top section */}
-      <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+      <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden min-h-0">
         {/* Logo */}
         <div className="flex items-center gap-3 mb-4">
           {branding.logoUrl ? (
