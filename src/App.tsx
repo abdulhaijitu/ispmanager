@@ -162,7 +162,7 @@ const App = () => (
                 <Route path="/dashboard/finance/income" element={<DailyIncomePage />} />
                 <Route path="/dashboard/finance/expense" element={<DailyExpensePage />} />
                 <Route path="/dashboard/finance/closing" element={<DailyAccountClosingPage />} />
-                <Route path="/dashboard/finance/history" element={<PH title="Financial History" />} />
+                <Route path="/dashboard/finance/history" element={<FinancialHistoryPage />} />
 
                 {/* Accounting */}
                 <Route path="/dashboard/accounting" element={<PH title="Accounting Dashboard" />} />
