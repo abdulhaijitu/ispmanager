@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { usePayments } from "@/hooks/usePayments";
 import { useBills } from "@/hooks/useBills";
-import { useTenant } from "@/hooks/useTenant";
+import { useTenantContext } from "@/contexts/TenantContext";
 import { useDemoMode } from "@/contexts/DemoModeContext";
 
 // Demo data
