@@ -41,6 +41,7 @@ import ZonesPage from "@/pages/config/ZonesPage";
 import ConnectionTypePage from "@/pages/config/ConnectionTypePage";
 import ClientTypePage from "@/pages/config/ClientTypePage";
 import ProtocolTypePage from "@/pages/config/ProtocolTypePage";
+import AreaManagementPage from "@/pages/config/AreaManagementPage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
