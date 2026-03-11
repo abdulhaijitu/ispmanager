@@ -238,15 +238,15 @@ const ChartOfAccountsPage = () => {
               return (
                 <div key={category.name} className="rounded-lg border border-border overflow-hidden">
                   {/* Category Header */}
-                  <div className="flex items-center justify-between bg-slate-800 dark:bg-slate-900 px-4 py-3">
+                  <div className="flex items-center justify-between bg-foreground/90 dark:bg-foreground/20 px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-white">{category.name}</span>
-                      <Info className="h-3.5 w-3.5 text-slate-400" />
+                      <span className="text-sm font-semibold text-background dark:text-foreground">{category.name}</span>
+                      <Info className="h-3.5 w-3.5 text-background/60 dark:text-muted-foreground" />
                     </div>
                     <Button
                       size="xs"
                       variant="ghost"
-                      className="text-emerald-400 hover:text-emerald-300 hover:bg-slate-700 gap-1 text-xs"
+                      className="text-primary hover:text-primary/80 hover:bg-foreground/10 gap-1 text-xs"
                       onClick={handleCreate}
                     >
                       <Plus className="h-3 w-3" /> Create New Account
