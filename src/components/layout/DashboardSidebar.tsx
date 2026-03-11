@@ -40,6 +40,7 @@ import {
   Scale,
   TrendingUp,
   Building2,
+  Mail,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
