@@ -251,7 +251,7 @@ const App = () => (
                 {/* SMS Service */}
                 <Route path="/dashboard/sms/send" element={<SendSmsPage />} />
                 <Route path="/dashboard/sms/template" element={<SmsTemplatePage />} />
-                <Route path="/dashboard/sms/gateway" element={<PH title="SMS Gateway" />} />
+                <Route path="/dashboard/sms/gateway" element={<SmsGatewayPage />} />
 
                 {/* System */}
                 <Route path="/dashboard/notifications" element={<Notifications />} />
