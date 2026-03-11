@@ -174,7 +174,7 @@ const App = () => (
                 <Route path="/dashboard/accounting/chart" element={<ChartOfAccountsPage />} />
                 <Route path="/dashboard/accounting/journal" element={<JournalVoucherPage />} />
                 <Route path="/dashboard/accounting/balance-sheet" element={<BalanceSheetPage />} />
-                <Route path="/dashboard/accounting/profit-loss" element={<PH title="Profit & Loss" />} />
+                <Route path="/dashboard/accounting/profit-loss" element={<ProfitLossPage />} />
                 <Route path="/dashboard/accounting/trial-balance" element={<PH title="Trial Balance" />} />
 
                 {/* Network */}
