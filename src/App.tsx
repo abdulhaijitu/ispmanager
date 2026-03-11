@@ -196,7 +196,7 @@ const App = () => (
                 <Route path="/dashboard/network-diagram" element={<PH title="Network Diagram" />} />
 
                 {/* Support & Ticketing */}
-                <Route path="/dashboard/support" element={<PH title="Client Support" />} />
+                <Route path="/dashboard/support" element={<ClientSupportPage />} />
                 <Route path="/dashboard/support/category" element={<SupportCategoryPage />} />
                 <Route path="/dashboard/support/history" element={<PH title="Support History" />} />
 
