@@ -51,6 +51,7 @@ import TaskHistoryPage from "@/pages/support/TaskHistoryPage";
 import EmployeeListPage from "@/pages/hr/EmployeeListPage";
 import DepartmentPage from "@/pages/hr/DepartmentPage";
 import SalarySheetPage from "@/pages/hr/SalarySheetPage";
+import AttendancePage from "@/pages/hr/AttendancePage";
 import ZonesPage from "@/pages/config/ZonesPage";
 import ConnectionTypePage from "@/pages/config/ConnectionTypePage";
 import ClientTypePage from "@/pages/config/ClientTypePage";
