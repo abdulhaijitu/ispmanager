@@ -14,10 +14,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { usePayments } from "@/hooks/usePayments";
-import { useTenant } from "@/hooks/useTenant";
+import { useCurrentTenant } from "@/hooks/useTenant";
 
 export default function DailyCollectionPage() {
-  const { tenant } = useTenant();
+  const { data: tenant } = useCurrentTenant();
   const { data: payments = [], isLoading } = usePayments(tenant?.id);
 
   const [activeTab, setActiveTab] = useState("collected");
