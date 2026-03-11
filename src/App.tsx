@@ -76,6 +76,7 @@ import ProfitLossPage from "@/pages/finance/ProfitLossPage";
 import TrialBalancePage from "@/pages/finance/TrialBalancePage";
 import ItemsPage from "@/pages/inventory/ItemsPage";
 import StockPage from "@/pages/inventory/StockPage";
+import AssetsPage from "@/pages/inventory/AssetsPage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
@@ -224,7 +225,7 @@ const App = () => (
                 {/* Inventory & Assets */}
                 <Route path="/dashboard/inventory/items" element={<ItemsPage />} />
                 <Route path="/dashboard/inventory/stock" element={<StockPage />} />
-                <Route path="/dashboard/inventory/assets" element={<PH title="Assets" />} />
+                <Route path="/dashboard/inventory/assets" element={<AssetsPage />} />
 
                 {/* Purchase & Vendors */}
                 <Route path="/dashboard/purchase/vendors" element={<PH title="Vendors" />} />
