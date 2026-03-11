@@ -93,6 +93,7 @@ import SmsTemplatePage from "@/pages/sms/SmsTemplatePage";
 import SmsGatewayPage from "@/pages/sms/SmsGatewayPage";
 import PaymentProcessingFeePage from "@/pages/system/PaymentProcessingFeePage";
 import VatSetupPage from "@/pages/system/VatSetupPage";
+import ActivityLoggersPage from "@/pages/system/ActivityLoggersPage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
