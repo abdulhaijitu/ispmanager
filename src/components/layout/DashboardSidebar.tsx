@@ -333,9 +333,11 @@ const roleDisplayNames: Record<string, string> = {
 };
 
 export function DashboardSidebar() {
+  const [menuSearch, setMenuSearch] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const { open } = useSidebar();
+  const { open, setOpen } = useSidebar();
   const { user, signOut } = useAuth();
   const { data: role, isLoading: roleLoading } = useUserRole();
   const { isImpersonatingReseller } = useResellerImpersonation();
