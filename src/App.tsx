@@ -91,6 +91,7 @@ import PurchaseBillPage from "@/pages/purchase/PurchaseBillPage";
 import SendSmsPage from "@/pages/sms/SendSmsPage";
 import SmsTemplatePage from "@/pages/sms/SmsTemplatePage";
 import SmsGatewayPage from "@/pages/sms/SmsGatewayPage";
+import PaymentProcessingFeePage from "@/pages/system/PaymentProcessingFeePage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
