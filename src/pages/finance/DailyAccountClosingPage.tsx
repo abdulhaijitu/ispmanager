@@ -12,7 +12,7 @@ import { usePayments } from "@/hooks/usePayments";
 import { useDemoMode } from "@/contexts/DemoModeContext";
 
 export default function DailyAccountClosingPage() {
-  const { tenant } = useTenant();
+  const { data: tenant } = useCurrentTenant();
   const { isDemoMode } = useDemoMode();
   const [fromDate, setFromDate] = useState<Date>(new Date());
   const [toDate, setToDate] = useState<Date>(new Date());
