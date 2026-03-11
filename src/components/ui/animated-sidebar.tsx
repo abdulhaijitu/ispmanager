@@ -80,7 +80,7 @@ export const DesktopSidebar = ({
         width: open ? "240px" : "60px",
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      {...props}
+    
     >
       {children}
       {/* Toggle button */}
