@@ -1,18 +1,11 @@
 import { 
-  Users, 
-  Wallet, 
-  TrendingUp, 
-  AlertCircle,
-  UserPlus,
-  ArrowDownRight,
   Plus,
   FileText,
-  Info,
 } from "lucide-react";
-import { MetricCard } from "@/components/dashboard/MetricCard";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { CustomerTable } from "@/components/dashboard/CustomerTable";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
+import { DashboardStatGrid } from "@/components/dashboard/DashboardStatGrid";
 import { useTenantContext } from "@/contexts/TenantContext";
 import { useCustomers } from "@/hooks/useCustomers";
 import { usePayments } from "@/hooks/usePayments";
@@ -35,64 +28,36 @@ export default function Dashboard() {
 
   const isLoading = !isDemoMode && (tenantLoading || customersLoading || paymentsLoading || billsLoading);
 
-  // Calculate metrics — use demo data when in demo mode
-  const totalCustomers = isDemoMode ? demoMetrics.totalCustomers : customers.length;
-  const activeCustomers = isDemoMode ? demoMetrics.activeCustomers : customers.filter(c => c.connection_status === "active").length;
-  const suspendedCustomers = isDemoMode ? demoMetrics.suspendedCustomers : customers.filter(c => c.connection_status === "suspended").length;
-
   const now = new Date();
   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-  
-  const newCustomersThisMonth = isDemoMode ? demoMetrics.newCustomersThisMonth : customers.filter(c => {
-    const joinDate = new Date(c.join_date);
-    return joinDate >= thisMonthStart;
-  }).length;
 
-  const customerGrowth = isDemoMode ? demoMetrics.customerGrowth : (() => {
-    const newCustomersLastMonth = customers.filter(c => {
-      const joinDate = new Date(c.join_date);
-      return joinDate >= lastMonthStart && joinDate <= lastMonthEnd;
-    }).length;
-    return newCustomersLastMonth > 0 
-      ? Math.round(((newCustomersThisMonth - newCustomersLastMonth) / newCustomersLastMonth) * 100)
-      : newCustomersThisMonth > 0 ? 100 : 0;
-  })();
+  // Client metrics
+  const totalCustomers = isDemoMode ? demoMetrics.totalCustomers : customers.length;
+  const activeCustomers = isDemoMode ? demoMetrics.activeCustomers : customers.filter(c => c.connection_status === "active").length;
+  const suspendedCustomers = isDemoMode ? demoMetrics.suspendedCustomers : customers.filter(c => c.connection_status === "suspended").length;
+  const inactiveCustomers = isDemoMode ? 0 : customers.filter(c => c.connection_status === "inactive").length;
 
-  const monthlyRevenue = isDemoMode ? demoMetrics.monthlyRevenue : (() => {
-    const monthlyPayments = payments.filter(p => {
-      const paymentDate = new Date(p.created_at);
-      return paymentDate >= thisMonthStart;
-    });
-    return monthlyPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-  })();
+  const newCustomersThisMonth = isDemoMode ? demoMetrics.newCustomersThisMonth : customers.filter(c => new Date(c.join_date) >= thisMonthStart).length;
 
-  const revenueGrowth = isDemoMode ? demoMetrics.revenueGrowth : (() => {
-    const thisMonthPayments = payments.filter(p => new Date(p.created_at) >= thisMonthStart);
-    const lastMonthPay = payments.filter(p => {
-      const d = new Date(p.created_at);
-      return d >= lastMonthStart && d <= lastMonthEnd;
-    });
-    const lastMonthRev = lastMonthPay.reduce((sum, p) => sum + Number(p.amount), 0);
-    const thisMonthRev = thisMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-    return lastMonthRev > 0
-      ? Math.round(((thisMonthRev - lastMonthRev) / lastMonthRev) * 100)
-      : thisMonthRev > 0 ? 100 : 0;
-  })();
+  // Billing metrics
+  const thisMonthBills = isDemoMode ? [] : bills.filter(b => new Date(b.created_at) >= thisMonthStart);
+  const billedCount = isDemoMode ? demoMetrics.monthlyBillsCount : thisMonthBills.length;
+  const paidCount = isDemoMode ? 0 : thisMonthBills.filter(b => b.status === "paid").length;
+  const partiallyPaidCount = isDemoMode ? 0 : thisMonthBills.filter(b => b.status === "partial").length;
+  const unpaidCount = isDemoMode ? 0 : thisMonthBills.filter(b => b.status === "unpaid" || b.status === "pending").length;
+  const billExpiredCount = isDemoMode ? 0 : thisMonthBills.filter(b => b.status === "overdue").length;
+
+  // Revenue
+  const monthlyRevenue = isDemoMode ? demoMetrics.monthlyRevenue : payments.filter(p => new Date(p.created_at) >= thisMonthStart).reduce((sum, p) => sum + Number(p.amount), 0);
+  const totalBilled = isDemoMode ? 9300 : thisMonthBills.reduce((sum, b) => sum + Number(b.amount), 0);
+  const collectionRate = isDemoMode ? demoMetrics.collectionRate : (totalBilled > 0 ? ((monthlyRevenue / totalBilled) * 100) : 0);
 
   const totalDue = isDemoMode ? demoMetrics.totalDue : customers.reduce((sum, c) => sum + (c.due_balance || 0), 0);
   const customersWithDue = isDemoMode ? demoMetrics.customersWithDue : customers.filter(c => (c.due_balance || 0) > 0).length;
 
-  const monthlyBillsCount = isDemoMode ? demoMetrics.monthlyBillsCount : bills.filter(b => {
-    const billDate = new Date(b.created_at);
-    return billDate >= thisMonthStart;
-  }).length;
-
-  const totalBilled = isDemoMode ? 9300 : bills.filter(b => new Date(b.created_at) >= thisMonthStart).reduce((sum, b) => sum + Number(b.amount), 0);
-  const collectionRate = isDemoMode ? demoMetrics.collectionRate : (totalBilled > 0 ? ((monthlyRevenue / totalBilled) * 100) : 0);
-
-  // Contextual guidance checks
+  // Contextual guidance
   const hasNoPaymentGateway = !isDemoMode && !currentTenant?.enable_online_payment;
   const autoSuspendDays = currentTenant?.auto_suspend_days;
 
@@ -103,9 +68,9 @@ export default function Dashboard() {
           <Skeleton className="h-8 w-32" />
           <Skeleton className="h-5 w-64" />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map(i => (
-            <Skeleton key={i} className="h-32 rounded-xl" />
+        <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <Skeleton key={i} className="h-20 rounded-xl" />
           ))}
         </div>
       </div>
@@ -122,22 +87,12 @@ export default function Dashboard() {
             {now.toLocaleDateString("en-US", { month: "long", year: "numeric" })} — your ISP at a glance
           </p>
         </div>
-        
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="gap-1.5"
-            onClick={() => navigate("/dashboard/billing")}
-          >
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate("/dashboard/billing")}>
             <FileText className="h-4 w-4" />
             <span className="hidden sm:inline">Generate Bills</span>
           </Button>
-          <Button 
-            size="sm" 
-            className="gap-1.5"
-            onClick={() => navigate("/dashboard/customers")}
-          >
+          <Button size="sm" className="gap-1.5" onClick={() => navigate("/dashboard/customers")}>
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Add Customer</span>
           </Button>
@@ -150,7 +105,7 @@ export default function Dashboard() {
       {/* Contextual Guidance Banners */}
       {hasNoPaymentGateway && totalCustomers > 0 && (
         <AlertBanner variant="info" title="Collect payments faster">
-          Enable online payments so customers can pay directly from their portal — reducing manual collection effort.{" "}
+          Enable online payments so customers can pay directly from their portal.{" "}
           <button onClick={() => navigate("/dashboard/settings")} className="font-semibold text-primary underline underline-offset-2">
             Set up now →
           </button>
@@ -159,68 +114,33 @@ export default function Dashboard() {
 
       {suspendedCustomers > 0 && autoSuspendDays && autoSuspendDays > 0 && (
         <AlertBanner variant="warning" title={`${suspendedCustomers} connection${suspendedCustomers > 1 ? "s" : ""} suspended`}>
-          Unpaid customers are automatically suspended after {autoSuspendDays} days. Connections restore instantly once payment is received.
+          Unpaid customers are automatically suspended after {autoSuspendDays} days.
         </AlertBanner>
       )}
 
-      {/* Primary Metrics — Revenue & Due first */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Monthly Revenue"
-          value={`৳${monthlyRevenue.toLocaleString()}`}
-          subtitle={now.toLocaleDateString("en-US", { month: "long" })}
-          icon={Wallet}
-          trend={revenueGrowth !== 0 ? { value: Math.abs(revenueGrowth), isPositive: revenueGrowth > 0 } : undefined}
-          variant="success"
-        />
-        <MetricCard
-          title="Outstanding Due"
-          value={`৳${totalDue.toLocaleString()}`}
-          subtitle={customersWithDue > 0 ? `From ${customersWithDue} customer${customersWithDue > 1 ? "s" : ""}` : "All caught up!"}
-          icon={AlertCircle}
-          variant={totalDue > 0 ? "warning" : "success"}
-        />
-        <MetricCard
-          title="Active Customers"
-          value={activeCustomers.toLocaleString()}
-          subtitle={`${totalCustomers} total`}
-          icon={Users}
-          trend={customerGrowth !== 0 ? { value: Math.abs(customerGrowth), isPositive: customerGrowth > 0 } : undefined}
-          variant="default"
-        />
-        <MetricCard
-          title="Collection Rate"
-          value={`${collectionRate.toFixed(0)}%`}
-          subtitle="This month"
-          icon={TrendingUp}
-          variant={collectionRate >= 90 ? "success" : collectionRate >= 70 ? "warning" : "danger"}
-        />
-      </div>
-
-      {/* Secondary Metrics - Compact */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <MetricCard
-          title="New This Month"
-          value={newCustomersThisMonth.toString()}
-          icon={UserPlus}
-          variant="default"
-          className="py-4"
-        />
-        <MetricCard
-          title="Suspended"
-          value={suspendedCustomers.toString()}
-          icon={ArrowDownRight}
-          variant={suspendedCustomers > 0 ? "danger" : "default"}
-          className="py-4"
-        />
-        <MetricCard
-          title="Bills Generated"
-          value={monthlyBillsCount.toString()}
-          icon={FileText}
-          variant="default"
-          className="py-4"
-        />
-      </div>
+      {/* Stats Grid — 4×5 colorful cards */}
+      <DashboardStatGrid
+        totalCustomers={totalCustomers}
+        activeCustomers={activeCustomers}
+        inactiveCustomers={inactiveCustomers}
+        suspendedCustomers={suspendedCustomers}
+        newCustomersThisMonth={newCustomersThisMonth}
+        renewedCustomers={0}
+        deactivatedCustomers={0}
+        expiredCustomers={0}
+        billedCount={billedCount}
+        paidCount={paidCount}
+        partiallyPaidCount={partiallyPaidCount}
+        unpaidCount={unpaidCount}
+        onlineCount={activeCustomers}
+        blockedCount={suspendedCustomers}
+        billExpiredCount={billExpiredCount}
+        dueCustomers={customersWithDue}
+        collectionRate={collectionRate}
+        monthlyRevenue={monthlyRevenue}
+        totalDue={totalDue}
+        billsGenerated={billedCount}
+      />
 
       {/* Charts and Activity */}
       <div className="grid gap-6 lg:grid-cols-5">
