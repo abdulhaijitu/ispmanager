@@ -58,6 +58,7 @@ import ChartOfAccountsPage from "@/pages/finance/ChartOfAccountsPage";
 import JournalVoucherPage from "@/pages/finance/JournalVoucherPage";
 import BalanceSheetPage from "@/pages/finance/BalanceSheetPage";
 import ProfitLossPage from "@/pages/finance/ProfitLossPage";
+import TrialBalancePage from "@/pages/finance/TrialBalancePage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
