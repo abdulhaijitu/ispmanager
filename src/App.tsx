@@ -231,7 +231,7 @@ const App = () => (
 
                 {/* Purchase & Vendors */}
                 <Route path="/dashboard/purchase/vendors" element={<VendorsPage />} />
-                <Route path="/dashboard/purchase" element={<PH title="Purchase" />} />
+                <Route path="/dashboard/purchase" element={<PurchasePage />} />
                 <Route path="/dashboard/purchase/bill" element={<PH title="Purchase Bill" />} />
 
                 {/* Resellers */}
