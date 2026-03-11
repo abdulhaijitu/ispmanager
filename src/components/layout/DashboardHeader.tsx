@@ -60,7 +60,7 @@ export function DashboardHeader() {
     .slice(0, 2);
 
   return (
-    <header className="sticky top-0 z-30 flex h-12 items-center gap-3 bg-primary text-primary-foreground px-3 md:px-4">
+    <header className="sticky top-0 z-40 flex h-12 items-center gap-3 bg-primary text-primary-foreground px-3 md:px-4">
       {/* Mobile menu trigger */}
       <Button
         variant="ghost"

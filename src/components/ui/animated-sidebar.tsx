@@ -73,20 +73,19 @@ export const DesktopSidebar = ({
   return (
     <motion.div
       className={cn(
-        "h-full px-2 py-4 hidden md:flex md:flex-col bg-sidebar border-r border-sidebar-border shrink-0 overflow-hidden relative",
+        "h-screen sticky top-0 px-2 py-4 hidden md:flex md:flex-col bg-sidebar border-r border-sidebar-border shrink-0 overflow-hidden relative",
         className
       )}
       animate={{
         width: open ? "240px" : "60px",
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-    
     >
       {children}
       {/* Toggle button */}
       <button
         onClick={() => setOpen(!open)}
-        className="absolute top-3 right-0 translate-x-1/2 z-50 h-6 w-6 rounded-full border border-sidebar-border bg-sidebar flex items-center justify-center hover:bg-sidebar-accent transition-colors shadow-sm"
+        className="absolute top-14 right-0 translate-x-1/2 z-30 h-6 w-6 rounded-full border border-sidebar-border bg-sidebar flex items-center justify-center hover:bg-sidebar-accent transition-colors shadow-sm"
       >
         {open ? (
           <ChevronLeft className="h-3.5 w-3.5 text-sidebar-foreground/70" />
