@@ -129,7 +129,7 @@ const App = () => (
                 <Route path="/dashboard/customers/:customerId" element={<CustomerDetail />} />
                 <Route path="/dashboard/clients/new-request" element={<NewRequestPage />} />
                 <Route path="/dashboard/clients/add" element={<AddNewClientPage />} />
-                <Route path="/dashboard/clients/left" element={<PH title="Left Clients" />} />
+                <Route path="/dashboard/clients/left" element={<LeftClientsPage />} />
                 <Route path="/dashboard/clients/change-request" element={<PH title="Change Request" />} />
 
                 {/* Configuration */}
