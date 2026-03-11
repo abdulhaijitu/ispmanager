@@ -84,6 +84,7 @@ import VendorsPage from "@/pages/purchase/VendorsPage";
 import PurchasePage from "@/pages/purchase/PurchasePage";
 import PurchaseBillPage from "@/pages/purchase/PurchaseBillPage";
 import SendSmsPage from "@/pages/sms/SendSmsPage";
+import SmsTemplatePage from "@/pages/sms/SmsTemplatePage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
@@ -248,7 +249,7 @@ const App = () => (
 
                 {/* SMS Service */}
                 <Route path="/dashboard/sms/send" element={<SendSmsPage />} />
-                <Route path="/dashboard/sms/template" element={<PH title="SMS Template" />} />
+                <Route path="/dashboard/sms/template" element={<SmsTemplatePage />} />
                 <Route path="/dashboard/sms/gateway" element={<PH title="SMS Gateway" />} />
 
                 {/* System */}
