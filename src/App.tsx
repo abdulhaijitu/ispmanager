@@ -44,6 +44,7 @@ import NotFound from "@/pages/NotFound";
 import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
 import TaskManagementPage from "@/pages/support/TaskManagementPage";
 import SupportCategoryPage from "@/pages/support/SupportCategoryPage";
+import TaskCategoryPage from "@/pages/support/TaskCategoryPage";
 import ClientSupportPage from "@/pages/support/ClientSupportPage";
 import SupportHistoryPage from "@/pages/support/SupportHistoryPage";
 import ZonesPage from "@/pages/config/ZonesPage";
