@@ -53,6 +53,7 @@ import DailyIncomePage from "@/pages/finance/DailyIncomePage";
 import DailyExpensePage from "@/pages/finance/DailyExpensePage";
 import DailyAccountClosingPage from "@/pages/finance/DailyAccountClosingPage";
 import FinancialHistoryPage from "@/pages/finance/FinancialHistoryPage";
+import AccountingDashboardPage from "@/pages/finance/AccountingDashboardPage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
@@ -165,7 +166,7 @@ const App = () => (
                 <Route path="/dashboard/finance/history" element={<FinancialHistoryPage />} />
 
                 {/* Accounting */}
-                <Route path="/dashboard/accounting" element={<PH title="Accounting Dashboard" />} />
+                <Route path="/dashboard/accounting" element={<AccountingDashboardPage />} />
                 <Route path="/dashboard/accounting/chart" element={<PH title="Chart of Accounts" />} />
                 <Route path="/dashboard/accounting/journal" element={<PH title="Journal" />} />
                 <Route path="/dashboard/accounting/balance-sheet" element={<PH title="Balance Sheet" />} />
