@@ -76,6 +76,7 @@ import ProfitLossPage from "@/pages/finance/ProfitLossPage";
 import TrialBalancePage from "@/pages/finance/TrialBalancePage";
 import ItemsPage from "@/pages/inventory/ItemsPage";
 import StockPage from "@/pages/inventory/StockPage";
+import AssetsPage from "@/pages/inventory/AssetsPage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
