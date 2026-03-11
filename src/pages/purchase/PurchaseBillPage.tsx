@@ -80,21 +80,15 @@ const PurchaseBillPage = () => {
   };
 
   return (
-    <PageContainer>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <SectionHeader
-          icon={ListOrdered}
-          title="Purchase List"
-          subtitle="All Purchase List"
-          breadcrumbs={[
-            { label: "Purchase", href: "/dashboard/purchase" },
-            { label: "Purchase Bills" },
-          ]}
-        />
+    <PageContainer
+      title="Purchase List"
+      description="All Purchase List"
+      actions={
         <Button onClick={() => navigate("/dashboard/purchase")} className="gap-2">
           <Plus className="h-4 w-4" /> Purchase
         </Button>
-      </div>
+      }
+    >
 
       <Tabs defaultValue="list" className="space-y-4">
         <TabsList>
