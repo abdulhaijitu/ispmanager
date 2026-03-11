@@ -40,6 +40,7 @@ import {
   Scale,
   TrendingUp,
   Building2,
+  Mail,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -288,8 +289,26 @@ const smsGroup: NavGroup = {
 
 const systemStandaloneItems: NavItem[] = [
   { title: "Notifications", href: "/dashboard/notifications", icon: Bell, roles: ["super_admin", "isp_owner", "admin", "manager", "staff", "accountant", "marketing"] },
-  { title: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["super_admin", "isp_owner", "admin"] },
 ];
+
+const systemGroup: NavGroup = {
+  label: "System",
+  icon: Settings,
+  roles: ["super_admin", "isp_owner", "admin"],
+  children: [
+    { title: "App Users", href: "/dashboard/system/app-users", icon: Users },
+    { title: "Company Setup", href: "/dashboard/system/company-setup", icon: Building2 },
+    { title: "Invoice Setup", href: "/dashboard/system/invoice-setup", icon: FileText },
+    { title: "Periods Setup", href: "/dashboard/system/periods-setup", icon: CalendarDays },
+    { title: "Payment Gateways", href: "/dashboard/system/payment-gateways", icon: CreditCard },
+    { title: "Email Setup", href: "/dashboard/system/email-setup", icon: Mail },
+    { title: "System Setup", href: "/dashboard/system/system-setup", icon: Cog },
+    { title: "P. Processing Fee", href: "/dashboard/system/processing-fee", icon: DollarSign },
+    { title: "VAT Setup", href: "/dashboard/system/vat-setup", icon: Receipt },
+    { title: "Activity Loggers", href: "/dashboard/system/activity-loggers", icon: ClipboardList },
+    { title: "Automatic Process", href: "/dashboard/system/automatic-process", icon: Wrench },
+  ],
+};
 
 // ── RESELLER SELF-SERVICE NAV ──
 const resellerSelfNavItems: NavItem[] = [
@@ -465,6 +484,7 @@ export function DashboardSidebar() {
             {systemStandaloneItems.filter(canAccess).map((item) => (
               <SidebarLink key={item.href} link={toLink(item)} active={isActive(item.href)} />
             ))}
+            {renderGroup(systemGroup)}
           </>
         )}
       </div>
