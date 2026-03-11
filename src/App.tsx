@@ -40,6 +40,7 @@ import ResellerDashboardPage from "@/pages/reseller/ResellerDashboardPage";
 import ResellerCustomersPage from "@/pages/reseller/ResellerCustomersPage";
 import ResellerPaymentsPage from "@/pages/reseller/ResellerPaymentsPage";
 import ResellerWalletPage from "@/pages/reseller/ResellerWalletPage";
+import ResellerPackageTariffPage from "@/pages/reseller/ResellerPackageTariffPage";
 import NotFound from "@/pages/NotFound";
 import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
 import TaskManagementPage from "@/pages/support/TaskManagementPage";
