@@ -37,7 +37,7 @@ export default function Dashboard() {
   const totalCustomers = isDemoMode ? demoMetrics.totalCustomers : customers.length;
   const activeCustomers = isDemoMode ? demoMetrics.activeCustomers : customers.filter(c => c.connection_status === "active").length;
   const suspendedCustomers = isDemoMode ? demoMetrics.suspendedCustomers : customers.filter(c => c.connection_status === "suspended").length;
-  const inactiveCustomers = isDemoMode ? 0 : customers.filter(c => c.connection_status === "inactive").length;
+  const inactiveCustomers = isDemoMode ? 0 : customers.filter(c => !c.connection_status || c.connection_status === "pending").length;
 
   const newCustomersThisMonth = isDemoMode ? demoMetrics.newCustomersThisMonth : customers.filter(c => new Date(c.join_date) >= thisMonthStart).length;
 
