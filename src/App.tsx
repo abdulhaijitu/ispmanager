@@ -78,6 +78,7 @@ import ItemsPage from "@/pages/inventory/ItemsPage";
 import StockPage from "@/pages/inventory/StockPage";
 import AssetsPage from "@/pages/inventory/AssetsPage";
 import VendorsPage from "@/pages/purchase/VendorsPage";
+import PurchasePage from "@/pages/purchase/PurchasePage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
