@@ -199,7 +199,7 @@ const App = () => (
                 {/* Support & Ticketing */}
                 <Route path="/dashboard/support" element={<ClientSupportPage />} />
                 <Route path="/dashboard/support/category" element={<SupportCategoryPage />} />
-                <Route path="/dashboard/support/history" element={<PH title="Support History" />} />
+                <Route path="/dashboard/support/history" element={<SupportHistoryPage />} />
 
                 {/* Task Management */}
                 <Route path="/dashboard/tasks" element={<PH title="Tasks" />} />
