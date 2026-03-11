@@ -74,6 +74,7 @@ import JournalVoucherPage from "@/pages/finance/JournalVoucherPage";
 import BalanceSheetPage from "@/pages/finance/BalanceSheetPage";
 import ProfitLossPage from "@/pages/finance/ProfitLossPage";
 import TrialBalancePage from "@/pages/finance/TrialBalancePage";
+import ItemsPage from "@/pages/inventory/ItemsPage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
