@@ -91,6 +91,7 @@ import PurchaseBillPage from "@/pages/purchase/PurchaseBillPage";
 import SendSmsPage from "@/pages/sms/SendSmsPage";
 import SmsTemplatePage from "@/pages/sms/SmsTemplatePage";
 import SmsGatewayPage from "@/pages/sms/SmsGatewayPage";
+import PaymentProcessingFeePage from "@/pages/system/PaymentProcessingFeePage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
@@ -268,7 +269,7 @@ const App = () => (
                 <Route path="/dashboard/system/payment-gateways" element={<PaymentGatewaysPage />} />
                 <Route path="/dashboard/system/email-setup" element={<PH title="Email Setup" />} />
                 <Route path="/dashboard/system/system-setup" element={<PH title="System Setup" />} />
-                <Route path="/dashboard/system/processing-fee" element={<PH title="P. Processing Fee" />} />
+                <Route path="/dashboard/system/processing-fee" element={<PaymentProcessingFeePage />} />
                 <Route path="/dashboard/system/vat-setup" element={<PH title="VAT Setup" />} />
                 <Route path="/dashboard/system/activity-loggers" element={<PH title="Activity Loggers" />} />
                 <Route path="/dashboard/system/automatic-process" element={<PH title="Automatic Process" />} />
