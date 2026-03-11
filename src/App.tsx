@@ -148,7 +148,7 @@ const App = () => (
 
                 {/* Billing & Finance */}
                 <Route path="/dashboard/billing" element={<Billing />} />
-                <Route path="/dashboard/billing/daily" element={<PH title="Daily Bill Collection" />} />
+                <Route path="/dashboard/billing/daily" element={<DailyCollectionPage />} />
                 <Route path="/dashboard/billing/monthly" element={<PH title="Monthly Billing Report" />} />
                 <Route path="/dashboard/payments" element={<Payments />} />
                 <Route path="/dashboard/reports" element={<Reports />} />

@@ -264,10 +264,10 @@ export default function DailyCollectionPage() {
                         <TableCell>{payment.customer?.phone || "—"}</TableCell>
                         <TableCell className="max-w-[120px] truncate">{payment.notes || "—"}</TableCell>
                         <TableCell className="text-right font-medium">৳{billAmount.toLocaleString()}</TableCell>
-                        <TableCell className="text-right font-semibold text-emerald-600">৳{received.toLocaleString()}</TableCell>
+                        <TableCell className="text-right font-semibold text-success">৳{received.toLocaleString()}</TableCell>
                         <TableCell className="text-right">৳0</TableCell>
                         <TableCell className="text-right">৳0</TableCell>
-                        <TableCell className="text-right">{due > 0 ? <span className="text-destructive font-medium">৳{due.toLocaleString()}</span> : <span className="text-emerald-600">৳0</span>}</TableCell>
+                        <TableCell className="text-right">{due > 0 ? <span className="text-destructive font-medium">৳{due.toLocaleString()}</span> : <span className="text-success">৳0</span>}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-[10px] capitalize">{payment.method || "cash"}</Badge>
                         </TableCell>
