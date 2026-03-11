@@ -94,6 +94,7 @@ import SmsGatewayPage from "@/pages/sms/SmsGatewayPage";
 import PaymentProcessingFeePage from "@/pages/system/PaymentProcessingFeePage";
 import VatSetupPage from "@/pages/system/VatSetupPage";
 import ActivityLoggersPage from "@/pages/system/ActivityLoggersPage";
+import AutomaticProcessPage from "@/pages/system/AutomaticProcessPage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
