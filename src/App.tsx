@@ -190,7 +190,7 @@ const App = () => (
                 <Route path="/dashboard/mikrotik/import" element={<MikrotikImportPage />} />
                 <Route path="/dashboard/mikrotik/bulk-import" element={<BulkClientsImportPage />} />
                 <Route path="/dashboard/olt" element={<OltDevicesPage />} />
-                <Route path="/dashboard/olt/users" element={<PH title="OLT Users" />} />
+                <Route path="/dashboard/olt/users" element={<OltUsersPage />} />
                 <Route path="/dashboard/network-diagram" element={<PH title="Network Diagram" />} />
 
                 {/* Support & Ticketing */}
