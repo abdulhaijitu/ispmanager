@@ -128,7 +128,7 @@ const App = () => (
 
                 {/* Configuration */}
                 <Route path="/dashboard/config/zones" element={<ZonesPage />} />
-                <Route path="/dashboard/config/connection-type" element={<PH title="Connection Type" />} />
+                <Route path="/dashboard/config/connection-type" element={<ConnectionTypePage />} />
                 <Route path="/dashboard/config/client-type" element={<PH title="Client Type" />} />
                 <Route path="/dashboard/config/protocol-type" element={<PH title="Protocol Type" />} />
                 <Route path="/dashboard/config/district" element={<PH title="District / Upazilla" />} />
