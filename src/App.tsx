@@ -46,6 +46,7 @@ import BillingStatusPage from "@/pages/config/BillingStatusPage";
 import NewRequestPage from "@/pages/clients/NewRequestPage";
 import AddNewClientPage from "@/pages/clients/AddNewClientPage";
 import LeftClientsPage from "@/pages/clients/LeftClientsPage";
+import ChangeRequestPage from "@/pages/clients/ChangeRequestPage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
@@ -131,7 +132,7 @@ const App = () => (
                 <Route path="/dashboard/clients/new-request" element={<NewRequestPage />} />
                 <Route path="/dashboard/clients/add" element={<AddNewClientPage />} />
                 <Route path="/dashboard/clients/left" element={<LeftClientsPage />} />
-                <Route path="/dashboard/clients/change-request" element={<PH title="Change Request" />} />
+                <Route path="/dashboard/clients/change-request" element={<ChangeRequestPage />} />
 
                 {/* Configuration */}
                 <Route path="/dashboard/config/zones" element={<ZonesPage />} />
