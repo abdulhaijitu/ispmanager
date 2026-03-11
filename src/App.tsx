@@ -49,6 +49,7 @@ import LeftClientsPage from "@/pages/clients/LeftClientsPage";
 import ChangeRequestPage from "@/pages/clients/ChangeRequestPage";
 import DailyCollectionPage from "@/pages/billing/DailyCollectionPage";
 import MonthlyBillingReport from "@/pages/billing/MonthlyBillingReport";
+import DailyIncomePage from "@/pages/finance/DailyIncomePage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
@@ -155,7 +156,7 @@ const App = () => (
                 <Route path="/dashboard/reports" element={<Reports />} />
 
                 {/* Income & Expense */}
-                <Route path="/dashboard/finance/income" element={<PH title="Daily Income" />} />
+                <Route path="/dashboard/finance/income" element={<DailyIncomePage />} />
                 <Route path="/dashboard/finance/expense" element={<PH title="Daily Expense" />} />
                 <Route path="/dashboard/finance/closing" element={<PH title="Account Closing" />} />
                 <Route path="/dashboard/finance/history" element={<PH title="Financial History" />} />
