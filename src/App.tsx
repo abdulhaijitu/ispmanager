@@ -85,6 +85,7 @@ import PurchasePage from "@/pages/purchase/PurchasePage";
 import PurchaseBillPage from "@/pages/purchase/PurchaseBillPage";
 import SendSmsPage from "@/pages/sms/SendSmsPage";
 import SmsTemplatePage from "@/pages/sms/SmsTemplatePage";
+import SmsGatewayPage from "@/pages/sms/SmsGatewayPage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
