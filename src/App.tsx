@@ -30,6 +30,7 @@ import NetworkPage from "@/pages/NetworkPage";
 import MikrotikServersPage from "@/pages/network/MikrotikServersPage";
 import MikrotikBackupPage from "@/pages/network/MikrotikBackupPage";
 import MikrotikImportPage from "@/pages/network/MikrotikImportPage";
+import BulkClientsImportPage from "@/pages/network/BulkClientsImportPage";
 import OltDevicesPage from "@/pages/OltDevicesPage";
 import Notifications from "@/pages/Notifications";
 import Resellers from "@/pages/Resellers";
@@ -186,7 +187,7 @@ const App = () => (
                 <Route path="/dashboard/mikrotik/servers" element={<MikrotikServersPage />} />
                 <Route path="/dashboard/mikrotik/backup" element={<MikrotikBackupPage />} />
                 <Route path="/dashboard/mikrotik/import" element={<MikrotikImportPage />} />
-                <Route path="/dashboard/mikrotik/bulk-import" element={<PH title="Bulk Clients Import" />} />
+                <Route path="/dashboard/mikrotik/bulk-import" element={<BulkClientsImportPage />} />
                 <Route path="/dashboard/olt" element={<OltDevicesPage />} />
                 <Route path="/dashboard/olt/users" element={<PH title="OLT Users" />} />
                 <Route path="/dashboard/network-diagram" element={<PH title="Network Diagram" />} />
