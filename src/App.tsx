@@ -43,6 +43,7 @@ import ClientTypePage from "@/pages/config/ClientTypePage";
 import ProtocolTypePage from "@/pages/config/ProtocolTypePage";
 import AreaManagementPage from "@/pages/config/AreaManagementPage";
 import BillingStatusPage from "@/pages/config/BillingStatusPage";
+import NewRequestPage from "@/pages/clients/NewRequestPage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
