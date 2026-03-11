@@ -99,21 +99,6 @@ export default function Dashboard() {
       {/* Onboarding Checklist */}
       <OnboardingChecklist />
 
-      {/* Contextual Guidance Banners */}
-      {hasNoPaymentGateway && totalCustomers > 0 && (
-        <AlertBanner variant="info" title="Collect payments faster">
-          Enable online payments so customers can pay directly from their portal.{" "}
-          <button onClick={() => navigate("/dashboard/settings")} className="font-semibold text-primary underline underline-offset-2">
-            Set up now →
-          </button>
-        </AlertBanner>
-      )}
-
-      {suspendedCustomers > 0 && autoSuspendDays && autoSuspendDays > 0 && (
-        <AlertBanner variant="warning" title={`${suspendedCustomers} connection${suspendedCustomers > 1 ? "s" : ""} suspended`}>
-          Unpaid customers are automatically suspended after {autoSuspendDays} days.
-        </AlertBanner>
-      )}
 
       {/* Stats Grid — 4×5 colorful cards */}
       <DashboardStatGrid
