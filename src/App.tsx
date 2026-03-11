@@ -46,6 +46,7 @@ import ResellerPgwSettlementPage from "@/pages/reseller/ResellerPgwSettlementPag
 import NotFound from "@/pages/NotFound";
 import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
 import CompanySetupPage from "@/pages/system/CompanySetupPage";
+import AppUsersPage from "@/pages/system/AppUsersPage";
 import TaskManagementPage from "@/pages/support/TaskManagementPage";
 import SupportCategoryPage from "@/pages/support/SupportCategoryPage";
 import TaskCategoryPage from "@/pages/support/TaskCategoryPage";
@@ -257,7 +258,7 @@ const App = () => (
                 {/* System */}
                 <Route path="/dashboard/notifications" element={<Notifications />} />
                 <Route path="/dashboard/settings" element={<Settings />} />
-                <Route path="/dashboard/system/app-users" element={<PH title="App Users" />} />
+                <Route path="/dashboard/system/app-users" element={<AppUsersPage />} />
                 <Route path="/dashboard/system/company-setup" element={<CompanySetupPage />} />
                 <Route path="/dashboard/system/invoice-setup" element={<PH title="Invoice Setup" />} />
                 <Route path="/dashboard/system/periods-setup" element={<PH title="Periods Setup" />} />
