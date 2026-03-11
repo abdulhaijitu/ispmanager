@@ -40,6 +40,7 @@ import ResellerDashboardPage from "@/pages/reseller/ResellerDashboardPage";
 import ResellerCustomersPage from "@/pages/reseller/ResellerCustomersPage";
 import ResellerPaymentsPage from "@/pages/reseller/ResellerPaymentsPage";
 import ResellerWalletPage from "@/pages/reseller/ResellerWalletPage";
+import ResellerPackageTariffPage from "@/pages/reseller/ResellerPackageTariffPage";
 import NotFound from "@/pages/NotFound";
 import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
 import TaskManagementPage from "@/pages/support/TaskManagementPage";
@@ -238,7 +239,7 @@ const App = () => (
                 {/* Resellers */}
                 <Route path="/dashboard/resellers" element={<Resellers />} />
                 <Route path="/dashboard/resellers/:resellerId" element={<ResellerDetail />} />
-                <Route path="/dashboard/resellers/tariff" element={<PH title="Package / Tariff Config" />} />
+                <Route path="/dashboard/resellers/tariff" element={<ResellerPackageTariffPage />} />
                 <Route path="/dashboard/resellers/funding" element={<PH title="Reseller Funding" />} />
                 <Route path="/dashboard/resellers/pgw" element={<PH title="PGW Settlement" />} />
 
