@@ -55,6 +55,7 @@ import DailyAccountClosingPage from "@/pages/finance/DailyAccountClosingPage";
 import FinancialHistoryPage from "@/pages/finance/FinancialHistoryPage";
 import AccountingDashboardPage from "@/pages/finance/AccountingDashboardPage";
 import ChartOfAccountsPage from "@/pages/finance/ChartOfAccountsPage";
+import JournalVoucherPage from "@/pages/finance/JournalVoucherPage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
@@ -169,7 +170,7 @@ const App = () => (
                 {/* Accounting */}
                 <Route path="/dashboard/accounting" element={<AccountingDashboardPage />} />
                 <Route path="/dashboard/accounting/chart" element={<ChartOfAccountsPage />} />
-                <Route path="/dashboard/accounting/journal" element={<PH title="Journal" />} />
+                <Route path="/dashboard/accounting/journal" element={<JournalVoucherPage />} />
                 <Route path="/dashboard/accounting/balance-sheet" element={<PH title="Balance Sheet" />} />
                 <Route path="/dashboard/accounting/profit-loss" element={<PH title="Profit & Loss" />} />
                 <Route path="/dashboard/accounting/trial-balance" element={<PH title="Trial Balance" />} />
