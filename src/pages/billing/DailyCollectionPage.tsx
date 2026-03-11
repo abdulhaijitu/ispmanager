@@ -104,15 +104,15 @@ export default function DailyCollectionPage() {
         <TabsContent value="collected" className="space-y-4 mt-4">
           {/* Stat Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="p-4 bg-gradient-to-br from-emerald-500 to-cyan-500 text-white border-0">
+            <Card className="p-4 bg-gradient-to-br from-success/90 to-primary/80 text-primary-foreground border-0">
               <p className="text-sm font-medium opacity-90">Receive</p>
               <p className="text-2xl font-bold mt-1">৳ {totalReceived.toLocaleString()}</p>
             </Card>
-            <Card className="p-4 bg-gradient-to-br from-teal-500 to-emerald-600 text-white border-0">
+            <Card className="p-4 bg-gradient-to-br from-secondary to-accent text-secondary-foreground border-0">
               <p className="text-sm font-medium opacity-90">Discount</p>
               <p className="text-2xl font-bold mt-1">৳ {totalDiscount.toLocaleString()}</p>
             </Card>
-            <Card className="p-4 bg-gradient-to-br from-violet-500 to-purple-600 text-white border-0">
+            <Card className="p-4 bg-gradient-to-br from-primary to-accent text-primary-foreground border-0">
               <p className="text-sm font-medium opacity-90">Due</p>
               <p className="text-2xl font-bold mt-1">৳ {Math.max(0, totalDue).toLocaleString()}</p>
             </Card>
