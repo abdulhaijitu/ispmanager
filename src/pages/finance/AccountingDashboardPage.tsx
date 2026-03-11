@@ -89,7 +89,7 @@ function SummaryCard({ title, amount, filteredAmount, monthLabel, icon, gradient
 export default function AccountingDashboardPage() {
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
-  const { currentTenant } = useTenant();
+  const { currentTenant } = useTenantContext();
   const { isDemoMode } = useDemoMode();
   const { data: payments } = usePayments(currentTenant?.id);
   const { data: bills } = useBills(currentTenant?.id);
