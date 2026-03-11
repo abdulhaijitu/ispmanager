@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserPlus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import ispManagerIcon from "@/assets/isp-manager-icon.png";
@@ -108,7 +108,13 @@ export default function StaffLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
+    <div className="min-h-screen relative flex items-center justify-center bg-muted/30 px-4">
+      <Link to="/portal/signup" className="absolute top-4 left-4">
+        <Button variant="outline" size="sm">
+          <UserPlus className="mr-2 h-4 w-4" />
+          Client Registration
+        </Button>
+      </Link>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <img src={ispManagerIcon} alt="ISP Manager" className="mx-auto mb-4 h-12 w-12 rounded-lg object-contain" />
