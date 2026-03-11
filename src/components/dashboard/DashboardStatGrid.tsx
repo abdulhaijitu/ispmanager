@@ -19,13 +19,14 @@ import {
   Wallet,
   Receipt,
 } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 import { DashboardStatCard, type StatVariant } from "./DashboardStatCard";
 
 interface StatItem {
   title: string;
   value: string | number;
   subtitle?: string;
-  icon: React.ComponentType<any>;
+  icon: LucideIcon;
   variant: StatVariant;
 }
 
