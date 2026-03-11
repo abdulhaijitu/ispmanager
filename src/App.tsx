@@ -83,6 +83,7 @@ import AssetsPage from "@/pages/inventory/AssetsPage";
 import VendorsPage from "@/pages/purchase/VendorsPage";
 import PurchasePage from "@/pages/purchase/PurchasePage";
 import PurchaseBillPage from "@/pages/purchase/PurchaseBillPage";
+import SendSmsPage from "@/pages/sms/SendSmsPage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
