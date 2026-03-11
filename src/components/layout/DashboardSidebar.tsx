@@ -550,7 +550,7 @@ export function DashboardSidebar() {
       </div>
 
       {/* Footer - Compact */}
-      <div className="border-t border-sidebar-border pt-2 pb-1">
+      <div className="mt-auto shrink-0 border-t border-sidebar-border pt-2 pb-1">
         <div className="flex items-center gap-2">
           <div className="relative h-7 w-7 shrink-0 rounded-full bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 flex items-center justify-center">
             {profileLoading || roleLoading ? (
