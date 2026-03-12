@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Download, Loader2, FileSpreadsheet, FileText, Users, UserPlus, RefreshCw, ArrowRightLeft, Wifi, Shield } from "lucide-react";
+import { Download, Loader2, FileSpreadsheet, FileText, Users, UserPlus, RefreshCw, ArrowRightLeft, Wifi, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CustomerTable, type CustomerTableData } from "@/components/customers/CustomerTable";
