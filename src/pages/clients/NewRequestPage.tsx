@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { PageContainer } from "@/components/shared/PageContainer";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { Plus, Pencil, Trash2, Search, FileText, CalendarIcon, UserCheck, Filter, RotateCcw } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, FileText, CalendarIcon, UserCheck, Filter, RotateCcw, User, Phone, Network, Settings, ChevronLeft, ChevronRight, X } from "lucide-react";
 
 interface ClientRequest {
   id: string;
@@ -111,12 +113,17 @@ export default function NewRequestPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editItem, setEditItem] = useState<ClientRequest | null>(null);
   const [deleteItem, setDeleteItem] = useState<ClientRequest | null>(null);
+  const [step, setStep] = useState(0);
 
   // Form
   const [form, setForm] = useState({
     customerName: "", mobile: "", address: "", zone: "", subzone: "",
     customerType: "Home User", connectionType: "Fiber", packageName: "",
     monthlyBill: 0, billingDate: "", otc: 0, physicalConnectivity: "FTTH",
+    gender: "", occupation: "", dateOfBirth: "", fatherName: "", motherName: "",
+    nidNo: "", regFormNo: "", remarks: "",
+    email: "", division: "", district: "", thana: "", altMobile: "",
+    oltDevice: "", onuMac: "",
   });
 
   const uniqueCreatedBy = [...new Set(items.map((i) => i.createdBy))];
@@ -139,25 +146,34 @@ export default function NewRequestPage() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / pp));
   const paginated = filtered.slice((page - 1) * pp, page * pp);
 
+  const defaultForm = {
+    customerName: "", mobile: "", address: "", zone: "", subzone: "",
+    customerType: "Home User", connectionType: "Fiber", packageName: "",
+    monthlyBill: 0, billingDate: "", otc: 0, physicalConnectivity: "FTTH",
+    gender: "", occupation: "", dateOfBirth: "", fatherName: "", motherName: "",
+    nidNo: "", regFormNo: "", remarks: "",
+    email: "", division: "", district: "", thana: "", altMobile: "",
+    oltDevice: "", onuMac: "",
+  };
+
   const openAdd = () => {
     setEditItem(null);
-    setForm({
-      customerName: "", mobile: "", address: "", zone: "", subzone: "",
-      customerType: "Home User", connectionType: "Fiber", packageName: "",
-      monthlyBill: 0, billingDate: "", otc: 0, physicalConnectivity: "FTTH",
-    });
+    setForm(defaultForm);
+    setStep(0);
     setDialogOpen(true);
   };
 
   const openEdit = (item: ClientRequest) => {
     setEditItem(item);
     setForm({
+      ...defaultForm,
       customerName: item.customerName, mobile: item.mobile, address: item.address,
       zone: item.zone, subzone: item.subzone, customerType: item.customerType,
       connectionType: item.connectionType, packageName: item.packageName,
       monthlyBill: item.monthlyBill, billingDate: item.billingDate,
       otc: item.otc, physicalConnectivity: item.physicalConnectivity,
     });
+    setStep(0);
     setDialogOpen(true);
   };
 
@@ -410,90 +426,258 @@ export default function NewRequestPage() {
         </CardContent>
       </Card>
 
-      {/* Add/Edit Dialog */}
+      {/* Add/Edit Multi-Step Wizard Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editItem ? "Edit Client Request" : "Add Client Request"}</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-2">
-            <div className="space-y-2">
-              <Label>Customer Name *</Label>
-              <Input value={form.customerName} onChange={(e) => setForm({ ...form, customerName: e.target.value })} placeholder="Full name" />
-            </div>
-            <div className="space-y-2">
-              <Label>Mobile *</Label>
-              <Input value={form.mobile} onChange={(e) => setForm({ ...form, mobile: e.target.value })} placeholder="01XXXXXXXXX" />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label>Address</Label>
-              <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Full address" />
-            </div>
-            <div className="space-y-2">
-              <Label>Zone</Label>
-              <Input value={form.zone} onChange={(e) => setForm({ ...form, zone: e.target.value })} placeholder="Zone" />
-            </div>
-            <div className="space-y-2">
-              <Label>Subzone</Label>
-              <Input value={form.subzone} onChange={(e) => setForm({ ...form, subzone: e.target.value })} placeholder="Subzone" />
-            </div>
-            <div className="space-y-2">
-              <Label>Customer Type</Label>
-              <Select value={form.customerType} onValueChange={(v) => setForm({ ...form, customerType: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Home User">Home User</SelectItem>
-                  <SelectItem value="Corporate Office">Corporate Office</SelectItem>
-                  <SelectItem value="Reseller">Reseller</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Connection Type</Label>
-              <Select value={form.connectionType} onValueChange={(v) => setForm({ ...form, connectionType: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Fiber">Fiber</SelectItem>
-                  <SelectItem value="Dedicated">Dedicated</SelectItem>
-                  <SelectItem value="Wireless">Wireless</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Package</Label>
-              <Input value={form.packageName} onChange={(e) => setForm({ ...form, packageName: e.target.value })} placeholder="Package name" />
-            </div>
-            <div className="space-y-2">
-              <Label>Monthly Bill (৳)</Label>
-              <Input type="number" value={form.monthlyBill} onChange={(e) => setForm({ ...form, monthlyBill: Number(e.target.value) })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Billing Date</Label>
-              <Input type="date" value={form.billingDate} onChange={(e) => setForm({ ...form, billingDate: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <Label>OTC (৳)</Label>
-              <Input type="number" value={form.otc} onChange={(e) => setForm({ ...form, otc: Number(e.target.value) })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Physical Connectivity</Label>
-              <Select value={form.physicalConnectivity} onValueChange={(v) => setForm({ ...form, physicalConnectivity: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="FTTH">FTTH</SelectItem>
-                  <SelectItem value="Direct Fiber">Direct Fiber</SelectItem>
-                  <SelectItem value="UTP Cable">UTP Cable</SelectItem>
-                  <SelectItem value="Wireless">Wireless</SelectItem>
-                </SelectContent>
-              </Select>
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-hidden p-0 gap-0">
+          {/* Dark Header */}
+          <div className="bg-primary px-6 py-4 rounded-t-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-primary-foreground">
+                  {editItem ? "Edit Client Request" : "New Client Request"}
+                </h2>
+                <p className="text-xs text-primary-foreground/70 mt-0.5">
+                  {editItem ? "Update the client request information" : "Fill in the details to create a new client request"}
+                </p>
+              </div>
+              <span className="text-xs text-primary-foreground/60 font-medium">Step {step + 1} of 4</span>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={!form.customerName.trim() || !form.mobile.trim()}>
-              {editItem ? "Update" : "Submit Request"}
+
+          {/* Step Indicators */}
+          <div className="px-6 pt-4 pb-2">
+            <div className="flex items-center justify-between mb-3">
+              {[
+                { icon: User, label: "Personal Info" },
+                { icon: Phone, label: "Contact Info" },
+                { icon: Network, label: "Network & Product" },
+                { icon: Settings, label: "Service Info" },
+              ].map((s, i) => (
+                <button
+                  key={i}
+                  onClick={() => setStep(i)}
+                  className={cn(
+                    "flex flex-col items-center gap-1.5 flex-1 group cursor-pointer",
+                  )}
+                >
+                  <div className={cn(
+                    "w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-200",
+                    i === step
+                      ? "bg-primary border-primary text-primary-foreground shadow-md"
+                      : i < step
+                        ? "bg-primary/15 border-primary/40 text-primary"
+                        : "bg-muted border-border text-muted-foreground"
+                  )}>
+                    <s.icon className="h-4 w-4" />
+                  </div>
+                  <span className={cn(
+                    "text-[10px] font-medium transition-colors hidden sm:block",
+                    i === step ? "text-primary" : "text-muted-foreground"
+                  )}>{s.label}</span>
+                </button>
+              ))}
+            </div>
+            <Progress value={((step + 1) / 4) * 100} className="h-1.5" />
+          </div>
+
+          {/* Form Content */}
+          <div className="px-6 py-4 overflow-y-auto max-h-[55vh]">
+            {/* Step 1: Personal Info */}
+            {step === 0 && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-foreground border-b pb-2 mb-3">Personal Information</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Name <span className="text-destructive">*</span></Label>
+                    <Input value={form.customerName} onChange={(e) => setForm({ ...form, customerName: e.target.value })} placeholder="Full name" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Gender</Label>
+                    <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v })}>
+                      <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select gender" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Occupation</Label>
+                    <Input value={form.occupation} onChange={(e) => setForm({ ...form, occupation: e.target.value })} placeholder="Occupation" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Date of Birth</Label>
+                    <Input type="date" value={form.dateOfBirth} onChange={(e) => setForm({ ...form, dateOfBirth: e.target.value })} className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Father Name</Label>
+                    <Input value={form.fatherName} onChange={(e) => setForm({ ...form, fatherName: e.target.value })} placeholder="Father's name" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Mother Name</Label>
+                    <Input value={form.motherName} onChange={(e) => setForm({ ...form, motherName: e.target.value })} placeholder="Mother's name" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">NID / Birth Certificate No</Label>
+                    <Input value={form.nidNo} onChange={(e) => setForm({ ...form, nidNo: e.target.value })} placeholder="NID number" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Registration Form No</Label>
+                    <Input value={form.regFormNo} onChange={(e) => setForm({ ...form, regFormNo: e.target.value })} placeholder="Reg. form no" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5 sm:col-span-2 lg:col-span-1">
+                    <Label className="text-xs">Remarks</Label>
+                    <Textarea value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} placeholder="Any remarks..." className="text-sm min-h-[36px] h-9 resize-none" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Contact Info */}
+            {step === 1 && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-foreground border-b pb-2 mb-3">Contact Information</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Mobile <span className="text-destructive">*</span></Label>
+                    <Input value={form.mobile} onChange={(e) => setForm({ ...form, mobile: e.target.value })} placeholder="01XXXXXXXXX" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Email</Label>
+                    <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="email@example.com" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Alternative Mobile</Label>
+                    <Input value={form.altMobile} onChange={(e) => setForm({ ...form, altMobile: e.target.value })} placeholder="01XXXXXXXXX" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Division</Label>
+                    <Input value={form.division} onChange={(e) => setForm({ ...form, division: e.target.value })} placeholder="Division" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">District</Label>
+                    <Input value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} placeholder="District" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Thana / Upazilla</Label>
+                    <Input value={form.thana} onChange={(e) => setForm({ ...form, thana: e.target.value })} placeholder="Thana / Upazilla" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
+                    <Label className="text-xs">Address</Label>
+                    <Textarea value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Full address" className="text-sm min-h-[60px] resize-none" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Network & Product Info */}
+            {step === 2 && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-foreground border-b pb-2 mb-3">Network & Product Information</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Zone</Label>
+                    <Input value={form.zone} onChange={(e) => setForm({ ...form, zone: e.target.value })} placeholder="Zone" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Subzone</Label>
+                    <Input value={form.subzone} onChange={(e) => setForm({ ...form, subzone: e.target.value })} placeholder="Subzone" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Connection Type</Label>
+                    <Select value={form.connectionType} onValueChange={(v) => setForm({ ...form, connectionType: v })}>
+                      <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Fiber">Fiber</SelectItem>
+                        <SelectItem value="Dedicated">Dedicated</SelectItem>
+                        <SelectItem value="Wireless">Wireless</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Physical Connectivity</Label>
+                    <Select value={form.physicalConnectivity} onValueChange={(v) => setForm({ ...form, physicalConnectivity: v })}>
+                      <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="FTTH">FTTH</SelectItem>
+                        <SelectItem value="Direct Fiber">Direct Fiber</SelectItem>
+                        <SelectItem value="UTP Cable">UTP Cable</SelectItem>
+                        <SelectItem value="Wireless">Wireless</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">OLT Device</Label>
+                    <Input value={form.oltDevice} onChange={(e) => setForm({ ...form, oltDevice: e.target.value })} placeholder="OLT device" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">ONU MAC</Label>
+                    <Input value={form.onuMac} onChange={(e) => setForm({ ...form, onuMac: e.target.value })} placeholder="ONU MAC address" className="h-9 text-sm" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Service Info */}
+            {step === 3 && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-foreground border-b pb-2 mb-3">Service Information</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Package</Label>
+                    <Input value={form.packageName} onChange={(e) => setForm({ ...form, packageName: e.target.value })} placeholder="Package name" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Customer Type</Label>
+                    <Select value={form.customerType} onValueChange={(v) => setForm({ ...form, customerType: v })}>
+                      <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Home User">Home User</SelectItem>
+                        <SelectItem value="Corporate Office">Corporate Office</SelectItem>
+                        <SelectItem value="Reseller">Reseller</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Monthly Bill (৳)</Label>
+                    <Input type="number" value={form.monthlyBill} onChange={(e) => setForm({ ...form, monthlyBill: Number(e.target.value) })} className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Billing Date</Label>
+                    <Input type="date" value={form.billingDate} onChange={(e) => setForm({ ...form, billingDate: e.target.value })} className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">OTC (৳)</Label>
+                    <Input type="number" value={form.otc} onChange={(e) => setForm({ ...form, otc: Number(e.target.value) })} className="h-9 text-sm" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer Navigation */}
+          <div className="flex items-center justify-between px-6 py-3 border-t bg-muted/30">
+            <Button variant="outline" size="sm" onClick={() => setDialogOpen(false)}>
+              <X className="h-3.5 w-3.5 mr-1" /> Close
             </Button>
-          </DialogFooter>
+            <div className="flex gap-2">
+              {step > 0 && (
+                <Button variant="outline" size="sm" onClick={() => setStep(step - 1)}>
+                  <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Previous
+                </Button>
+              )}
+              {step < 3 ? (
+                <Button size="sm" onClick={() => setStep(step + 1)}>
+                  Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                </Button>
+              ) : (
+                <Button size="sm" onClick={handleSave} disabled={!form.customerName.trim() || !form.mobile.trim()}>
+                  {editItem ? "Update" : "Submit Request"}
+                </Button>
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
