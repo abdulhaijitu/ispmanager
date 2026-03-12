@@ -155,6 +155,17 @@ export default function PortalManagePage() {
 // NOTICES TAB
 // ════════════════════════════════════
 function NoticesTab({ search, setSearch, pageSize, setPageSize }: { search: string; setSearch: (v: string) => void; pageSize: string; setPageSize: (v: string) => void }) {
+  const [noticeDialogOpen, setNoticeDialogOpen] = useState(false);
+  const [noticeTitle, setNoticeTitle] = useState("");
+  const [noticeDetails, setNoticeDetails] = useState("");
+
+  const handleNoticeSubmit = () => {
+    console.log("Notice submitted:", { noticeTitle, noticeDetails });
+    setNoticeTitle("");
+    setNoticeDetails("");
+    setNoticeDialogOpen(false);
+  };
+
   return (
     <div className="space-y-4">
       {/* Action Bar */}
@@ -163,8 +174,63 @@ function NoticesTab({ search, setSearch, pageSize, setPageSize }: { search: stri
           <Button variant="outline" size="sm"><FileText className="h-4 w-4 mr-1.5" />Generate PDF</Button>
           <Button variant="outline" size="sm"><FileSpreadsheet className="h-4 w-4 mr-1.5" />Generate CSV</Button>
         </div>
-        <Button size="sm"><Plus className="h-4 w-4 mr-1.5" />New Notice</Button>
+        <Button size="sm" onClick={() => setNoticeDialogOpen(true)}><Plus className="h-4 w-4 mr-1.5" />New Notice</Button>
       </div>
+
+      {/* Add New Notice Dialog */}
+      <Dialog open={noticeDialogOpen} onOpenChange={setNoticeDialogOpen}>
+        <DialogContent className="sm:max-w-[520px] p-0 gap-0 overflow-hidden">
+          <DialogHeader className="bg-primary text-primary-foreground px-5 py-4">
+            <DialogTitle className="text-base font-bold text-primary-foreground">Add New Notice</DialogTitle>
+          </DialogHeader>
+
+          <div className="p-5 space-y-5">
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase tracking-wide">
+                Notice Title <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                placeholder="Enter notice title"
+                value={noticeTitle}
+                onChange={(e) => setNoticeTitle(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase tracking-wide">
+                Notice Details <span className="text-destructive">*</span>
+              </Label>
+              <Textarea
+                placeholder="Enter notice details..."
+                value={noticeDetails}
+                onChange={(e) => setNoticeDetails(e.target.value)}
+                rows={5}
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="border-t px-5 py-3 flex-row justify-between sm:justify-between">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-destructive text-destructive hover:bg-destructive/10"
+              onClick={() => setNoticeDialogOpen(false)}
+            >
+              <X className="h-4 w-4 mr-1.5" />
+              Cancel
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNoticeSubmit}
+              disabled={!noticeTitle.trim() || !noticeDetails.trim()}
+            >
+              <Check className="h-4 w-4 mr-1.5" />
+              Submit
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Show entries + Search */}
       <EntriesSearchBar search={search} setSearch={setSearch} pageSize={pageSize} setPageSize={setPageSize} />
