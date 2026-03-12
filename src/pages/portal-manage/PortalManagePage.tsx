@@ -281,11 +281,28 @@ function MediaServersTab() {
   const [categoryName, setCategoryName] = useState("");
   const [categoryDetails, setCategoryDetails] = useState("");
 
+  const [serverDialogOpen, setServerDialogOpen] = useState(false);
+  const [serverCategory, setServerCategory] = useState("");
+  const [serverName, setServerName] = useState("");
+  const [serverLogo, setServerLogo] = useState<File | null>(null);
+  const [serverLink, setServerLink] = useState("");
+  const [serverDetails, setServerDetails] = useState("");
+
   const handleCategorySubmit = () => {
     console.log("Category submitted:", { categoryName, categoryDetails });
     setCategoryName("");
     setCategoryDetails("");
     setCategoryDialogOpen(false);
+  };
+
+  const handleServerSubmit = () => {
+    console.log("Server submitted:", { serverCategory, serverName, serverLogo, serverLink, serverDetails });
+    setServerCategory("");
+    setServerName("");
+    setServerLogo(null);
+    setServerLink("");
+    setServerDetails("");
+    setServerDialogOpen(false);
   };
 
   return (
