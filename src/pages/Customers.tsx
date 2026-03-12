@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Download, Loader2, FileSpreadsheet, FileText, Users, UserPlus, RefreshCw, ArrowRightLeft, Wifi, Shield } from "lucide-react";
+import { Download, Loader2, FileSpreadsheet, FileText, Users, UserPlus, RefreshCw, ArrowRightLeft, Wifi, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CustomerTable, type CustomerTableData } from "@/components/customers/CustomerTable";
@@ -155,11 +155,6 @@ export default function Customers() {
     setCurrentPage(1);
   };
 
-  const handleAddCustomer = () => {
-    setFormMode("add");
-    setSelectedCustomer(null);
-    setFormDialogOpen(true);
-  };
 
   const handleEditCustomer = (customer: CustomerTableData) => {
     setFormMode("edit");
@@ -280,10 +275,6 @@ export default function Customers() {
           <h1 className="text-2xl font-bold tracking-tight">Client List</h1>
           <p className="text-muted-foreground">View All Client</p>
         </div>
-        <Button className="gap-2" onClick={handleAddCustomer}>
-          <Plus className="h-4 w-4" />
-          Add New Client
-        </Button>
       </div>
 
       {/* Action Buttons Bar */}
