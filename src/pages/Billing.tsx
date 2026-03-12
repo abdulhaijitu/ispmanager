@@ -3,9 +3,7 @@ import {
   Receipt,
   Download,
   Search,
-  Filter,
   Plus,
-  Calendar,
   Eye,
   Send,
   MoreHorizontal,
@@ -14,8 +12,20 @@ import {
   Clock,
   AlertCircle,
   Loader2,
+  FileSpreadsheet,
+  RefreshCw,
+  Ban,
+  RotateCcw,
+  MapPin,
+  ChevronDown,
+  ChevronUp,
+  Users,
+  DollarSign,
+  Wallet,
+  TrendingUp,
+  
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -49,8 +59,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { InvoiceDetailDialog, type InvoiceDetail } from "@/components/billing/InvoiceDetailDialog";
 import { RecordPaymentDialog } from "@/components/billing/RecordPaymentDialog";
 import { useBills, useGenerateBills, type Bill } from "@/hooks/useBills";
@@ -58,6 +68,19 @@ import { useTenantContext } from "@/contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { downloadInvoicePdf } from "@/lib/generateInvoicePdf";
 import type { PaymentStatus } from "@/types";
+import { useDemoMode } from "@/contexts/DemoModeContext";
+
+// Demo billing list data
+const demoBillingList = [
+  { id: "BL-001", cCode: "C001", idIp: "192.168.1.10", name: "Rahim Ahmed", mobile: "01712345678", zone: "Zone-A", cusType: "Home", connType: "Fiber", package: "Home 20", speed: "20 Mbps", exDate: "2025-04-15", mBill: 800, received: 800 },
+  { id: "BL-002", cCode: "C002", idIp: "192.168.1.11", name: "Fatima Begum", mobile: "01812345679", zone: "Zone-B", cusType: "Home", connType: "Fiber", package: "Pro 50", speed: "50 Mbps", exDate: "2025-04-15", mBill: 1500, received: 0 },
+  { id: "BL-003", cCode: "C003", idIp: "192.168.1.12", name: "Kamal Hossain", mobile: "01912345680", zone: "Zone-A", cusType: "Home", connType: "Cable", package: "Starter 10", speed: "10 Mbps", exDate: "2025-03-10", mBill: 600, received: 0 },
+  { id: "BL-004", cCode: "C004", idIp: "192.168.1.13", name: "Nusrat Jahan", mobile: "01612345681", zone: "Zone-C", cusType: "Corporate", connType: "Fiber", package: "Home 20", speed: "20 Mbps", exDate: "2025-04-20", mBill: 800, received: 800 },
+  { id: "BL-005", cCode: "C005", idIp: "192.168.1.14", name: "Shahin Alam", mobile: "01512345682", zone: "Zone-B", cusType: "Home", connType: "Fiber", package: "Ultra 100", speed: "100 Mbps", exDate: "2025-04-10", mBill: 3000, received: 0 },
+  { id: "BL-006", cCode: "C006", idIp: "192.168.1.15", name: "Anika Rahman", mobile: "01312345683", zone: "Zone-A", cusType: "Home", connType: "Fiber", package: "Pro 50", speed: "50 Mbps", exDate: "2025-04-25", mBill: 1500, received: 1500 },
+  { id: "BL-007", cCode: "C007", idIp: "192.168.1.16", name: "Tanvir Islam", mobile: "01412345684", zone: "Zone-C", cusType: "Home", connType: "Cable", package: "Home 20", speed: "20 Mbps", exDate: "2025-04-18", mBill: 800, received: 0 },
+  { id: "BL-008", cCode: "C008", idIp: "192.168.1.17", name: "Mithila Das", mobile: "01712345699", zone: "Zone-A", cusType: "Home", connType: "Fiber", package: "Starter 10", speed: "10 Mbps", exDate: "2025-04-30", mBill: 600, received: 600 },
+];
 
 const statusConfig: Record<
   PaymentStatus,
@@ -113,6 +136,7 @@ function transformBillToInvoiceDetail(bill: Bill): InvoiceDetail {
 export default function Billing() {
   const { toast } = useToast();
   const { currentTenant } = useTenantContext();
+  const { isDemoMode } = useDemoMode();
   const { data: bills, isLoading, error } = useBills(currentTenant?.id);
   const generateBills = useGenerateBills();
   
@@ -133,22 +157,19 @@ export default function Billing() {
     invoiceNumber: string;
     outstandingAmount: number;
   } | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [entriesPerPage, setEntriesPerPage] = useState("10");
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
   const handleGenerateBills = async () => {
     if (!currentTenant?.id) {
-      toast({
-        title: "Error",
-        description: "Tenant not found",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Tenant not found", variant: "destructive" });
       return;
     }
-
     const [year, month] = selectedMonth.split('-').map(Number);
     const billingPeriodStart = new Date(year, month - 1, 1);
     const billingPeriodEnd = new Date(year, month, 0);
     const dueDate = new Date(year, month - 1, 15);
-
     try {
       const result = await generateBills.mutateAsync({
         tenantId: currentTenant.id,
@@ -156,18 +177,10 @@ export default function Billing() {
         billingPeriodEnd: billingPeriodEnd.toISOString().split('T')[0],
         dueDate: dueDate.toISOString().split('T')[0],
       });
-
-      toast({
-        title: "Bills generated",
-        description: `Bills generated for ${result.length} customer(s)`,
-      });
+      toast({ title: "Bills generated", description: `Bills generated for ${result.length} customer(s)` });
       setIsGenerateDialogOpen(false);
     } catch (error: any) {
-      toast({
-        title: "Failed to generate bills",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Failed to generate bills", description: error.message, variant: "destructive" });
     }
   };
 
@@ -175,8 +188,7 @@ export default function Billing() {
     const matchesSearch =
       bill.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       bill.invoice_number.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || bill.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || bill.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -186,20 +198,22 @@ export default function Billing() {
     return sum + paid;
   }, 0);
   const totalDue = totalBilled - totalPaid;
-  const overdueCount = (bills || []).filter((b) => b.status === "overdue").length;
+  const paidCount = (bills || []).filter((b) => b.status === "paid").length;
+  const unpaidCount = (bills || []).filter((b) => b.status !== "paid").length;
+
+  // Demo metrics
+  const demoTotalBill = demoBillingList.reduce((s, r) => s + r.mBill, 0);
+  const demoReceived = demoBillingList.reduce((s, r) => s + r.received, 0);
+  const demoDue = demoTotalBill - demoReceived;
+  const demoPaidCount = demoBillingList.filter(r => r.received >= r.mBill).length;
+  const demoUnpaidCount = demoBillingList.filter(r => r.received < r.mBill).length;
 
   const formatDate = (date: Date | string) => {
     const d = typeof date === "string" ? new Date(date) : date;
-    return new Intl.DateTimeFormat("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(d);
+    return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(d);
   };
 
-  const formatCurrency = (amount: number) => {
-    return `৳${amount.toLocaleString()}`;
-  };
+  const formatCurrency = (amount: number) => `৳${amount.toLocaleString()}`;
 
   const handleViewInvoice = (bill: Bill) => {
     setSelectedInvoice(transformBillToInvoiceDetail(bill));
@@ -209,7 +223,6 @@ export default function Billing() {
   const handleRecordPayment = (bill: Bill) => {
     const paidAmount = bill.payments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
     const outstanding = Number(bill.amount) - paidAmount;
-    
     setPaymentDialog({
       open: true,
       billId: bill.id,
@@ -220,7 +233,17 @@ export default function Billing() {
     });
   };
 
-  if (isLoading) {
+  const toggleRowSelection = (id: string) => {
+    setSelectedRows(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]);
+  };
+
+  const toggleAllRows = () => {
+    if (isDemoMode) {
+      setSelectedRows(selectedRows.length === demoBillingList.length ? [] : demoBillingList.map(r => r.id));
+    }
+  };
+
+  if (isLoading && !isDemoMode) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -228,7 +251,7 @@ export default function Billing() {
     );
   }
 
-  if (error) {
+  if (error && !isDemoMode) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <AlertCircle className="h-12 w-12 text-destructive" />
@@ -238,15 +261,34 @@ export default function Billing() {
     );
   }
 
+  // Summary card data
+  const summaryCards = [
+    { label: "Paid Client", value: isDemoMode ? demoPaidCount : paidCount, icon: Users, gradient: "from-emerald-500 to-emerald-600" },
+    { label: "Unpaid Client", value: isDemoMode ? demoUnpaidCount : unpaidCount, icon: Users, gradient: "from-rose-500 to-rose-600" },
+    { label: "Received Bill", value: formatCurrency(isDemoMode ? demoReceived : totalPaid), icon: CheckCircle, gradient: "from-sky-500 to-sky-600" },
+    { label: "Due Amount", value: formatCurrency(isDemoMode ? demoDue : totalDue), icon: AlertCircle, gradient: "from-amber-500 to-amber-600" },
+  ];
+
+  const summaryCards2 = [
+    { label: "Generated Bill", value: isDemoMode ? demoBillingList.length : (bills?.length || 0), icon: FileText, gradient: "from-violet-500 to-violet-600" },
+    { label: "Advance Amount", value: formatCurrency(0), icon: Wallet, gradient: "from-teal-500 to-teal-600" },
+    { label: "Monthly Bill", value: formatCurrency(isDemoMode ? demoTotalBill : totalBilled), icon: TrendingUp, gradient: "from-indigo-500 to-indigo-600" },
+  ];
+
+  const displayData = isDemoMode ? demoBillingList : [];
+  const filteredDisplayData = displayData.filter(r =>
+    r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    r.cCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    r.mobile.includes(searchTerm)
+  );
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Billing</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage invoices, generate bills, and track payment status
-          </p>
+          <h1 className="text-2xl font-bold text-foreground">Billing List</h1>
+          <p className="text-sm text-muted-foreground">Manage invoices, generate bills, and track payment status</p>
         </div>
         <Dialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
           <DialogTrigger asChild>
@@ -258,17 +300,13 @@ export default function Billing() {
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Generate Monthly Bills</DialogTitle>
-              <DialogDescription>
-                Generate bills for all active customers for the selected billing period.
-              </DialogDescription>
+              <DialogDescription>Generate bills for all active customers for the selected billing period.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Billing Month</Label>
                 <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select month" />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Select month" /></SelectTrigger>
                   <SelectContent>
                     {(() => {
                       const months = [];
@@ -277,11 +315,7 @@ export default function Billing() {
                         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
                         const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
                         const label = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-                        months.push(
-                          <SelectItem key={value} value={value}>
-                            {label}
-                          </SelectItem>
-                        );
+                        months.push(<SelectItem key={value} value={value}>{label}</SelectItem>);
                       }
                       return months;
                     })()}
@@ -289,22 +323,13 @@ export default function Billing() {
                 </Select>
               </div>
               <div className="rounded-lg bg-muted p-3">
-                <p className="text-sm text-muted-foreground">
-                  Invoices will be generated for active customers based on their package price.
-                </p>
+                <p className="text-sm text-muted-foreground">Invoices will be generated for active customers based on their package price.</p>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsGenerateDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleGenerateBills}
-                disabled={generateBills.isPending}
-              >
-                {generateBills.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+              <Button variant="outline" onClick={() => setIsGenerateDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleGenerateBills} disabled={generateBills.isPending}>
+                {generateBills.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Generate Bills
               </Button>
             </DialogFooter>
@@ -312,343 +337,291 @@ export default function Billing() {
         </Dialog>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Billed
-            </CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalBilled)}</div>
-            <p className="text-xs text-muted-foreground">{bills?.length || 0} invoices</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Collected
-            </CardTitle>
-            <CheckCircle className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">
-              {formatCurrency(totalPaid)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {totalBilled > 0 ? ((totalPaid / totalBilled) * 100).toFixed(1) : 0}% collection rate
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Outstanding
-            </CardTitle>
-            <Clock className="h-4 w-4 text-accent-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-accent-foreground">
-              {formatCurrency(totalDue)}
-            </div>
-            <p className="text-xs text-muted-foreground">Pending collection</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Overdue
-            </CardTitle>
-            <AlertCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">{overdueCount}</div>
-            <p className="text-xs text-muted-foreground">Invoices past due date</p>
-          </CardContent>
-        </Card>
+      {/* Action Buttons Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+        <Button size="sm" className="gap-1.5 text-xs">
+          <FileSpreadsheet className="h-3.5 w-3.5" /> Generate Excel
+        </Button>
+        <Button size="sm" className="gap-1.5 text-xs">
+          <FileText className="h-3.5 w-3.5" /> Generate PDF
+        </Button>
+        <Button size="sm" className="gap-1.5 text-xs">
+          <RefreshCw className="h-3.5 w-3.5" /> Sync Clients & Servers
+        </Button>
+        <Button size="sm" className="gap-1.5 text-xs">
+          <Ban className="h-3.5 w-3.5" /> Disable Selected
+        </Button>
+        <Button size="sm" className="gap-1.5 text-xs">
+          <RotateCcw className="h-3.5 w-3.5" /> Bulk Status Change
+        </Button>
+        <Button size="sm" className="gap-1.5 text-xs">
+          <MapPin className="h-3.5 w-3.5" /> Bulk Zone Change
+        </Button>
       </div>
 
-      {/* Tabs for different views */}
-      <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="all">All Invoices</TabsTrigger>
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="overdue">Overdue</TabsTrigger>
-        </TabsList>
+      {/* Summary Cards Row 1 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {summaryCards.map((card) => (
+          <div key={card.label} className={`rounded-xl bg-gradient-to-br ${card.gradient} p-4 text-white shadow-md`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium opacity-90">{card.label}</p>
+                <p className="text-2xl font-bold mt-1">{card.value}</p>
+              </div>
+              <card.icon className="h-8 w-8 opacity-80" />
+            </div>
+          </div>
+        ))}
+      </div>
 
-        <TabsContent value="all" className="space-y-4">
-          {/* Filters */}
-          <Card>
+      {/* Summary Cards Row 2 */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        {summaryCards2.map((card) => (
+          <div key={card.label} className={`rounded-xl bg-gradient-to-br ${card.gradient} p-4 text-white shadow-md`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium opacity-90">{card.label}</p>
+                <p className="text-2xl font-bold mt-1">{card.value}</p>
+              </div>
+              <card.icon className="h-8 w-8 opacity-80" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Collapsible Filter Panel */}
+      <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+        <div className="flex justify-center">
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-1.5">
+              {filtersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              {filtersOpen ? "Hide Filters" : "Show Filters"}
+            </Button>
+          </CollapsibleTrigger>
+        </div>
+        <CollapsibleContent>
+          <Card className="mt-3">
             <CardContent className="p-4">
-              <div className="flex flex-col gap-4 sm:flex-row">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by customer name or invoice ID..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-40">
-                    <Filter className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="paid">Paid</SelectItem>
-                    <SelectItem value="due">Due</SelectItem>
-                    <SelectItem value="partial">Partial</SelectItem>
-                    <SelectItem value="overdue">Overdue</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button variant="outline" className="gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Date Range
-                </Button>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                {[
+                  "Server", "Protocol Type", "Profiles", "Zone", "Sub Zone", "Box",
+                  "Package", "Billing Status", "Payment Status", "Mikrotik Status", "Connection Type", "Client Type",
+                  "From Ex.Date", "To Ex.Date", "From EffectiveTo", "To EffectiveTo", "Area", "Reseller",
+                ].map((label) => (
+                  <div key={label} className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">{label}</Label>
+                    {label.includes("Date") || label.includes("Effective") ? (
+                      <Input type="date" className="h-8 text-xs" />
+                    ) : (
+                      <Select>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder={`Select ${label}`} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
+        </CollapsibleContent>
+      </Collapsible>
 
-          {/* Invoice Table */}
-          <Card>
-            <CardContent className="p-0">
-              {filteredBills.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No invoices found</p>
-                  <p className="text-sm text-muted-foreground">
-                    {bills?.length === 0
-                      ? "Generate bills to get started"
-                      : "Try adjusting your search or filters"}
-                  </p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Invoice ID</TableHead>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Billing Period</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Due Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+      {/* Entries + Search Bar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Show</span>
+          <Select value={entriesPerPage} onValueChange={setEntriesPerPage}>
+            <SelectTrigger className="w-20 h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="25">25</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="100">100</SelectItem>
+            </SelectContent>
+          </Select>
+          <span className="text-sm text-muted-foreground">entries</span>
+        </div>
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9 h-8 text-sm"
+          />
+        </div>
+      </div>
+
+      {/* Main Table */}
+      <Card>
+        <CardContent className="p-0">
+          {isDemoMode ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-primary hover:bg-primary">
+                    <TableHead className="text-primary-foreground">
+                      <input
+                        type="checkbox"
+                        className="rounded"
+                        checked={selectedRows.length === demoBillingList.length}
+                        onChange={toggleAllRows}
+                      />
+                    </TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">C.Code</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">ID/IP</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">Cus. Name</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">Mobile</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">Zone</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">Cus. Type</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">Conn. Type</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">Package</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">Speed</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">Ex.Date</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">M.Bill</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">Received</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredDisplayData.map((row, idx) => (
+                    <TableRow key={row.id} className={idx % 2 === 0 ? "bg-background" : "bg-muted/30"}>
+                      <TableCell>
+                        <input
+                          type="checkbox"
+                          className="rounded"
+                          checked={selectedRows.includes(row.id)}
+                          onChange={() => toggleRowSelection(row.id)}
+                        />
+                      </TableCell>
+                      <TableCell className="text-xs font-medium">{row.cCode}</TableCell>
+                      <TableCell className="text-xs">{row.idIp}</TableCell>
+                      <TableCell className="text-xs font-medium">{row.name}</TableCell>
+                      <TableCell className="text-xs">{row.mobile}</TableCell>
+                      <TableCell className="text-xs">{row.zone}</TableCell>
+                      <TableCell className="text-xs">{row.cusType}</TableCell>
+                      <TableCell className="text-xs">{row.connType}</TableCell>
+                      <TableCell className="text-xs">{row.package}</TableCell>
+                      <TableCell className="text-xs">{row.speed}</TableCell>
+                      <TableCell className="text-xs">{row.exDate}</TableCell>
+                      <TableCell className="text-xs font-semibold">{formatCurrency(row.mBill)}</TableCell>
+                      <TableCell className="text-xs font-semibold">
+                        <span className={row.received >= row.mBill ? "text-emerald-600" : "text-destructive"}>
+                          {formatCurrency(row.received)}
+                        </span>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredBills.map((bill) => {
-                      const status = (bill.status || "due") as PaymentStatus;
-                      const StatusIcon = statusConfig[status].icon;
-                      return (
-                        <TableRow 
-                          key={bill.id}
-                          className="cursor-pointer hover:bg-muted/50"
-                          onClick={() => handleViewInvoice(bill)}
-                        >
-                          <TableCell className="font-medium">{bill.invoice_number}</TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{bill.customer?.name || "Unknown"}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {bill.customer?.phone}
-                              </p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-sm text-muted-foreground">
-                              {formatDate(bill.billing_period_start)} -{" "}
-                              {formatDate(bill.billing_period_end)}
-                            </span>
-                          </TableCell>
-                          <TableCell className="font-semibold">
-                            {formatCurrency(Number(bill.amount))}
-                          </TableCell>
-                          <TableCell>{formatDate(bill.due_date)}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={statusConfig[status].variant}
-                              className="gap-1"
-                            >
-                              <StatusIcon className="h-3 w-3" />
-                              {statusConfig[status].label}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                <Button variant="ghost" size="icon">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleViewInvoice(bill);
-                                }}>
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  View Invoice
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : filteredBills.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">No invoices found</p>
+              <p className="text-sm text-muted-foreground">
+                {bills?.length === 0 ? "Generate bills to get started" : "Try adjusting your search or filters"}
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-primary hover:bg-primary">
+                    <TableHead className="text-primary-foreground text-xs font-semibold">Invoice ID</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">Customer</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">Billing Period</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">Amount</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">Due Date</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold">Status</TableHead>
+                    <TableHead className="text-primary-foreground text-xs font-semibold text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredBills.map((bill, idx) => {
+                    const status = (bill.status || "due") as PaymentStatus;
+                    const StatusIcon = statusConfig[status].icon;
+                    return (
+                      <TableRow
+                        key={bill.id}
+                        className={`cursor-pointer ${idx % 2 === 0 ? "bg-background" : "bg-muted/30"}`}
+                        onClick={() => handleViewInvoice(bill)}
+                      >
+                        <TableCell className="text-xs font-medium">{bill.invoice_number}</TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="text-xs font-medium">{bill.customer?.name || "Unknown"}</p>
+                            <p className="text-xs text-muted-foreground">{bill.customer?.phone}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {formatDate(bill.billing_period_start)} - {formatDate(bill.billing_period_end)}
+                        </TableCell>
+                        <TableCell className="text-xs font-semibold">{formatCurrency(Number(bill.amount))}</TableCell>
+                        <TableCell className="text-xs">{formatDate(bill.due_date)}</TableCell>
+                        <TableCell>
+                          <Badge variant={statusConfig[status].variant} className="gap-1 text-xs">
+                            <StatusIcon className="h-3 w-3" />
+                            {statusConfig[status].label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleViewInvoice(bill); }}>
+                                <Eye className="mr-2 h-4 w-4" /> View Invoice
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => {
+                                e.stopPropagation();
+                                const invoiceDetail = transformBillToInvoiceDetail(bill);
+                                downloadInvoicePdf(invoiceDetail);
+                                toast({ title: "PDF Downloaded", description: `Invoice ${bill.invoice_number} has been downloaded.` });
+                              }}>
+                                <Download className="mr-2 h-4 w-4" /> Download PDF
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                <Send className="mr-2 h-4 w-4" /> Send to Customer
+                              </DropdownMenuItem>
+                              {bill.status !== "paid" && (
+                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleRecordPayment(bill); }}>
+                                  <Receipt className="mr-2 h-4 w-4" /> Record Payment
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={(e) => {
-                                  e.stopPropagation();
-                                  const invoiceDetail = transformBillToInvoiceDetail(bill);
-                                  downloadInvoicePdf(invoiceDetail);
-                                  toast({
-                                    title: "PDF Downloaded",
-                                    description: `Invoice ${bill.invoice_number} has been downloaded.`,
-                                  });
-                                }}>
-                                  <Download className="mr-2 h-4 w-4" />
-                                  Download PDF
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                                  <Send className="mr-2 h-4 w-4" />
-                                  Send to Customer
-                                </DropdownMenuItem>
-                                {bill.status !== "paid" && (
-                                  <DropdownMenuItem onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRecordPayment(bill);
-                                  }}>
-                                    <Receipt className="mr-2 h-4 w-4" />
-                                    Record Payment
-                                  </DropdownMenuItem>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="pending" className="space-y-4">
-          <Card>
-            <CardContent className="p-0">
-              {(() => {
-                const pendingBills = (bills || []).filter(b => b.status === "due" || b.status === "partial");
-                if (pendingBills.length === 0) {
-                  return (
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <CheckCircle className="h-12 w-12 text-success mb-4" />
-                      <p className="text-muted-foreground">No pending invoices</p>
-                      <p className="text-sm text-muted-foreground">All invoices are paid!</p>
-                    </div>
-                  );
-                }
-                return (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Invoice ID</TableHead>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Due Date</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pendingBills.map((bill) => {
-                        const status = (bill.status || "due") as PaymentStatus;
-                        const StatusIcon = statusConfig[status].icon;
-                        return (
-                          <TableRow key={bill.id}>
-                            <TableCell className="font-medium">{bill.invoice_number}</TableCell>
-                            <TableCell>{bill.customer?.name || "Unknown"}</TableCell>
-                            <TableCell>{formatCurrency(Number(bill.amount))}</TableCell>
-                            <TableCell>{formatDate(bill.due_date)}</TableCell>
-                            <TableCell>
-                              <Badge variant={statusConfig[status].variant} className="gap-1">
-                                <StatusIcon className="h-3 w-3" />
-                                {statusConfig[status].label}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button size="sm" onClick={() => handleRecordPayment(bill)}>
-                                Record Payment
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                );
-              })()}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-        <TabsContent value="overdue" className="space-y-4">
-          <Card>
-            <CardContent className="p-0">
-              {(() => {
-                const overdueBills = (bills || []).filter(b => b.status === "overdue");
-                if (overdueBills.length === 0) {
-                  return (
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <CheckCircle className="h-12 w-12 text-success mb-4" />
-                      <p className="text-muted-foreground">No overdue invoices</p>
-                      <p className="text-sm text-muted-foreground">Great! All payments are on time.</p>
-                    </div>
-                  );
-                }
-                return (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Invoice ID</TableHead>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Due Date</TableHead>
-                        <TableHead>Days Overdue</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {overdueBills.map((bill) => {
-                        const dueDate = new Date(bill.due_date);
-                        const today = new Date();
-                        const daysOverdue = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
-                        return (
-                          <TableRow key={bill.id} className="bg-destructive/5">
-                            <TableCell className="font-medium">{bill.invoice_number}</TableCell>
-                            <TableCell>{bill.customer?.name || "Unknown"}</TableCell>
-                            <TableCell className="font-semibold text-destructive">
-                              {formatCurrency(Number(bill.amount))}
-                            </TableCell>
-                            <TableCell>{formatDate(bill.due_date)}</TableCell>
-                            <TableCell>
-                              <Badge variant="destructive">{daysOverdue} days</Badge>
-                            </TableCell>
-                            <TableCell className="text-right space-x-2">
-                              <Button size="sm" variant="outline" onClick={() => handleViewInvoice(bill)}>
-                                View
-                              </Button>
-                              <Button size="sm" onClick={() => handleRecordPayment(bill)}>
-                                Collect
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                );
-              })()}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {/* Pagination Info */}
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>
+          Showing 1 to {isDemoMode ? filteredDisplayData.length : filteredBills.length} of{" "}
+          {isDemoMode ? demoBillingList.length : (bills?.length || 0)} entries
+        </span>
+        <div className="flex gap-1">
+          <Button variant="outline" size="sm" disabled>Previous</Button>
+          <Button size="sm" className="min-w-[32px]">1</Button>
+          <Button variant="outline" size="sm" disabled>Next</Button>
+        </div>
+      </div>
 
       {/* Invoice Detail Dialog */}
       <InvoiceDetailDialog
@@ -670,7 +643,7 @@ export default function Billing() {
       {/* Record Payment Dialog */}
       {paymentDialog && currentTenant && (() => {
         const bill = bills?.find(b => b.id === paymentDialog.billId);
-        const billingPeriod = bill 
+        const billingPeriod = bill
           ? `${formatDate(bill.billing_period_start)} - ${formatDate(bill.billing_period_end)}`
           : undefined;
         return (
