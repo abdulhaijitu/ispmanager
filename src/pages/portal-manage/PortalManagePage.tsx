@@ -565,6 +565,17 @@ function MediaServersTab() {
 // NEWS & EVENTS TAB
 // ════════════════════════════════════
 function NewsEventsTab({ search, setSearch, pageSize, setPageSize }: { search: string; setSearch: (v: string) => void; pageSize: string; setPageSize: (v: string) => void }) {
+  const [newsDialogOpen, setNewsDialogOpen] = useState(false);
+  const [newsTitle, setNewsTitle] = useState("");
+  const [newsDetails, setNewsDetails] = useState("");
+
+  const handleNewsSubmit = () => {
+    if (!newsTitle.trim() || !newsDetails.trim()) return;
+    setNewsDialogOpen(false);
+    setNewsTitle("");
+    setNewsDetails("");
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
@@ -572,7 +583,7 @@ function NewsEventsTab({ search, setSearch, pageSize, setPageSize }: { search: s
           <Button variant="outline" size="sm"><FileText className="h-4 w-4 mr-1.5" />Generate PDF</Button>
           <Button variant="outline" size="sm"><FileSpreadsheet className="h-4 w-4 mr-1.5" />Generate CSV</Button>
         </div>
-        <Button size="sm"><Plus className="h-4 w-4 mr-1.5" />News & Events</Button>
+        <Button size="sm" onClick={() => setNewsDialogOpen(true)}><Plus className="h-4 w-4 mr-1.5" />News & Events</Button>
       </div>
 
       <EntriesSearchBar search={search} setSearch={setSearch} pageSize={pageSize} setPageSize={setPageSize} />
@@ -615,6 +626,57 @@ function NewsEventsTab({ search, setSearch, pageSize, setPageSize }: { search: s
         </Table>
       </div>
       <PaginationInfo total={demoNewsEvents.length} pageSize={parseInt(pageSize)} />
+
+      {/* Add News & Events Dialog */}
+      <Dialog open={newsDialogOpen} onOpenChange={setNewsDialogOpen}>
+        <DialogContent className="sm:max-w-lg p-0 overflow-hidden">
+          <DialogHeader className="bg-primary px-5 py-3">
+            <DialogTitle className="text-primary-foreground text-base font-bold">Add News & Events</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 px-5 py-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wide">
+                News & Events Title <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                value={newsTitle}
+                onChange={(e) => setNewsTitle(e.target.value)}
+                placeholder="Enter news or event title"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wide">
+                News & Events Details <span className="text-destructive">*</span>
+              </Label>
+              <Textarea
+                value={newsDetails}
+                onChange={(e) => setNewsDetails(e.target.value)}
+                placeholder="Enter details..."
+                rows={4}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wide">
+                News & Events Images <span className="text-destructive">*</span>
+              </Label>
+              <div className="flex items-center gap-2">
+                <Input type="file" accept="image/*" className="flex-1" />
+                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="px-5 py-3 border-t flex-row justify-between sm:justify-between gap-2">
+            <Button variant="outline" className="text-destructive border-destructive hover:bg-destructive/10" onClick={() => setNewsDialogOpen(false)}>
+              <X className="h-4 w-4 mr-1.5" />Cancel
+            </Button>
+            <Button variant="outline" onClick={handleNewsSubmit}>
+              <Check className="h-4 w-4 mr-1.5" />Submit
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
