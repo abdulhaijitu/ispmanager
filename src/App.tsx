@@ -99,6 +99,7 @@ import PaymentProcessingFeePage from "@/pages/system/PaymentProcessingFeePage";
 import VatSetupPage from "@/pages/system/VatSetupPage";
 import ActivityLoggersPage from "@/pages/system/ActivityLoggersPage";
 import AutomaticProcessPage from "@/pages/system/AutomaticProcessPage";
+import PortalManagePage from "@/pages/portal-manage/PortalManagePage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
@@ -185,6 +186,7 @@ const App = () => (
                 <Route path="/dashboard/clients/add" element={<AddNewClientPage />} />
                 <Route path="/dashboard/clients/left" element={<LeftClientsPage />} />
                 <Route path="/dashboard/clients/change-request" element={<ChangeRequestPage />} />
+                <Route path="/dashboard/portal-manage" element={<PortalManagePage />} />
 
                 {/* Configuration */}
                 <Route path="/dashboard/config/zones" element={<ZonesPage />} />
