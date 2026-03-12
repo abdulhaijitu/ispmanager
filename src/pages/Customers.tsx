@@ -155,11 +155,6 @@ export default function Customers() {
     setCurrentPage(1);
   };
 
-  const handleAddCustomer = () => {
-    setFormMode("add");
-    setSelectedCustomer(null);
-    setFormDialogOpen(true);
-  };
 
   const handleEditCustomer = (customer: CustomerTableData) => {
     setFormMode("edit");
