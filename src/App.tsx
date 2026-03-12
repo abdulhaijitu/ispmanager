@@ -243,6 +243,10 @@ const App = () => (
                 <Route path="/dashboard/hr/department" element={<DepartmentPage />} />
                 <Route path="/dashboard/hr/salary" element={<SalarySheetPage />} />
                 <Route path="/dashboard/hr/attendance" element={<AttendancePage />} />
+                <Route path="/dashboard/hr/leave/category" element={<LeaveCategoryPage />} />
+                <Route path="/dashboard/hr/leave/setup" element={<LeaveSetupPage />} />
+                <Route path="/dashboard/hr/leave/apply" element={<LeaveApplyPage />} />
+                <Route path="/dashboard/hr/leave/approval" element={<LeaveApprovalPage />} />
 
                 {/* Inventory & Assets */}
                 <Route path="/dashboard/inventory/items" element={<ItemsPage />} />
