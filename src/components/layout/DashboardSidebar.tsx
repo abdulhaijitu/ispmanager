@@ -90,18 +90,6 @@ const dashboardItem: NavItem = {
 // ── GROUPED NAV ──
 const navGroups: NavGroup[] = [
   {
-    label: "Clients",
-    icon: Users,
-    roles: ["super_admin", "isp_owner", "admin", "manager", "staff"],
-    children: [
-      { title: "Client List", href: "/dashboard/customers", icon: Users },
-      { title: "New Request", href: "/dashboard/clients/new-request", icon: UserPlus },
-      { title: "Add New", href: "/dashboard/clients/add", icon: UserPlus },
-      { title: "Left Clients", href: "/dashboard/clients/left", icon: Users },
-      { title: "Change Request", href: "/dashboard/clients/change-request", icon: FileText },
-    ],
-  },
-  {
     label: "Configuration",
     icon: Cog,
     roles: ["super_admin", "isp_owner", "admin"],
@@ -112,6 +100,18 @@ const navGroups: NavGroup[] = [
       { title: "Protocol Type", href: "/dashboard/config/protocol-type", icon: Network },
       { title: "Area Management", href: "/dashboard/config/district", icon: MapPin },
       { title: "Billing Status", href: "/dashboard/config/billing-status", icon: FileText },
+    ],
+  },
+  {
+    label: "Clients",
+    icon: Users,
+    roles: ["super_admin", "isp_owner", "admin", "manager", "staff"],
+    children: [
+      { title: "Client List", href: "/dashboard/customers", icon: Users },
+      { title: "New Request", href: "/dashboard/clients/new-request", icon: UserPlus },
+      { title: "Add New", href: "/dashboard/clients/add", icon: UserPlus },
+      { title: "Left Clients", href: "/dashboard/clients/left", icon: Users },
+      { title: "Change Request", href: "/dashboard/clients/change-request", icon: FileText },
     ],
   },
 ];
