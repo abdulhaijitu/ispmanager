@@ -65,6 +65,12 @@ export default function ZonesPage() {
     setFormName(item.name);
     setFormDetails(item.details);
     setFormParentId(item.zoneId || item.subZoneId || "");
+    if (activeTab === "box" && item.subZoneId) {
+      const sz = subZones.find(s => s.id === item.subZoneId);
+      setFormZoneId(sz?.zoneId || "");
+    } else {
+      setFormZoneId("");
+    }
     setDialogOpen(true);
   };
 
