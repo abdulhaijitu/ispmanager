@@ -55,8 +55,9 @@ export default function ZonesPage() {
   const [formName, setFormName] = useState("");
   const [formDetails, setFormDetails] = useState("");
   const [formParentId, setFormParentId] = useState("");
+  const [formZoneId, setFormZoneId] = useState("");
 
-  const resetForm = () => { setFormName(""); setFormDetails(""); setFormParentId(""); setEditItem(null); };
+  const resetForm = () => { setFormName(""); setFormDetails(""); setFormParentId(""); setFormZoneId(""); setEditItem(null); };
 
   const openAdd = () => { resetForm(); setDialogOpen(true); };
   const openEdit = (item: any) => {
