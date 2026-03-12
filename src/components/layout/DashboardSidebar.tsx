@@ -540,7 +540,6 @@ export function DashboardSidebar() {
 
             {/* Accounts */}
             <SidebarGroupLabel>Accounts</SidebarGroupLabel>
-            {financeGroups.map(renderGroup)}
             {canAccess(paymentsItem) && (
               <SidebarLink link={toLink(paymentsItem)} active={isActive(paymentsItem.href)} />
             )}
