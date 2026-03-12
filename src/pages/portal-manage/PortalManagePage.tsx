@@ -275,11 +275,21 @@ function NoticesTab({ search, setSearch, pageSize, setPageSize }: { search: stri
 // ════════════════════════════════════
 // MEDIA SERVERS TAB
 // ════════════════════════════════════
+const demoMediaServers = [
+  { id: "ms1", title: "BDFlix", category: "Entertainment", mediaLink: "https://bdflix.com", details: "Bangla movie streaming" },
+  { id: "ms2", title: "YouTube BD", category: "Video", mediaLink: "https://youtube.com", details: "Video streaming platform" },
+  { id: "ms3", title: "Toffee", category: "Entertainment", mediaLink: "https://toffeelive.com", details: "Live TV and movies" },
+  { id: "ms4", title: "Chorki", category: "Entertainment", mediaLink: "https://chorki.com", details: "Premium OTT platform" },
+  { id: "ms5", title: "Bioscope", category: "Video", mediaLink: "https://bioscope.live", details: "Live streaming service" },
+];
+
 function MediaServersTab() {
   const [subTab, setSubTab] = useState("categories");
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [categoryName, setCategoryName] = useState("");
   const [categoryDetails, setCategoryDetails] = useState("");
+  const [mediaSearch, setMediaSearch] = useState("");
+  const [mediaPageSize, setMediaPageSize] = useState("10");
 
   const [serverDialogOpen, setServerDialogOpen] = useState(false);
   const [serverCategory, setServerCategory] = useState("");
