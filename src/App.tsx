@@ -99,6 +99,7 @@ import PaymentProcessingFeePage from "@/pages/system/PaymentProcessingFeePage";
 import VatSetupPage from "@/pages/system/VatSetupPage";
 import ActivityLoggersPage from "@/pages/system/ActivityLoggersPage";
 import AutomaticProcessPage from "@/pages/system/AutomaticProcessPage";
+import PortalManagePage from "@/pages/portal-manage/PortalManagePage";
 
 // Auth Pages
 import StaffLogin from "@/pages/auth/StaffLogin";
