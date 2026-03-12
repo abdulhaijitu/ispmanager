@@ -505,15 +505,40 @@ export function DashboardSidebar() {
               <SidebarLink link={toLink(dashboardItem)} active={isActive(dashboardItem.href)} />
             )}
 
-            {/* Client Management */}
-            <SidebarGroupLabel>Client Management</SidebarGroupLabel>
+            {/* Home User */}
+            <SidebarGroupLabel>Home User</SidebarGroupLabel>
             {navGroups.map(renderGroup)}
             {canAccess(packagesItem) && (
               <SidebarLink link={toLink(packagesItem)} active={isActive(packagesItem.href)} />
             )}
 
-            {/* Billing & Finance */}
-            <SidebarGroupLabel>Billing & Finance</SidebarGroupLabel>
+            {/* Corporate Client */}
+            <SidebarGroupLabel>Corporate Client</SidebarGroupLabel>
+            {open && (
+              <div className="px-3 py-2 text-[11px] text-muted-foreground/60 italic">Coming Soon</div>
+            )}
+
+            {/* MAC Client */}
+            <SidebarGroupLabel>MAC Client</SidebarGroupLabel>
+            {renderGroup(resellerGroup)}
+
+            {/* Bandwidth Client */}
+            <SidebarGroupLabel>Bandwidth Client</SidebarGroupLabel>
+            {open && (
+              <div className="px-3 py-2 text-[11px] text-muted-foreground/60 italic">Coming Soon</div>
+            )}
+
+            {/* HR */}
+            <SidebarGroupLabel>HR</SidebarGroupLabel>
+            {renderGroup(operationGroups[2])}
+
+            {/* Support */}
+            <SidebarGroupLabel>Support</SidebarGroupLabel>
+            {renderGroup(operationGroups[0])}
+            {renderGroup(operationGroups[1])}
+
+            {/* Accounts */}
+            <SidebarGroupLabel>Accounts</SidebarGroupLabel>
             {financeGroups.map(renderGroup)}
             {canAccess(paymentsItem) && (
               <SidebarLink link={toLink(paymentsItem)} active={isActive(paymentsItem.href)} />
@@ -523,23 +548,17 @@ export function DashboardSidebar() {
             )}
             {financeGroups2.map(renderGroup)}
 
-            {/* Network */}
-            <SidebarGroupLabel>Network</SidebarGroupLabel>
+            {/* Purchase */}
+            <SidebarGroupLabel>Purchase</SidebarGroupLabel>
+            {renderGroup(operationGroups[4])}
+            {renderGroup(operationGroups[3])}
+
+            {/* System */}
+            <SidebarGroupLabel>System</SidebarGroupLabel>
             {networkGroups.map(renderGroup)}
             {canAccess(networkDiagramItem) && (
               <SidebarLink link={toLink(networkDiagramItem)} active={isActive(networkDiagramItem.href)} />
             )}
-
-            {/* Operations */}
-            <SidebarGroupLabel>Operations</SidebarGroupLabel>
-            {operationGroups.map(renderGroup)}
-
-            {/* Reseller */}
-            <SidebarGroupLabel>Reseller</SidebarGroupLabel>
-            {renderGroup(resellerGroup)}
-
-            {/* System */}
-            <SidebarGroupLabel>System</SidebarGroupLabel>
             {renderGroup(smsGroup)}
             {systemStandaloneItems.filter(canAccess).map((item) => (
               <SidebarLink key={item.href} link={toLink(item)} active={isActive(item.href)} />
